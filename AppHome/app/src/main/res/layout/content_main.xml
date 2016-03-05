@@ -19,20 +19,40 @@
         <TableRow>
 
             <Button
-                android:id="@+id/sendTextRoosendaal"
+                android:id="@+id/nextTrainRoosendaal"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:onClick="sendTextRoosendaal"
-                android:text="@string/sendToRoosendaal" />
+                android:onClick="nextTrainRoosendaal"
+                android:text="@string/next_roosendaal" />
 
             <Button
-                android:id="@+id/sentTextHeeze"
+                android:id="@+id/nextTrainHeeze"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:onClick="sendTextHeeze"
-                android:text="@string/sendToHeeze"/>
+                android:onClick="nextTrainHeeze"
+                android:text="@string/next_heeze"/>
         </TableRow>
+
+        <TableRow>
+
+            <Button
+                android:id="@+id/lastTrainRoosendaal"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:onClick="lastTrainRoosendaal"
+                android:text="@string/last_roosendaal" />
+
+            <Button
+                android:id="@+id/lastTrainHeeze"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:onClick="lastTrainHeeze"
+                android:text="@string/last_heeze"/>
+        </TableRow>
+
     </TableLayout>
 </ScrollView>
