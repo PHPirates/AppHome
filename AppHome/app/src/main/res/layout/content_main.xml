@@ -24,7 +24,6 @@
                 android:layout_height="wrap_content"
                 android:text="@string/from"/>
 
-<<<<<<< HEAD
             <TextView
                 android:id="@+id/textTo"
                 android:layout_width="0dp"
@@ -48,22 +47,12 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content">
-=======
-            <Button
-                android:id="@+id/nextTrainRoosendaal"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:onClick="nextTrainRoosendaal"
-                android:text="@string/next_roosendaal" />
->>>>>>> origin/decideFromTo
 
             </NumberPicker>
         </TableRow>
 
         <TableRow>
             <Button
-<<<<<<< HEAD
                 android:id="@+id/sendText"
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -72,34 +61,5 @@
                 android:onClick="sendText"/>
         </TableRow>
 
-=======
-                android:id="@+id/nextTrainHeeze"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:onClick="nextTrainHeeze"
-                android:text="@string/next_heeze"/>
-        </TableRow>
-
-        <TableRow>
-
-            <Button
-                android:id="@+id/lastTrainRoosendaal"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:onClick="lastTrainRoosendaal"
-                android:text="@string/last_roosendaal" />
-
-            <Button
-                android:id="@+id/lastTrainHeeze"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:onClick="lastTrainHeeze"
-                android:text="@string/last_heeze"/>
-        </TableRow>
-
->>>>>>> origin/decideFromTo
     </TableLayout>
 </ScrollView>
