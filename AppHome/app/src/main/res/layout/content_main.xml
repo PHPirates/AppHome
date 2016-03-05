@@ -59,6 +59,14 @@
                 android:layout_height="wrap_content"
                 android:text="@string/send"
                 android:onClick="sendText"/>
+            <CheckBox
+                android:id="@+id/lastCheck"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/lastTrain"
+                android:onClick="checkedLastTrain"
+                />
         </TableRow>
 
     </TableLayout>
