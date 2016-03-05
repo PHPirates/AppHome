@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
      * Buttons.
      */
 
-    public void sendText(View view){
+    public void sendTextRoosendaal(View view){
         Calendar c = Calendar.getInstance();
         c.set(Calendar.SECOND,0);
         c.set(Calendar.MILLISECOND,0);
@@ -46,10 +46,38 @@ public class MainActivity extends AppCompatActivity {
         //String nextTrain = simpleDateFormat.format(c.getTime());
         c.add(Calendar.MINUTE,89); //time I need to get home
         String ETA = "ETA "+simpleDateFormat.format(c.getTime());
-        
+
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, ETA);
+        sendIntent.setType("text/plain");
+        sendIntent.setPackage("com.whatsapp");
+        startActivity(sendIntent);
+    }
+
+    public void sendTextHeeze(View view){
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.SECOND,0);
+        c.set(Calendar.MILLISECOND,0);
+
+        //time next train
+        int minutes = c.get(Calendar.MINUTE);
+        if (minutes<34) {
+            minutes=34; //next train at :34
+        } else {
+            minutes = 64; //add up to the next train departure at :04
+        }
+        c.set(Calendar.MINUTE,minutes);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm",java.util.Locale.getDefault());
+        //String nextTrain = simpleDateFormat.format(c.getTime());
+//        c.add(Calendar.MINUTE,89); //time I need to get home
+//        String ETA = "ETA "+simpleDateFormat.format(c.getTime());
+
+        String train = "Trein van " + simpleDateFormat.format(c.getTime());
+
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, train);
         sendIntent.setType("text/plain");
         sendIntent.setPackage("com.whatsapp");
         startActivity(sendIntent);
