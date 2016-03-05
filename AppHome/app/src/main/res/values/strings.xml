@@ -2,4 +2,12 @@
     <string name="app_name">AppHome</string>
     <string name="action_settings">Settings</string>
     <string name="send">Send</string>
+    <string name="from">From:</string>
+    <string name="to">To:</string>
+    <string name="sendToRoosendaal">Send To Roosendaal</string>
+    <string name="sendToHeeze">Send To Heeze</string>
+    <string name="next_heeze">Next one to Heeze</string>
+    <string name="last_heeze">Last one to Heeze</string>
+    <string name="next_roosendaal">Next one to R\'daal</string>
+    <string name="last_roosendaal">Last one to R\'daal</string>
 </resources>
