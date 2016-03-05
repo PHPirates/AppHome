@@ -2,17 +2,11 @@ package com.abbyberkers.apphome;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.CheckBox;
 import android.widget.NumberPicker;
-import android.widget.Toast;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -39,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
         npFrom.setMaxValue(cities.length - 1);
         npFrom.setDisplayedValues(cities);
         npFrom.setWrapSelectorWheel(true);
+        npFrom.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
 
         npFrom.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
@@ -53,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         npTo.setMaxValue(cities.length - 1);
         npTo.setDisplayedValues(cities);
         npTo.setWrapSelectorWheel(true);
+        npTo.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
 
         npTo.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
@@ -72,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void sendText(View view) {
 
-        String message = "Yay! I am default.";
+        String message = "You are here already, you stupid!";
 
         int EHV = 0;
         int Heeze = 1;
