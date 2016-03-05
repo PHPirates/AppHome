@@ -68,26 +68,30 @@ public class MainActivity extends AppCompatActivity {
 
     public void sendText(View view){
 
+        String message = "Yay! I am default.";
+
         if(from == 0){
             if(to == 1){
-                sendTextHeeze();
+                message = "Trein van " + time(34, 0);
             } else if(to == 2){
-                sendTextRoosendaal();
+                message = "ETA " + time(31, 89);
+
+            }
+        } else if(from == 1){
+            if(to == 0){
+                message = "Eindhoven ETA " + time(45,15);
+            } else if(to == 2){
+                message = "Aiming for the " + time(31, 0) + " Eindhoven train.";
+            }
+        } else if(from == 2) {
+            if(to == 0){
+                message = "ETA " + time(50, 100);
+            } else if(to == 1){
+                message = "ETA " + time(50, 113);
             }
         }
 
-    }
-
-    public void sendTextRoosendaal() {
-
-        String ETA = "ETA " + time(31, 89);
-        sendText(ETA);
-    }
-
-    public void sendTextHeeze() {
-
-        String train = "Trein van " + time(34, 0); // 0 if you want the time of train departing
-        sendText(train);
+        sendText(message);
 
     }
 
