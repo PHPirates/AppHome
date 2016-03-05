@@ -4,21 +4,21 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.NumberPicker;
+import android.widget.Toast;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
-    NumberPicker npFrom;
-    NumberPicker npTo;
     int from = 0; //default from Eindhoven
     int to;
+    int depart; //departure numberpicker value
     boolean boxChecked; //check if checkbox checked
-
-    String[] cities = new String[]{"Eindhoven", "Heeze", "Roosendaal"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +27,9 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        String[] cities = new String[]{"Eindhoven", "Heeze", "Roosendaal"};
+
+        NumberPicker npFrom;
         npFrom = (NumberPicker) findViewById(R.id.numberPickerFrom);
 
         npFrom.setMinValue(0);
@@ -39,8 +42,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 from = newVal;
+                updateDepartures();
             }
         });
+
+        NumberPicker npTo;
 
         npTo = (NumberPicker) findViewById(R.id.numberPickerTo);
 
@@ -54,10 +60,86 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 to = newVal;
+                Log.e("update","updatelisten");
+                Toast.makeText(getApplicationContext(),"updatelisten",Toast.LENGTH_SHORT).show();
+                updateDepartures();
             }
         });
 
+        String[] departTimes = currentDepartures();
 
+        NumberPicker npDep; //NP for close departure times
+        npDep = (NumberPicker) findViewById(R.id.numberPickerDepartures);
+
+        npDep.setMinValue(0);
+        npDep.setMaxValue(departTimes.length - 1);
+        npDep.setValue(2);
+        npDep.setDisplayedValues(departTimes);
+        npDep.setWrapSelectorWheel(false);
+        npDep.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+
+        npTo.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                depart = newVal;
+            }
+        });
+    }
+
+    public void updateDepartures() {
+        String[] departTimes = currentDepartures();
+        NumberPicker npDep; //NP for close departure times
+        npDep = (NumberPicker) findViewById(R.id.numberPickerDepartures);
+        npDep.setDisplayedValues(departTimes);
+    }
+
+    public String[] currentDepartures() {
+        Log.e("update","update");
+        Toast.makeText(this,"update",Toast.LENGTH_SHORT).show();
+        int nrDepTimes = 5; //number of departure times
+        int lo = -2; //lower and higher bound of for loops
+        int hi = 3;
+
+        //initialise calendar with current time and trim
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+        String[] dep = new String[nrDepTimes];
+
+
+        int EHV = 0;
+        int Heeze = 1;
+        int RDaal = 2;
+
+        //time(14,0) gives next departure time when departure is :14 each half hour
+        if (from == EHV) {
+            if (to == Heeze) {
+                Log.e("cD","ehv to heeze");
+                Toast.makeText(this,"ehv to heeze",Toast.LENGTH_SHORT).show();
+                for (int i = lo; i < hi; i++) {
+                    dep[i+2] = time(4,30*i);
+                }
+            } else if (to == RDaal) {
+                for (int i = lo; i < hi; i++) {
+                    dep[i+2] = time(1,30*i);
+                }
+            } else {
+                for (int i = lo; i < hi; i++) {
+                    dep[i+2] = time(0,30*i);
+                }
+            }
+        } else if (from == Heeze) {
+            if (to == EHV) {
+            } else if (to == RDaal) {
+            }
+        } else if (from == RDaal) {
+            if (to == EHV) {
+            } else if (to == Heeze) {
+            }
+        }
+
+        return dep;
     }
 
     /**
@@ -134,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
         }
         c.set(Calendar.MINUTE, minutes);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-        if (travel > 0) { //if we want to know arrival time, otherwise return departure time
+        if (travel != 0) { //if we want to know arrival time, otherwise return departure time
             c.add(Calendar.MINUTE, travel); //time I need to get home
         }
 
