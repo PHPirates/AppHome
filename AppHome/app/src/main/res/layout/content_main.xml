@@ -17,22 +17,49 @@
         android:layout_height="wrap_content">
 
         <TableRow>
-
-            <Button
-                android:id="@+id/sendTextRoosendaal"
+            <TextView
+                android:id="@+id/textFrom"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:onClick="sendTextRoosendaal"
-                android:text="@string/sendToRoosendaal" />
+                android:text="@string/from"/>
 
-            <Button
-                android:id="@+id/sentTextHeeze"
+            <TextView
+                android:id="@+id/textTo"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:onClick="sendTextHeeze"
-                android:text="@string/sendToHeeze"/>
+                android:text="@string/to"/>
         </TableRow>
+
+        <TableRow>
+
+            <NumberPicker
+                android:id="@+id/numberPickerFrom"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content">
+
+            </NumberPicker>
+
+            <NumberPicker
+                android:id="@+id/numberPickerTo"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content">
+
+            </NumberPicker>
+        </TableRow>
+
+        <TableRow>
+            <Button
+                android:id="@+id/sendText"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/send"
+                android:onClick="sendText"/>
+        </TableRow>
+
     </TableLayout>
 </ScrollView>

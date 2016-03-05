@@ -9,12 +9,20 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.NumberPicker;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
+
+    NumberPicker npFrom;
+    NumberPicker npTo;
+    int from = 0; //default from Eindhoven
+    int to;
+
+    String[] cities = new String[]{"Eindhoven", "Heeze", "Roosendaal"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,63 +31,94 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        npFrom = (NumberPicker) findViewById(R.id.numberPickerFrom);
+
+        npFrom.setMinValue(0);
+        npFrom.setMaxValue(cities.length - 1);
+        npFrom.setDisplayedValues(cities);
+        npFrom.setWrapSelectorWheel(true);
+
+        npFrom.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                from = newVal;
+            }
+        });
+
+        npTo = (NumberPicker) findViewById(R.id.numberPickerTo);
+
+        npTo.setMinValue(0);
+        npTo.setMaxValue(cities.length - 1);
+        npTo.setDisplayedValues(cities);
+        npTo.setWrapSelectorWheel(true);
+
+        npTo.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+            @Override
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+                to = newVal;
+            }
+        });
+
+
     }
 
     /**
-     * Buttons.
+     * buttons ------------------------------------------------------
      */
 
-    public void sendTextRoosendaal(View view){
+    public void sendText(View view){
+
+        if(from == 0){
+            if(to == 1){
+                sendTextHeeze();
+            } else if(to == 2){
+                sendTextRoosendaal();
+            }
+        }
+
+    }
+
+    public void sendTextRoosendaal() {
+
+        String ETA = "ETA " + time(31, 89);
+        sendText(ETA);
+    }
+
+    public void sendTextHeeze() {
+
+        String train = "Trein van " + time(34, 0); // 0 if you want the time of train departing
+        sendText(train);
+
+    }
+
+    String time(int depart, int travel){
         Calendar c = Calendar.getInstance();
-        c.set(Calendar.SECOND,0);
-        c.set(Calendar.MILLISECOND,0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
 
         //time next train
         int minutes = c.get(Calendar.MINUTE);
-        if (minutes<31) {
-            minutes=31; //next train at :31
+        if (minutes < depart) {
+            minutes = depart; //next train at :31
         } else {
-            minutes = 61; //add up to the next train departure at :01
+            minutes = depart + 30; //add up to the next train departure at :01
         }
-        c.set(Calendar.MINUTE,minutes);
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm",java.util.Locale.getDefault());
-        //String nextTrain = simpleDateFormat.format(c.getTime());
-        c.add(Calendar.MINUTE,89); //time I need to get home
-        String ETA = "ETA "+simpleDateFormat.format(c.getTime());
+        c.set(Calendar.MINUTE, minutes);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+        if(travel > 0) {
+            c.add(Calendar.MINUTE, travel); //time I need to get home
+        }
 
+        return simpleDateFormat.format(c.getTime());
+    }
+
+    public void sendText(String text){
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, ETA);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, text);
         sendIntent.setType("text/plain");
         sendIntent.setPackage("com.whatsapp");
         startActivity(sendIntent);
     }
 
-    public void sendTextHeeze(View view){
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.SECOND,0);
-        c.set(Calendar.MILLISECOND,0);
-
-        //time next train
-        int minutes = c.get(Calendar.MINUTE);
-        if (minutes<34) {
-            minutes=34; //next train at :34
-        } else {
-            minutes = 64; //add up to the next train departure at :04
-        }
-        c.set(Calendar.MINUTE,minutes);
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm",java.util.Locale.getDefault());
-        //String nextTrain = simpleDateFormat.format(c.getTime());
-//        c.add(Calendar.MINUTE,89); //time I need to get home
-//        String ETA = "ETA "+simpleDateFormat.format(c.getTime());
-
-        String train = "Trein van " + simpleDateFormat.format(c.getTime());
-
-        Intent sendIntent = new Intent();
-        sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, train);
-        sendIntent.setType("text/plain");
-        sendIntent.setPackage("com.whatsapp");
-        startActivity(sendIntent);
-    }
 }

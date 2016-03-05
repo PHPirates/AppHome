@@ -2,6 +2,8 @@
     <string name="app_name">AppHome</string>
     <string name="action_settings">Settings</string>
     <string name="send">Send</string>
+    <string name="from">From:</string>
+    <string name="to">To:</string>
     <string name="sendToRoosendaal">Send To Roosendaal</string>
     <string name="sendToHeeze">Send To Heeze</string>
 </resources>
