@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.NumberPicker;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
@@ -60,11 +61,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 to = newVal;
-                Log.e("update","updatelisten");
-                Toast.makeText(getApplicationContext(),"updatelisten",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), Integer.toString(from), Toast.LENGTH_SHORT).show();
+
+//                Log.e("update","updatelisten");
+//                Toast.makeText(getApplicationContext(),"updatelisten",Toast.LENGTH_SHORT).show();
                 updateDepartures();
             }
         });
+
 
         String[] departTimes = currentDepartures();
 
@@ -78,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         npDep.setWrapSelectorWheel(false);
         npDep.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
 
-        npTo.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
+        npDep.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 depart = newVal;
@@ -94,13 +98,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String[] currentDepartures() {
-        Log.e("update","update");
-        Toast.makeText(this,"update",Toast.LENGTH_SHORT).show();
+//        Log.e("update","update");
+//        Toast.makeText(this,"update",Toast.LENGTH_SHORT).show();
         int nrDepTimes = 5; //number of departure times
         int lo = -2; //lower and higher bound of for loops
         int hi = 3;
 
-        //initialise calendar with current time and trim
+    //initialise calendar with current time and trim
         Calendar c = Calendar.getInstance();
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
@@ -112,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
         int Heeze = 1;
         int RDaal = 2;
 
-        //time(14,0) gives next departure time when departure is :14 each half hour
+    //time(14,0) gives next departure time when departure is :14 each half hour
         if (from == EHV) {
             if (to == Heeze) {
                 Log.e("cD","ehv to heeze");
@@ -129,13 +133,19 @@ public class MainActivity extends AppCompatActivity {
                     dep[i+2] = time(0,30*i);
                 }
             }
-        } else if (from == Heeze) {
+        } else if (from == Heeze) { //TODO make for loops for these times
             if (to == EHV) {
+                dep = new String[]{"Time one", "Time two", "Time three", "Time four", "Time five"};
             } else if (to == RDaal) {
+                dep = new String[]{"Time one", "Time two", "Time three", "Time four", "Time five"};
+
             }
         } else if (from == RDaal) {
+            dep = new String[]{"Time one", "Time two", "Time three", "Time four", "Time five"};
+
             if (to == EHV) {
             } else if (to == Heeze) {
+                dep = new String[]{"Time one", "Time two", "Time three", "Time four", "Time five"};
             }
         }
 
@@ -197,6 +207,7 @@ public class MainActivity extends AppCompatActivity {
 
         //time next train
         int minutes = c.get(Calendar.MINUTE);
+        int hours = c.get(Calendar.HOUR_OF_DAY);
         if (!boxChecked) { //taking next train
             if (minutes < depart) {
                 minutes = depart; //next train at e.g. :20
@@ -206,15 +217,17 @@ public class MainActivity extends AppCompatActivity {
                 minutes = depart + 60; //train departure in the next hour, :20
             }
         } else { //took last train
-            if (minutes < depart) {
-                minutes = depart - 30; //e.g. the :50 of last hour
-            } else if (minutes < depart + 30) {
-                minutes = depart; //took the :20 train
-            } else { //minutes >depart+30
-                minutes = depart + 30;
-            }
+        if (minutes < depart) {
+            minutes = depart - 30; //e.g. the :50 of last hour
+        } else if (minutes < depart + 30) {
+            minutes = depart + 30; //took the :20 train
+        } else { //minutes >depart+30
+            minutes = depart;
+            hours++;
+        }
         }
         c.set(Calendar.MINUTE, minutes);
+        c.set(Calendar.HOUR_OF_DAY, hours);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
         if (travel != 0) { //if we want to know arrival time, otherwise return departure time
             c.add(Calendar.MINUTE, travel); //time I need to get home
