@@ -4,12 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.NumberPicker;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -61,11 +58,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 to = newVal;
-                Toast.makeText(getApplicationContext(), Integer.toString(from),
-                        Toast.LENGTH_SHORT).show();
-
-//                Log.e("update","updatelisten");
-//                Toast.makeText(getApplicationContext(),"updatelisten",Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getApplicationContext(), Integer.toString(from),
+//                        Toast.LENGTH_SHORT).show();
                 updateDepartures();
             }
         });
@@ -99,59 +93,75 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String[] currentDepartures() {
-//        Log.e("update","update");
-//        Toast.makeText(this,"update",Toast.LENGTH_SHORT).show();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+        Calendar[] calendars = currentDeparturesCal();
+        String[] deps = new String[calendars.length];
+        for (int i = 0; i < calendars.length; i++) {
+            deps[i] = simpleDateFormat.format(calendars[i].getTime());
+        }
+        return deps;
+    }
+
+    public Calendar[] currentDeparturesCal() {
         int nrDepTimes = 5; //number of departure times
         int lo = -2; //lower and higher bound of for loops
         int hi = 3;
 
-    //initialise calendar with current time and trim
+        //initialise calendar with current time and trim
         Calendar c = Calendar.getInstance();
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-        String[] dep = new String[nrDepTimes];
-
+        Calendar[] dep = new Calendar[nrDepTimes];
 
         int EHV = 0;
         int Heeze = 1;
         int RDaal = 2;
 
-    //time(14,0) gives next departure time when departure is :14 each half hour
+        String[] def = new String[]{"", "", "", "", ""}; //TODO default thing
+
+        //arrivalTime(14,0) gives next departure time when departure is :14 each half hour
         if (from == EHV) {
             if (to == Heeze) {
-                Log.e("cD","ehv to heeze");
-                Toast.makeText(this,"ehv to heeze",Toast.LENGTH_SHORT).show();
                 for (int i = lo; i < hi; i++) {
-                    dep[i+2] = time(4,30*i);
+                    dep[i + 2] = arrivalTimeCal(4, 30 * i);
                 }
             } else if (to == RDaal) {
                 for (int i = lo; i < hi; i++) {
-                    dep[i+2] = time(1,30*i);
+                    dep[i + 2] = arrivalTimeCal(1, 30 * i);
                 }
             } else {
-                for (int i = lo; i < hi; i++) {
-                    dep[i+2] = time(0,30*i);
-                }
+                //dep = def;
             }
-        } else if (from == Heeze) { //TODO make for loops for these times
+        } else if (from == Heeze) {
             if (to == EHV) {
-                dep = new String[]{"Time one", "Time two", "Time three", "Time four", "Time five"};
+                for (int i = lo; i < hi; i++) {
+                    dep[i + 2] = arrivalTimeCal(16, 30 * i);
+                }
             } else if (to == RDaal) {
-                dep = new String[]{"Time one", "Time two", "Time three", "Time four", "Time five"};
-
+                for (int i = lo; i < hi; i++) {
+                    dep[i + 2] = arrivalTimeCal(16, 30 * i);
+                }
+            } else {
+                //dep = def;
             }
         } else if (from == RDaal) {
-            dep = new String[]{"Time one", "Time two", "Time three", "Time four", "Time five"};
-
             if (to == EHV) {
+                for (int i = lo; i < hi; i++) {
+                    dep[i + 2] = arrivalTimeCal(50, 30 * i);
+                }
             } else if (to == Heeze) {
-                dep = new String[]{"Time one", "Time two", "Time three", "Time four", "Time five"};
+                for (int i = lo; i < hi; i++) {
+                    dep[i + 2] = arrivalTimeCal(50, 30 * i);
+                }
+            } else {
+                //dep = def;
             }
         }
 
         return dep;
     }
+
+
 
     /**
      * Sends the text, called on buttonclick
@@ -159,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
      * @param view button Send
      */
 
-    public void sendText(View view) {
+    public void sendText(View view) { //TODO should take the chosen time
 
         String message = "You are here already, you stupid!";
 
@@ -169,22 +179,23 @@ public class MainActivity extends AppCompatActivity {
 
         if (from == EHV) {
             if (to == Heeze) {
-                message = "Trein van " + time(4, 0);
+                message = "Trein van " + arrivalTime(4, 0);
             } else if (to == RDaal) {
-                message = "ETA " + time(1, 89);
+//                message = "ETA " + arrivalTime(1, 89);
+                message = "ETA " + cAddTravel(currentDeparturesCal()[depart],89);
 
             }
         } else if (from == Heeze) {
             if (to == EHV) {
-                message = "Eindhoven ETA " + time(15, 15);
+                message = "Eindhoven ETA " + arrivalTime(15, 15);
             } else if (to == RDaal) {
-                message = "Aiming for the " + time(1, 0) + " Eindhoven train.";
+                message = "Aiming for the " + arrivalTime(1, 0) + " Eindhoven train.";
             }
         } else if (from == RDaal) {
             if (to == EHV) {
-                message = "ETA " + time(20, 70);
+                message = "ETA " + arrivalTime(20, 70);
             } else if (to == Heeze) {
-                message = "ETA " + time(20, 113);
+                message = "ETA " + arrivalTime(20, 113);
             }
         }
 
@@ -192,6 +203,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public String cAddTravel(Calendar c, int travel) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+        c.add(Calendar.MINUTE,travel);
+        return simpleDateFormat.format(c.getTime());
+    }
     /**
      * departure time should be the first departure time in a given hour
      *
@@ -200,13 +216,19 @@ public class MainActivity extends AppCompatActivity {
      * @return ETA destination, or departure time if travel=0
      */
 
-    String time(int depart, int travel) {
-        //initialise calendar with current time and trim
+    public String arrivalTime(int depart, int travel) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+        Calendar c = arrivalTimeCal(depart,travel);
+        return simpleDateFormat.format(c.getTime());
+    }
+
+    public Calendar arrivalTimeCal(int depart, int travel) {
+        //initialise calendar with current arrivalTime and trim
         Calendar c = Calendar.getInstance();
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        //time next train
+        //arrivalTime next train
         int minutes = c.get(Calendar.MINUTE);
         int hours = c.get(Calendar.HOUR_OF_DAY);
         if (!boxChecked) { //taking next train
@@ -218,23 +240,22 @@ public class MainActivity extends AppCompatActivity {
                 minutes = depart + 60; //train departure in the next hour, :20
             }
         } else { //took last train
-        if (minutes < depart) {
-            minutes = depart - 30; //e.g. the :50 of last hour
-        } else if (minutes < depart + 30) {
-            minutes = depart; //took the :20 train
-        } else { //minutes >depart+30
-            minutes = depart + 30;
+            if (minutes < depart) {
+                minutes = depart - 30; //e.g. the :50 of last hour
+            } else if (minutes < depart + 30) {
+                minutes = depart; //took the :20 train
+            } else { //minutes >depart+30
+                minutes = depart + 30;
 //            hours++;
-        }
+            }
         }
         c.set(Calendar.MINUTE, minutes);
         c.set(Calendar.HOUR_OF_DAY, hours);
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-        if (travel != 0) { //if we want to know arrival time, otherwise return departure time
-            c.add(Calendar.MINUTE, travel); //time I need to get home
-        }
 
-        return simpleDateFormat.format(c.getTime());
+        if (travel != 0) { //if we want to know arrival arrivalTime, otherwise return departure arrivalTime
+            c.add(Calendar.MINUTE, travel); //arrivalTime I need to get home
+        }
+    return c;
     }
 
     /**
