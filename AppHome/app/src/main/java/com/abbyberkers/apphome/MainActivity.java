@@ -61,7 +61,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 to = newVal;
-                Toast.makeText(getApplicationContext(), Integer.toString(from), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), Integer.toString(from),
+                        Toast.LENGTH_SHORT).show();
 
 //                Log.e("update","updatelisten");
 //                Toast.makeText(getApplicationContext(),"updatelisten",Toast.LENGTH_SHORT).show();
@@ -220,10 +221,10 @@ public class MainActivity extends AppCompatActivity {
         if (minutes < depart) {
             minutes = depart - 30; //e.g. the :50 of last hour
         } else if (minutes < depart + 30) {
-            minutes = depart + 30; //took the :20 train
+            minutes = depart; //took the :20 train
         } else { //minutes >depart+30
-            minutes = depart;
-            hours++;
+            minutes = depart + 30;
+//            hours++;
         }
         }
         c.set(Calendar.MINUTE, minutes);
