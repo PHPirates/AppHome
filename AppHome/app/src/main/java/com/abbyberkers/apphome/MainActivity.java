@@ -94,7 +94,8 @@ public class MainActivity extends AppCompatActivity {
         NumberPicker npDep; //NP for close departure times
         npDep = (NumberPicker) findViewById(R.id.numberPickerDepartures);
         npDep.setDisplayedValues(departTimes);
-        npDep.setValue(2);
+        npDep.setValue(2); //set default option
+        depart = 2; //set chosen value to default
         if (to == from) {
             setDividerColor(npDep, 0);
         } else {
