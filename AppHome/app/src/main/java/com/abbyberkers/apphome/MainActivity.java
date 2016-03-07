@@ -21,7 +21,6 @@ public class MainActivity extends AppCompatActivity {
     int from = 0; //default from Eindhoven
     int to;
     int depart; //departure numberpicker value
-    boolean boxChecked; //check if checkbox checked
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +62,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 to = newVal;
-//                Toast.makeText(getApplicationContext(), Integer.toString(from),
-//                        Toast.LENGTH_SHORT).show();
                 updateDepartures();
             }
         });
@@ -77,10 +74,9 @@ public class MainActivity extends AppCompatActivity {
 
         npDep.setMinValue(0);
         npDep.setMaxValue(departTimes.length - 1);
-        npDep.setDisplayedValues(departTimes);
         npDep.setWrapSelectorWheel(false);
         npDep.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        setDividerColor(npDep,0); //remove divider initially
+        updateDepartures();
 
         npDep.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
@@ -115,12 +111,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     ColorDrawable colorDrawable = new ColorDrawable(color);
                     pf.set(picker, colorDrawable);
-                } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                } catch (Resources.NotFoundException e) {
-                    e.printStackTrace();
-                }
-                catch (IllegalAccessException e) {
+                } catch (IllegalArgumentException | Resources.NotFoundException | IllegalAccessException e) {
                     e.printStackTrace();
                 }
                 break;
@@ -139,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
             if (calendars[i] != null) { //if from == to, add empty strings
                 deps[i] = simpleDateFormat.format(calendars[i].getTime());
             } else {
-                deps[i] = "";
+                deps[i] = " ";
             }
         }
         return deps;
