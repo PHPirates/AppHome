@@ -1,7 +1,11 @@
 package com.abbyberkers.apphome;
 
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -73,10 +77,10 @@ public class MainActivity extends AppCompatActivity {
 
         npDep.setMinValue(0);
         npDep.setMaxValue(departTimes.length - 1);
-        npDep.setValue(2);
         npDep.setDisplayedValues(departTimes);
         npDep.setWrapSelectorWheel(false);
         npDep.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        setDividerColor(npDep,0); //remove divider initially
 
         npDep.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
@@ -95,6 +99,33 @@ public class MainActivity extends AppCompatActivity {
         npDep = (NumberPicker) findViewById(R.id.numberPickerDepartures);
         npDep.setDisplayedValues(departTimes);
         npDep.setValue(2);
+        if (to == from) {
+            setDividerColor(npDep, 0);
+        } else {
+            setDividerColor(npDep, ContextCompat.getColor(this,R.color.divider));
+        }
+    }
+
+    private void setDividerColor(NumberPicker picker, int color) {
+
+        java.lang.reflect.Field[] pickerFields = NumberPicker.class.getDeclaredFields();
+        for (java.lang.reflect.Field pf : pickerFields) {
+            if (pf.getName().equals("mSelectionDivider")) {
+                pf.setAccessible(true);
+                try {
+                    ColorDrawable colorDrawable = new ColorDrawable(color);
+                    pf.set(picker, colorDrawable);
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                } catch (Resources.NotFoundException e) {
+                    e.printStackTrace();
+                }
+                catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
     }
 
     /**
