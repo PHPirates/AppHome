@@ -7,4 +7,5 @@
     <string name="sendToRoosendaal">Send To Roosendaal</string>
     <string name="sendToHeeze">Send To Heeze</string>
     <string name="lastTrain">I\'m in the train.</string>
+    <string name="title_activity_widget_configuration">WidgetConfigurationActivity</string>
 </resources>

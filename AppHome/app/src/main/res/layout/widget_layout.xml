@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/shape">
+
+    <TextView
+        android:id="@+id/testText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="test"/>
+
+    <Button
+        android:id="@+id/sendTimeOne"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="One"/>
+
+    <Button
+        android:id="@+id/sendTimeTwo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Two"/>
+
+    <Button
+        android:id="@+id/sendTimeThree"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Three"/>
+
+</LinearLayout>
