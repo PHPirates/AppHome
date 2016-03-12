@@ -6,12 +6,12 @@
         android:width="2dp"
         android:color="#FFFFFFFF" />
 
-    <solid android:color="#DDFFFFFF"/>
+    <solid android:color="#abffffff"/>
 
-    <corners
-        android:bottomLeftRadius="7dp"
-        android:bottomRightRadius="7dp"
-        android:topLeftRadius="7dp"
-        android:topRightRadius="7dp" />
+    <!--<corners-->
+        <!--android:bottomLeftRadius="7dp"-->
+        <!--android:bottomRightRadius="7dp"-->
+        <!--android:topLeftRadius="7dp"-->
+        <!--android:topRightRadius="7dp" />-->
 
 </shape> 

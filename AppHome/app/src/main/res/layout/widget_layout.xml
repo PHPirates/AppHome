@@ -15,18 +15,18 @@
         android:id="@+id/sendTimeOne"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="One"/>
+        android:text="Time One"/>
 
     <Button
         android:id="@+id/sendTimeTwo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Two"/>
+        android:text="Time Two"/>
 
     <Button
         android:id="@+id/sendTimeThree"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Three"/>
+        android:text="Time Three"/>
 
 </LinearLayout>

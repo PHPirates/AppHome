@@ -40,7 +40,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        // TODO Auto-generated method stub
+//        // TODO Auto-generated method stub
         super.onReceive(context, intent);
 
         if (intent.getAction().equals(SYNC_CLICKED)) {
@@ -66,7 +66,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
         }
     }
-
+//
     protected PendingIntent getPendingSelfIntent(Context context, String action) {
         Intent intent = new Intent(context, getClass());
         intent.setAction(action);

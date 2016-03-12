@@ -30,14 +30,6 @@
                 android:resource="@layout/widget_info" />
         </receiver>
 
-        <activity
-            android:name=".WidgetConfigurationActivity"
-            android:label="@string/title_activity_widget_configuration"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
-            </intent-filter>
-        </activity>
     </application>
 
 </manifest>

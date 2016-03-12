@@ -6,7 +6,6 @@
     android:minWidth="300dp"
     android:layout_height="wrap_content"
     android:layout_width="wrap_content"
-    android:configure="WidgetConfigurationActivity"
     android:updatePeriodMillis="300000">
 
 </appwidget-provider>
