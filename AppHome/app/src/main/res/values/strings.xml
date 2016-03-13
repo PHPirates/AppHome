@@ -8,4 +8,7 @@
     <string name="sendToHeeze">Send To Heeze</string>
     <string name="lastTrain">I\'m in the train.</string>
     <string name="title_activity_widget_configuration">WidgetConfigurationActivity</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="configure">Configure</string>
+    <string name="add_widget">Add widget</string>
 </resources>

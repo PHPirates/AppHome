@@ -1,5 +1,6 @@
 package com.abbyberkers.apphome;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -16,6 +17,13 @@ import java.util.Random;
 public class WidgetProvider extends AppWidgetProvider {
 
     final String SYNC_CLICKED = "action";
+    private static final String TAG = "LOG_TAG";
+
+    @Override
+    public void onEnabled(Context context){
+        super.onEnabled(context);
+        Log.d(TAG, "onEnabled");
+    }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -29,8 +37,6 @@ public class WidgetProvider extends AppWidgetProvider {
 
         remoteViews.setOnClickPendingIntent(R.id.sendTimeOne, getPendingSelfIntent(context, SYNC_CLICKED));
 
-
-
         remoteViews.setTextViewText(R.id.testText, "TESTINGupdate");
 
         appWidgetManager.updateAppWidget(watchWidget, remoteViews);
@@ -43,7 +49,11 @@ public class WidgetProvider extends AppWidgetProvider {
 //        // TODO Auto-generated method stub
         super.onReceive(context, intent);
 
+        Log.d(TAG, "onReceive");
+
         if (intent.getAction().equals(SYNC_CLICKED)) {
+
+            Log.e("widget", "time one button clicked.");
 
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 
@@ -66,7 +76,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
         }
     }
-//
+
     protected PendingIntent getPendingSelfIntent(Context context, String action) {
         Intent intent = new Intent(context, getClass());
         intent.setAction(action);
