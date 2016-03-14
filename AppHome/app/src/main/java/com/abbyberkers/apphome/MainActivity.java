@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
@@ -16,13 +17,21 @@ import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -104,69 +113,66 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        new RetrieveFeedTask().execute();
+        APIRequest();
     }
 
-    class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
+    public void APIRequest() {
+        Log.e("begin","api");
+        try {
+            URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation=Utrecht+Centraal&toStation=Wierden&departure=true");
+            String userCredentials = "t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
+            String encoding = new String(android.util.Base64.encode(userCredentials.getBytes(), Base64.DEFAULT));
 
-        private Exception exception;
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Authorization", "Basic " + encoding);
+            InputStream content = (InputStream) connection.getInputStream();
+            BufferedReader in =
+                    new BufferedReader(new InputStreamReader(content));
+            String line;
+            Log.e("prewhile","test");
+            while ((line = in.readLine()) != null) {
+                Log.e("testlog","test1");
+                Log.e("line:",line);
+                responseView.setText(line);
+            }
+        } catch (Exception e) {
+            Log.e("error", "error");
+            String stackTrace = Log.getStackTraceString(e);
+            Log.e("trace",stackTrace);
+            e.printStackTrace();
 
-        protected void onPreExecute() {
-            progressBar.setVisibility(View.VISIBLE);
-            responseView.setText("");
         }
 
-        protected String doInBackground(Void... urls) {
-            String fromStation = "Roosendaal";
-            String toStation = "Eindhoven";
 
-            try {
-//                URL url = new URL(API_URL + "fromStation=" + fromStation +
-//                        "&toStation=" + toStation);//+ "&apiKey=" + API_KEY);
-                URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation=Utrecht+Centraal&toStation=Wierden&departure=true");
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                try {
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                    StringBuilder stringBuilder = new StringBuilder();
-                    String line;
-                    while ((line = bufferedReader.readLine()) != null) {
-                        stringBuilder.append(line).append("\n");
-                    }
-                    bufferedReader.close();
-                    return stringBuilder.toString();
-                } finally {
-                    //urlConnection.getErrorStream();
-                    urlConnection.disconnect();
-                }
-            } catch (Exception e) {
-                Log.e("ERROR", e.getMessage(), e);
+    }
 
-                return null;
+    public static void downloadFileWithAuth(String urlStr, String user, String pass, String outFilePath) {
+        try {
+            // URL url = new URL ("http://ip:port/download_url");
+            URL url = new URL(urlStr);
+            String authStr = user + ":" + pass;
+            //String authEncoded = new Base64().encodeBytes(authStr.getBytes());
+            //String authEncoded = "Basic " + new String(new Base64().encode(authStr.getBytes()));
+            String authEncoded = "Basic " + new String(android.util.Base64.encode(authStr.getBytes(), Base64.DEFAULT));
+
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Authorization", "Basic " + authEncoded);
+
+            File file = new File(outFilePath);
+            InputStream in = (InputStream) connection.getInputStream();
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+            for (int b; (b = in.read()) != -1;) {
+                out.write(b);
             }
+            out.close();
+            in.close();
         }
-
-        protected void onPostExecute(String response) {
-            if (response == null) {
-                response = "THERE WAS AN ERROR";
-            }
-            progressBar.setVisibility(View.GONE);
-            Log.i("INFO", response);
-            responseView.setText(response);
-            // TODO: check this.exception
-            // TODO: do something with the feed
-
-//            try {
-//                JSONObject object = (JSONObject) new JSONTokener(response).nextValue();
-//                String requestID = object.getString("requestId");
-//                int likelihood = object.getInt("likelihood");
-//                JSONArray photos = object.getJSONArray("photos");
-//                .
-//                .
-//                .
-//                .
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
+        catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
