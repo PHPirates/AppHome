@@ -24,6 +24,7 @@ public class WidgetSettings extends AppCompatActivity {
     public static final String TIME_ONE_KEY = "time_one";
     public static final String TIME_TWO_KEY = "time_two";
     public static final String TIME_THREE_KEY = "time_three";
+    public static final String DIRECTION_KEY = "direction";
 
 
     final Context context = WidgetSettings.this;
@@ -199,6 +200,9 @@ public class WidgetSettings extends AppCompatActivity {
 
     public void setWidget(View view){
 
+        String direction = direction(from, to);
+        saveDirection(context, direction);
+
         saveTimeOne(context, cToString(currentDeparturesCalSettings()[1]));
         saveTimeTwo(context, cToString(currentDeparturesCalSettings()[2]));
         saveTimeThree(context, cToString(currentDeparturesCalSettings()[3]));
@@ -228,7 +232,6 @@ public class WidgetSettings extends AppCompatActivity {
      */
     public String cToString(Calendar c) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-//        c.add(Calendar.MINUTE);
         return simpleDateFormat.format(c.getTime());
     }
 
@@ -263,6 +266,13 @@ public class WidgetSettings extends AppCompatActivity {
         return c;
     }
 
+    static void saveDirection(Context context, String direction){
+        SharedPreferences.Editor prefs = context.getSharedPreferences(
+                PREFS_NAME,0).edit();
+        prefs.putString(DIRECTION_KEY, direction);
+        prefs.commit();
+    }
+
     static void saveTimeOne(Context context, String timeOne) {
         SharedPreferences.Editor prefs = context.getSharedPreferences(
                 PREFS_NAME, 0).edit();
@@ -284,6 +294,12 @@ public class WidgetSettings extends AppCompatActivity {
         prefs.commit();
     }
 
+    static String loadDirection(Context context){
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+        String direction = prefs.getString(DIRECTION_KEY, "Settings");
+        return direction;
+    }
+
     static String loadTimeOne(Context context){
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
         String timeOne = prefs.getString(TIME_ONE_KEY,"Time One");
@@ -300,6 +316,29 @@ public class WidgetSettings extends AppCompatActivity {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME,0);
         String timeThree = prefs.getString(TIME_THREE_KEY, "Time Three");
         return timeThree;
+    }
+
+    String direction(int from, int to){
+        if(from == 0){
+            if(to == 1){
+                return "Eindhoven - Heeze";
+            } else if(to == 2){
+                return "Eindhoven - Roosendaal";
+            }
+        } else if(from == 1){
+            if(to == 0){
+                return "Heeze - Eindhoven";
+            } else if(to == 2){
+                return "Heeze - Roosendaal";
+            }
+        } else {
+            if(to == 0){
+                return "Roosendaal - Heeze";
+            } else if(to == 1){
+                return "Roosendaal - Eindhoven";
+            }
+        }
+        return "Settings";
     }
 }
 

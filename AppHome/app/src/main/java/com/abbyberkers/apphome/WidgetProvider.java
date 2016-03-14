@@ -35,6 +35,7 @@ public class WidgetProvider extends AppWidgetProvider {
         remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
         watchWidget = new ComponentName(context, WidgetProvider.class);
 
+        String direction = WidgetSettings.loadDirection(context);
         String timeOne = WidgetSettings.loadTimeOne(context);
         String timeTwo = WidgetSettings.loadTimeTwo(context);
         String timeThree = WidgetSettings.loadTimeThree(context);
@@ -51,6 +52,9 @@ public class WidgetProvider extends AppWidgetProvider {
             remoteViews.setTextViewText(R.id.sendTimeThree, timeThree);
         }
 
+        if(direction != null){
+            remoteViews.setTextViewText(R.id.settingsButton, direction);
+        }
 
 
         Intent intent = new Intent(context, WidgetSettings.class);
