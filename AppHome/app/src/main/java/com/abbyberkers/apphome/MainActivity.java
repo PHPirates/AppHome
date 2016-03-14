@@ -19,14 +19,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
 import java.net.URL;
+import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.logging.Level;
@@ -113,7 +117,92 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        APIRequest();
+        new RetrieveFeedTask().execute();
+    }
+
+    class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
+
+        private Exception exception;
+
+        protected void onPreExecute() {
+            progressBar.setVisibility(View.VISIBLE);
+            responseView.setText("");
+        }
+
+        protected String doInBackground(Void... urls) {
+            //TODO try with header
+            // Do some validation here
+            Log.e("background","back");
+
+            InputStream in = null;
+            int resCode = -1;
+
+            try {
+                Log.e("try1","1");
+//                URL url = new URL("http://t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg@webservices.ns.nl/ns-api-treinplanner?fromStation=Utrecht+Centraal&toStation=Wierden&departure=true");
+                URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation=Utrecht+Centraal&toStation=Wierden&departure=true");
+
+                String userCredentials = "t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
+                String encoding = new String(android.util.Base64.encode(userCredentials.getBytes(), Base64.DEFAULT));
+
+                //github test
+                final String username = "t.m.schouten@student.tue.nl";
+                final String password = "sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
+
+//                Authenticator.setDefault(new Authenticator() {
+//                    protected PasswordAuthentication getPasswordAuthentication() {
+//                        return new PasswordAuthentication(username, password.toCharArray());
+//                    }
+//                });
+
+                //end test
+
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestProperty("Authorization", "Basic " + encoding);
+                try {
+                    Log.e("try2","2");
+                    //edit
+                    resCode = urlConnection.getResponseCode();
+                    if (resCode == HttpURLConnection.HTTP_OK) {
+                        Log.e("rescode","ok");
+                        in = urlConnection.getInputStream();
+                    } else {
+                        Log.e("rescode","not ok");
+                        in = urlConnection.getErrorStream();
+                    }
+                    //end
+                    BufferedReader bufferedReader = new BufferedReader(
+                            new InputStreamReader(in));
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = bufferedReader.readLine()) != null) {
+                        stringBuilder.append(line).append("\n");
+                    }
+                    bufferedReader.close();
+                    return stringBuilder.toString();
+                }
+                finally{
+                    urlConnection.disconnect();
+                }
+            }
+            catch(Exception e) {
+                Log.e("ERROR", e.getMessage(), e);
+                return null;
+                //use getresponsecode
+            }
+        }
+
+        protected void onPostExecute(String response) {
+            if(response == null) {
+                response = "THERE WAS AN ERROR";
+            }
+            progressBar.setVisibility(View.GONE);
+            Log.i("INFO", response);
+            responseView.setText(response);
+            Log.e("response",response);
+        }
     }
 
     public void APIRequest() {
@@ -123,11 +212,13 @@ public class MainActivity extends AppCompatActivity {
             String userCredentials = "t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
             String encoding = new String(android.util.Base64.encode(userCredentials.getBytes(), Base64.DEFAULT));
 
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Authorization", "Basic " + encoding);
-            InputStream content = (InputStream) connection.getInputStream();
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setDoOutput(true);
+            urlConnection.setRequestProperty("Authorization", "Basic " + encoding);
+
+
+            InputStream content = (InputStream) urlConnection.getInputStream();
             BufferedReader in =
                     new BufferedReader(new InputStreamReader(content));
             String line;
