@@ -1,40 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/shape">
 
-    <TableRow>
-    <TextView
-        android:id="@+id/testText"
-        android:width="0dp"
-        android:layout_weight="3"
+    <!--<TextView-->
+        <!--android:id="@+id/testText"-->
+        <!--android:width="0dp"-->
+        <!--android:layout_weight="3"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="test"/>-->
+
+    <Button
+        android:id="@+id/settingsButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="test"/>
+        android:text="@string/action_settings"/>
 
-    </TableRow>
-
-    <TableRow>
     <Button
         android:id="@+id/sendTimeOne"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Time One"/>
-    </TableRow>
-    <TableRow>
     <Button
         android:id="@+id/sendTimeTwo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Time Two"/>
-    </TableRow>
-    <TableRow>
     <Button
         android:id="@+id/sendTimeThree"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Time Three"/>
-    </TableRow>
-</TableLayout>
+</LinearLayout>

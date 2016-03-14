@@ -19,11 +19,11 @@ public class WidgetProvider extends AppWidgetProvider {
     final String SYNC_CLICKED = "action";
     private static final String TAG = "LOG_TAG";
 
-    @Override
-    public void onEnabled(Context context){
-        super.onEnabled(context);
-        Log.d(TAG, "onEnabled");
-    }
+//    @Override
+//    public void onEnabled(Context context){
+//        super.onEnabled(context);
+//        Log.d(TAG, "onEnabled");
+//    }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -35,9 +35,31 @@ public class WidgetProvider extends AppWidgetProvider {
         remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
         watchWidget = new ComponentName(context, WidgetProvider.class);
 
-        remoteViews.setOnClickPendingIntent(R.id.sendTimeOne, getPendingSelfIntent(context, SYNC_CLICKED));
+        String timeOne = WidgetSettings.loadTimeOne(context);
+        String timeTwo = WidgetSettings.loadTimeTwo(context);
+        String timeThree = WidgetSettings.loadTimeThree(context);
 
-        remoteViews.setTextViewText(R.id.testText, "TESTINGupdate");
+        if(timeOne != null){
+            remoteViews.setTextViewText(R.id.sendTimeOne, timeOne);
+        }
+
+        if(timeTwo != null){
+            remoteViews.setTextViewText(R.id.sendTimeTwo, timeTwo);
+        }
+
+        if(timeThree != null){
+            remoteViews.setTextViewText(R.id.sendTimeThree, timeThree);
+        }
+
+
+
+        Intent intent = new Intent(context, WidgetSettings.class);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, 0);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        remoteViews.setOnClickPendingIntent(R.id.settingsButton, pendingIntent);
+        remoteViews.setOnClickPendingIntent(R.id.sendTimeOne, getPendingSelfIntent(context,SYNC_CLICKED));
+
+//        remoteViews.setTextViewText(R.id.testText, "TESTINGupdate");
 
         appWidgetManager.updateAppWidget(watchWidget, remoteViews);
 
@@ -53,7 +75,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
         if (intent.getAction().equals(SYNC_CLICKED)) {
 
-            Log.e("widget", "time one button clicked.");
+            Log.e("widget", "time one button clicked");
 
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
 

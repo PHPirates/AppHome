@@ -30,6 +30,7 @@
                 android:resource="@layout/widget_info" />
         </receiver>
 
+        <activity android:name=".WidgetSettings"></activity>
     </application>
 
 </manifest>
