@@ -130,40 +130,22 @@ public class MainActivity extends AppCompatActivity {
         }
 
         protected String doInBackground(Void... urls) {
-            //TODO try with header
-            // Do some validation here
-            Log.e("background","back");
-
-            InputStream in = null;
-            int resCode = -1;
+            InputStream in;
+            int resCode;
 
             try {
-                Log.e("try1","1");
-//                URL url = new URL("http://t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg@webservices.ns.nl/ns-api-treinplanner?fromStation=Utrecht+Centraal&toStation=Wierden&departure=true");
-                URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation=Utrecht+Centraal&toStation=Wierden&departure=true");
+                URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation=Roosendaal&toStation=Eindhoven");
 
-                String userCredentials = "t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
-                String encoding = new String(android.util.Base64.encode(userCredentials.getBytes(), Base64.DEFAULT));
+//                String userCredentials = "t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
+//                String encoding = new String(android.util.Base64.encode(userCredentials.getBytes(), Base64.DEFAULT));
+//                encoding = encoding.replaceAll("\\s+",""); //because the base64 encoding doesn't work.
 
-                //github test
-                final String username = "t.m.schouten@student.tue.nl";
-                final String password = "sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
-
-//                Authenticator.setDefault(new Authenticator() {
-//                    protected PasswordAuthentication getPasswordAuthentication() {
-//                        return new PasswordAuthentication(username, password.toCharArray());
-//                    }
-//                });
-
-                //end test
-
+                //encoded userCredentials with online encoder
+                String encoding = "dC5tLnNjaG91dGVuQHN0dWRlbnQudHVlLm5sOnNPLTY1QVp4dUVySm1tQzI4ZUlSQjg1YW9zN29HVkowQzZ0T1pJOVllSERQTFhlRXYxbmZCZw==";
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("POST");
-                urlConnection.setDoOutput(true);
                 urlConnection.setRequestProperty("Authorization", "Basic " + encoding);
+
                 try {
-                    Log.e("try2","2");
-                    //edit
                     resCode = urlConnection.getResponseCode();
                     if (resCode == HttpURLConnection.HTTP_OK) {
                         Log.e("rescode","ok");
@@ -172,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
                         Log.e("rescode","not ok");
                         in = urlConnection.getErrorStream();
                     }
-                    //end
                     BufferedReader bufferedReader = new BufferedReader(
                             new InputStreamReader(in));
                     StringBuilder stringBuilder = new StringBuilder();
@@ -190,7 +171,6 @@ public class MainActivity extends AppCompatActivity {
             catch(Exception e) {
                 Log.e("ERROR", e.getMessage(), e);
                 return null;
-                //use getresponsecode
             }
         }
 
@@ -202,68 +182,6 @@ public class MainActivity extends AppCompatActivity {
             Log.i("INFO", response);
             responseView.setText(response);
             Log.e("response",response);
-        }
-    }
-
-    public void APIRequest() {
-        Log.e("begin","api");
-        try {
-            URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation=Utrecht+Centraal&toStation=Wierden&departure=true");
-            String userCredentials = "t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
-            String encoding = new String(android.util.Base64.encode(userCredentials.getBytes(), Base64.DEFAULT));
-
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("POST");
-            urlConnection.setDoOutput(true);
-            urlConnection.setRequestProperty("Authorization", "Basic " + encoding);
-
-
-            InputStream content = (InputStream) urlConnection.getInputStream();
-            BufferedReader in =
-                    new BufferedReader(new InputStreamReader(content));
-            String line;
-            Log.e("prewhile","test");
-            while ((line = in.readLine()) != null) {
-                Log.e("testlog","test1");
-                Log.e("line:",line);
-                responseView.setText(line);
-            }
-        } catch (Exception e) {
-            Log.e("error", "error");
-            String stackTrace = Log.getStackTraceString(e);
-            Log.e("trace",stackTrace);
-            e.printStackTrace();
-
-        }
-
-
-    }
-
-    public static void downloadFileWithAuth(String urlStr, String user, String pass, String outFilePath) {
-        try {
-            // URL url = new URL ("http://ip:port/download_url");
-            URL url = new URL(urlStr);
-            String authStr = user + ":" + pass;
-            //String authEncoded = new Base64().encodeBytes(authStr.getBytes());
-            //String authEncoded = "Basic " + new String(new Base64().encode(authStr.getBytes()));
-            String authEncoded = "Basic " + new String(android.util.Base64.encode(authStr.getBytes(), Base64.DEFAULT));
-
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Authorization", "Basic " + authEncoded);
-
-            File file = new File(outFilePath);
-            InputStream in = (InputStream) connection.getInputStream();
-            OutputStream out = new BufferedOutputStream(new FileOutputStream(file));
-            for (int b; (b = in.read()) != -1;) {
-                out.write(b);
-            }
-            out.close();
-            in.close();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
