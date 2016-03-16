@@ -15,6 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import java.io.BufferedReader;
@@ -24,13 +25,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
@@ -43,8 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
     TextView responseView;
     ProgressBar progressBar;
-    static final String API_KEY = "sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
-    static final String API_URL = "http://webservices.ns.nl/ns-api-treinplanner?";
+    String response; //set after getting xml from ns, used by getNSDepTimes TODO link
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,8 +125,6 @@ public class MainActivity extends AppCompatActivity {
 
     class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
 
-        private Exception exception;
-
         protected void onPreExecute() {
             progressBar.setVisibility(View.VISIBLE);
             responseView.setText("");
@@ -147,10 +150,9 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     resCode = urlConnection.getResponseCode();
                     if (resCode == HttpURLConnection.HTTP_OK) {
-                        Log.e("rescode","ok");
                         in = urlConnection.getInputStream();
                     } else {
-                        Log.e("rescode","not ok");
+                        Log.e("rescode", "rescode not ok");
                         in = urlConnection.getErrorStream();
                     }
                     BufferedReader bufferedReader = new BufferedReader(
@@ -178,16 +180,20 @@ public class MainActivity extends AppCompatActivity {
 //                response = "THERE WAS AN ERROR";
 //            }
             progressBar.setVisibility(View.GONE);
-            parseXML(response);
-            Log.e("response",response);
+            setResponse(response);
         }
     }
 
-    public void parseXML(String response) {
+    public void setResponse(String response) {
+        this.response = response;
+        //debug
+        String[] res = getNSDepartures();
+    }
+
+    public String[] getNSDepartures() {
         if (response == null) {
             response = "No response from NS";
         }
-        //textview is responseView
         try {
             //create java DOM xml parser
             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
@@ -201,13 +207,56 @@ public class MainActivity extends AppCompatActivity {
             //create XPath object
             XPath xPath = XPathFactory.newInstance().newXPath();
 
-            String testexpr = "/ReisMogelijkheden/ReisMogelijkheid[1]/ActueleAankomstTijd";
-            String arrivalTime = xPath.compile(testexpr).evaluate(xmlDocument);
-            Log.e("arrivaltime", arrivalTime);
-            responseView.setText(arrivalTime);
+//            String testexpr = "/ReisMogelijkheden/ReisMogelijkheid[3]/ActueleVertrekTijd";
+//            String arrivalTime = xPath.compile(testexpr).evaluate(xmlDocument);
+//            Log.e("arrivaltime", arrivalTime);
+////            responseView.setText(arrivalTime);
+
+            //generate list of departure times corresponding to nrpickers
+            String depTimesExpr = "//ActueleVertrekTijd";
+            NodeList nodeList = (NodeList) xPath.compile(depTimesExpr).evaluate(xmlDocument, XPathConstants.NODESET);
+            String[] depTimes = new String[5];
+            //use dep times 1 upto 5 from xml
+            for (int i = 0; i < depTimes.length; i++) {
+                depTimes[i] = nodeList.item(i + 1).getFirstChild().getNodeValue();
+            }
+
+            //convert to HH:mm
+            for (int i = 0; i < depTimes.length; i++) {
+                depTimes[i] = convertNSToString(depTimes[i]);
+            }
+
+            //test printing
+            String res = "";
+            for (String depTime : depTimes) {
+                res += "\n" + depTime;
+            }
+            responseView.setText(res);
+
+            return depTimes;
         } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
             e.printStackTrace();
         }
+        return new String[]{" ", " ", " ", " ", " "};
+    }
+
+    public String convertNSToString(String nsTime) {
+
+        try {
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+            Date date = sdf.parse(nsTime);
+            Calendar c = new GregorianCalendar();
+            c.setTime(date);
+            c.add(Calendar.HOUR, 1); //add one hour because +1:00 NS times
+            SimpleDateFormat simpleHour = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+            return simpleHour.format(c.getTime());
+
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return "parse failed";
     }
 
     //*****************normal stuff****************
