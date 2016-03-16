@@ -2,39 +2,37 @@ package com.abbyberkers.apphome;
 
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-import java.io.BufferedOutputStream;
+
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
+
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.Authenticator;
 import java.net.HttpURLConnection;
-import java.net.PasswordAuthentication;
 import java.net.URL;
-import java.net.URLConnection;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -134,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
             int resCode;
 
             try {
+                //http://t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg@webservices.ns.nl/ns-api-treinplanner?fromStation=Roosendaal&toStation=Eindhoven
                 URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation=Roosendaal&toStation=Eindhoven");
 
 //                String userCredentials = "t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
@@ -175,16 +174,41 @@ public class MainActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(String response) {
-            if(response == null) {
-                response = "THERE WAS AN ERROR";
-            }
+//            if(response == null) {
+//                response = "THERE WAS AN ERROR";
+//            }
             progressBar.setVisibility(View.GONE);
-            Log.i("INFO", response);
-            responseView.setText(response);
+            parseXML(response);
             Log.e("response",response);
         }
     }
 
+    public void parseXML(String response) {
+        if (response == null) {
+            response = "No response from NS";
+        }
+        //textview is responseView
+        try {
+            //create java DOM xml parser
+            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder;
+            builder = builderFactory.newDocumentBuilder();
+
+            //parse xml with the DOM parser
+            Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
+
+
+            //create XPath object
+            XPath xPath = XPathFactory.newInstance().newXPath();
+
+            String testexpr = "/ReisMogelijkheden/ReisMogelijkheid[1]/ActueleAankomstTijd";
+            String arrivalTime = xPath.compile(testexpr).evaluate(xmlDocument);
+            Log.e("arrivaltime", arrivalTime);
+            responseView.setText(arrivalTime);
+        } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
+            e.printStackTrace();
+        }
+    }
 
     //*****************normal stuff****************
 
