@@ -27,9 +27,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -215,16 +217,46 @@ public class MainActivity extends AppCompatActivity {
             //generate list of departure times corresponding to nrpickers
             String depTimesExpr = "//ActueleVertrekTijd";
             NodeList nodeList = (NodeList) xPath.compile(depTimesExpr).evaluate(xmlDocument, XPathConstants.NODESET);
-            String[] depTimes = new String[5];
-            //use dep times 1 upto 5 from xml
-            for (int i = 0; i < depTimes.length; i++) {
-                depTimes[i] = nodeList.item(i + 1).getFirstChild().getNodeValue();
+            List<String> nsTimes = new ArrayList<>();
+
+            //use dep times from xml
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                nsTimes.add(i, nodeList.item(i).getFirstChild().getNodeValue());
             }
 
-            //convert to HH:mm
-            for (int i = 0; i < depTimes.length; i++) {
-                depTimes[i] = convertNSToString(depTimes[i]);
+            //get next departure time
+            Calendar nextDepCal = departureTimeCal(20, 0); //uses instance variables to and from
+            Date nextDepDate = nextDepCal.getTime();
+
+            //find next departure time in List
+            int nextIndex = -1;
+            //convert to date to compare
+            for (int i = 0; i < nsTimes.size(); i++) {
+                Date nsDate = convertNSToDate(nsTimes.get(i));
+                if (nextDepDate.before(nsDate)) {
+                    nextIndex = i - 1; //index of next time. No idea why -1 is needed
+                    break;
+                }
             }
+
+            String[] depTimes = new String[5];
+
+            if (nextIndex == -1) {
+                Log.e("nextIndex", "no next departure time!");
+            } else {
+                //index is index of next dept time of all the xml deptimes in nsTimes
+                //get departure times around next time
+                for (int i = 0; i < depTimes.length; i++) {
+                    depTimes[i] = convertNSToString(nsTimes.get(nextIndex - 2 + i));
+                }
+            }
+
+//            //convert to HH:mm
+//            for (int i = 0; i < nsTimes.size(); i++) {
+//                String depTime = nsTimes.get(i);
+//                depTime = convertNSToString(depTime);
+//                nsTimes.set(i,depTime);
+//            }
 
             //test printing
             String res = "";
@@ -240,23 +272,27 @@ public class MainActivity extends AppCompatActivity {
         return new String[]{" ", " ", " ", " ", " "};
     }
 
-    public String convertNSToString(String nsTime) {
-
+    public Date convertNSToDate(String nsTime) {
         try {
-
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
-            Date date = sdf.parse(nsTime);
-            Calendar c = new GregorianCalendar();
-            c.setTime(date);
-            c.add(Calendar.HOUR, 1); //add one hour because +1:00 NS times
-            SimpleDateFormat simpleHour = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-            return simpleHour.format(c.getTime());
-
-
+            return sdf.parse(nsTime);
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return "parse failed";
+        return new Date(); //default
+    }
+
+    public String convertNSToString(String nsTime) {
+        Date date = convertNSToDate(nsTime);
+        Calendar c = new GregorianCalendar();
+        c.setTime(date);
+//        c.add(Calendar.HOUR, 1); //add one hour because +1:00 NS times
+        return convertCalendarToString(c);
+    }
+
+    public String convertCalendarToString(Calendar c) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+        return sdf.format(c.getTime());
     }
 
     //*****************normal stuff****************
@@ -336,23 +372,23 @@ public class MainActivity extends AppCompatActivity {
             if (to == Heeze) {
                 for (int i = lo; i < hi; i++) {
                     //generate departure times using travel time, back and forth in time
-                    dep[i + 2] = arrivalTimeCal(4, 30 * i);
+                    dep[i + 2] = departureTimeCal(4, 30 * i);
                 }
             } else if (to == RDaal) {
                 for (int i = lo; i < hi; i++) {
-                    dep[i + 2] = arrivalTimeCal(1, 30 * i);
+                    dep[i + 2] = departureTimeCal(1, 30 * i);
                 }
             }
         } else if (from == Heeze) {
             if (to == EHV || to == RDaal) {
                 for (int i = lo; i < hi; i++) {
-                    dep[i + 2] = arrivalTimeCal(16, 30 * i);
+                    dep[i + 2] = departureTimeCal(16, 30 * i);
                 }
             }
         } else if (from == RDaal) {
             if (to == EHV || to == Heeze) {
                 for (int i = lo; i < hi; i++) {
-                    dep[i + 2] = arrivalTimeCal(50, 30 * i);
+                    dep[i + 2] = departureTimeCal(50, 30 * i);
                 }
             }
         }
@@ -418,7 +454,7 @@ public class MainActivity extends AppCompatActivity {
      * @return departure time with offset
      */
 
-    public Calendar arrivalTimeCal(int depart, int offset) {
+    public Calendar departureTimeCal(int depart, int offset) {
         //initialise calendar with current arrivalTime and trim
         Calendar c = Calendar.getInstance();
         c.set(Calendar.SECOND, 0);
