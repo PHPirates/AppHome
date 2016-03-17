@@ -22,7 +22,7 @@
         <receiver android:name=".WidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="SYNC_CLICKED" />
+                <action android:name="TIME_ONE" />
             </intent-filter>
 
             <meta-data

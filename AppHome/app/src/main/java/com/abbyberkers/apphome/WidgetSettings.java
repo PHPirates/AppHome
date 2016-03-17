@@ -1,5 +1,6 @@
 package com.abbyberkers.apphome;
 
+import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -55,7 +56,7 @@ public class WidgetSettings extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 from = newVal;
-                updateDeparturesSettings();
+//                updateDeparturesSettings();
             }
         });
 
@@ -73,46 +74,31 @@ public class WidgetSettings extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 to = newVal;
-                updateDeparturesSettings();
+//                updateDeparturesSettings();
             }
         });
 
         //get all the current departures to show in numberpicker
         String[] departTimes = currentDeparturesSettings();
 
-        NumberPicker npDep; //NP for close departure times
-        npDep = (NumberPicker) findViewById(R.id.numberPickerDeparturesSettings);
-
-        npDep.setMinValue(0);
-        npDep.setMaxValue(departTimes.length - 1);
-        npDep.setWrapSelectorWheel(false);
-        npDep.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        updateDeparturesSettings();
-
-        npDep.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                depart = newVal;
-            }
-        });
     }
 
     /**
      * Update the time picker when selecting a new destination
      */
-    public void updateDeparturesSettings() {
-        String[] departTimes = currentDeparturesSettings();
-        NumberPicker npDep; //NP for close departure times
-        npDep = (NumberPicker) findViewById(R.id.numberPickerDeparturesSettings);
-        npDep.setDisplayedValues(departTimes);
-        npDep.setValue(2); //set default option
-        depart = 2; //set chosen value to default
-        if (to == from) {
-            setDividerColor(npDep, 0);
-        } else {
-            setDividerColor(npDep, ContextCompat.getColor(this, R.color.divider));
-        }
-    }
+//    public void updateDeparturesSettings() {
+//        String[] departTimes = currentDeparturesSettings();
+//        NumberPicker npDep; //NP for close departure times
+//        npDep = (NumberPicker) findViewById(R.id.numberPickerDeparturesSettings);
+//        npDep.setDisplayedValues(departTimes);
+//        npDep.setValue(2); //set default option
+//        depart = 2; //set chosen value to default
+//        if (to == from) {
+//            setDividerColor(npDep, 0);
+//        } else {
+//            setDividerColor(npDep, ContextCompat.getColor(this, R.color.divider));
+//        }
+//    }
 
     private void setDividerColor(NumberPicker picker, int color) {
 
@@ -222,7 +208,7 @@ public class WidgetSettings extends AppCompatActivity {
                 appWidgetIds);
         context.sendBroadcast(updateIntent);
         // Done with Configure, finish Activity.
-        finish();
+        finishAffinity();
 
     }
 
@@ -338,7 +324,7 @@ public class WidgetSettings extends AppCompatActivity {
                 return "Roosendaal - Eindhoven";
             }
         }
-        return "Settings";
+        return "from - to";
     }
 }
 
