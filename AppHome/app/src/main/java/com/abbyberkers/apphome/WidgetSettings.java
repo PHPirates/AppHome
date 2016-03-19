@@ -1,6 +1,8 @@
 package com.abbyberkers.apphome;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,9 +14,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.NumberPicker;
+import android.widget.RemoteViews;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -189,9 +193,21 @@ public class WidgetSettings extends AppCompatActivity {
         String direction = direction(from, to);
         saveDirection(context, direction);
 
-        saveTimeOne(context, cToString(currentDeparturesCalSettings()[1]));
-        saveTimeTwo(context, cToString(currentDeparturesCalSettings()[2]));
-        saveTimeThree(context, cToString(currentDeparturesCalSettings()[3]));
+        Calendar cal = currentDeparturesCalSettings()[2];
+        cal.add(Calendar.MINUTE,1);
+
+        Intent intent = new Intent(context, Receiver.class);
+//        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, 0);
+
+        PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+
+        AlarmManager alarmManager = (AlarmManager)context.getSystemService(ALARM_SERVICE);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 180000, pIntent);
+        Log.e("setWidget", "alarm set at " + cToString(cal));
+
+//        saveTimeOne(context, cToString(currentDeparturesCalSettings()[1]));
+//        saveTimeTwo(context, cToString(currentDeparturesCalSettings()[2]));
+//        saveTimeThree(context, cToString(currentDeparturesCalSettings()[3]));
 
         // We need to broadcast an APPWIDGET_UPDATE to our appWidget
         // so it will update the user name TextView.
