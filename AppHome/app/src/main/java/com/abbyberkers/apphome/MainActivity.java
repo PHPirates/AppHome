@@ -418,7 +418,7 @@ public class MainActivity extends AppCompatActivity {
                 // and add optionally travel time to that and convert to string with cAddTravel
                 message = "Trein van " + cAddTravel(getNSDepartures()[depart], 0);
             } else if (to == RDaal) {
-                message = "ETA " + cAddTravel(getNSDepartures()[depart], 89);
+                message = "ETA " + cAddTravel(getNSDepartures()[depart], 90);
             }
         } else if (from == Heeze) {
             if (to == EHV) {
@@ -446,6 +446,10 @@ public class MainActivity extends AppCompatActivity {
     public String cAddTravel(Calendar c, int travel) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
         c.add(Calendar.MINUTE, travel);
+        //round time to nearest ten minutes
+        int unroundedMinutes = c.get(Calendar.MINUTE);
+        int mod = unroundedMinutes % 10;
+        c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
         return simpleDateFormat.format(c.getTime());
     }
 
