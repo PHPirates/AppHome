@@ -416,21 +416,21 @@ public class MainActivity extends AppCompatActivity {
             if (to == Heeze) {
                 //take the chosen calendar object of the current departures,
                 // and add optionally travel time to that and convert to string with cAddTravel
-                message = "Trein van " + cAddTravel(currentDeparturesCal()[depart], 0);
+                message = "Trein van " + cAddTravel(getNSDepartures()[depart], 0);
             } else if (to == RDaal) {
-                message = "ETA " + cAddTravel(currentDeparturesCal()[depart], 89);
+                message = "ETA " + cAddTravel(getNSDepartures()[depart], 89);
             }
         } else if (from == Heeze) {
             if (to == EHV) {
-                message = "Eindhoven ETA " + cAddTravel(currentDeparturesCal()[depart], 15);
+                message = "Eindhoven ETA " + cAddTravel(getNSDepartures()[depart], 15);
             } else if (to == RDaal) {
-                message = "Aiming for the " + cAddTravel(currentDeparturesCal()[depart], 0) + " Eindhoven train.";
+                message = "Aiming for the " + cAddTravel(getNSDepartures()[depart], 0) + " Eindhoven train.";
             }
         } else if (from == RDaal) {
             if (to == EHV) {
-                message = "ETA " + cAddTravel(currentDeparturesCal()[depart], 70);  //20,70
+                message = "ETA " + cAddTravel(getNSDepartures()[depart], 70);  //20,70
             } else if (to == Heeze) {
-                message = "ETA " + cAddTravel(currentDeparturesCal()[depart], 113);
+                message = "ETA " + cAddTravel(getNSDepartures()[depart], 113);
             }
         }
 
