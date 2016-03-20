@@ -202,17 +202,16 @@ public class MainActivity extends AppCompatActivity {
             Log.e("nstimes", Integer.toString(nsTimes.size()));
             Log.e("forlnstimes", nsTimes.get(3));
 
-            //get next departure time
-            Calendar nextDepCal = departureTimeCal(20, 0); //uses instance variables to and from
-            Date nextDepDate = nextDepCal.getTime();
+            //get current time
+            Date current = new Date();
 
             //find next departure time in List
             int nextIndex = -1;
             //convert to date to compare
             for (int i = 0; i < nsTimes.size(); i++) {
                 Date nsDate = convertNSToDate(nsTimes.get(i));
-                if (nextDepDate.before(nsDate)) {
-                    nextIndex = i - 1; //index of next time. No idea why -1 is needed
+                if (current.before(nsDate)) {
+                    nextIndex = i; //index of next departure time.
                     break;
                 }
             }
@@ -348,55 +347,6 @@ public class MainActivity extends AppCompatActivity {
         return deps;
     }
 
-    /**
-     * Used to generate strings to show in the numberpicker, and reused when sending to whatsapp,
-     * to find out which time was picked, using the instance id set by the numberpicker
-     *
-     * @return calendar array of current departures, null objects if to==from
-     */
-    public Calendar[] currentDeparturesCal() {
-        int nrDepTimes = 5; //number of departure times
-        int lo = -2; //lower and higher bound of for loops
-        int hi = 3;
-
-        //initialise calendar with current time and trim
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
-        Calendar[] dep = new Calendar[nrDepTimes];
-
-        int EHV = 0;
-        int Heeze = 1;
-        int RDaal = 2;
-
-        //arrivalTime(14,0) gives next departure time when departure is :14 each half hour
-        if (from == EHV) {
-            if (to == Heeze) {
-                for (int i = lo; i < hi; i++) {
-                    //generate departure times using travel time, back and forth in time
-                    dep[i + 2] = departureTimeCal(4, 30 * i);
-                }
-            } else if (to == RDaal) {
-                for (int i = lo; i < hi; i++) {
-                    dep[i + 2] = departureTimeCal(1, 30 * i);
-                }
-            }
-        } else if (from == Heeze) {
-            if (to == EHV || to == RDaal) {
-                for (int i = lo; i < hi; i++) {
-                    dep[i + 2] = departureTimeCal(16, 30 * i);
-                }
-            }
-        } else if (from == RDaal) {
-            if (to == EHV || to == Heeze) {
-                for (int i = lo; i < hi; i++) {
-                    dep[i + 2] = departureTimeCal(50, 30 * i);
-                }
-            }
-        }
-
-        return dep;
-    }
 
     /**
      * Sends the text, called on buttonclick
@@ -424,7 +374,7 @@ public class MainActivity extends AppCompatActivity {
             if (to == EHV) {
                 message = "Eindhoven ETA " + cAddTravel(getNSDepartures()[depart], 15);
             } else if (to == RDaal) {
-                message = "Aiming for the " + cAddTravel(getNSDepartures()[depart], 0) + " Eindhoven train.";
+                message = "Yay at " + cAddTravel(getNSDepartures()[depart], 114) + ".";
             }
         } else if (from == RDaal) {
             if (to == EHV) {
@@ -446,10 +396,12 @@ public class MainActivity extends AppCompatActivity {
     public String cAddTravel(Calendar c, int travel) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
         c.add(Calendar.MINUTE, travel);
-        //round time to nearest ten minutes
-        int unroundedMinutes = c.get(Calendar.MINUTE);
-        int mod = unroundedMinutes % 10;
-        c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
+        if (from == 0 && to == 2) { //if going to Rdaal
+            //round time to nearest ten minutes
+            int unroundedMinutes = c.get(Calendar.MINUTE);
+            int mod = unroundedMinutes % 10;
+            c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
+        }
         return simpleDateFormat.format(c.getTime());
     }
 
@@ -461,29 +413,6 @@ public class MainActivity extends AppCompatActivity {
      * @return departure time with offset
      */
 
-    public Calendar departureTimeCal(int depart, int offset) {
-        //initialise calendar with current arrivalTime and trim
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
-
-        //arrivalTime next train
-        int minutes = c.get(Calendar.MINUTE);
-
-        if (minutes < depart) {
-            minutes = depart; //next train at e.g. :20
-        } else if (minutes < depart + 30) {
-            minutes = 30 + depart; //add up to the next train departure at e.g. :50
-        } else { //minutes>depart+30
-            minutes = depart + 60; //train departure in the next hour, :20
-        }
-
-        //set calendar
-        c.set(Calendar.MINUTE, minutes);
-        c.add(Calendar.MINUTE, offset); //add travel time
-
-        return c;
-    }
 
     /**
      * send message to whatsapp
