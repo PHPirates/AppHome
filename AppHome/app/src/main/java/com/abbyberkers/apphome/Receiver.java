@@ -9,9 +9,6 @@ import android.content.Intent;
 import android.util.Log;
 import android.widget.RemoteViews;
 
-/**
- * Created by s152337 on 17-3-2016.
- */
 public class Receiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {

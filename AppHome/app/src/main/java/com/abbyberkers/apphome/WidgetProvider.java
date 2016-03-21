@@ -51,21 +51,28 @@ public class WidgetProvider extends AppWidgetProvider {
 
         String direction = WidgetSettings.loadDirection(context);
 
-        if(direction != null){
+        if (direction != null) {
             remoteViews.setTextViewText(R.id.settingsButton, direction);
             Log.e("direction", direction);
-            int depart = 4;
+            int depart = 0;
 
-            if(direction.equals("Eindhoven - Heeze")){
-                if(minutes < depart){
-                    c.set(Calendar.MINUTE, depart);
-                } else if(depart < minutes && minutes < depart + 30){
-                    c.set(Calendar.MINUTE, depart + 30);
-                } else {
-                    c.set(Calendar.MINUTE, depart);
-                    c.add(Calendar.MINUTE, 60);
-                }
+            if (direction.equals("Eindhoven - Heeze")) {
+                depart = 4;
+            } else if(direction.equals("Eindhoven - Roosendaal")){
+                depart = 1;
+            } else if(direction.equals("Heeze - Eindhoven") || direction.equals("Heeze - Roosendaal")){
+                depart = 15;
+            } else if(direction.equals("Roosendaal - Eindhoven") || direction.equals("Roosendaal - Heeze")){
+                depart = 20;
+            }
 
+            if (minutes < depart) {
+                c.set(Calendar.MINUTE, depart);
+            } else if (depart < minutes && minutes < depart + 30) {
+                c.set(Calendar.MINUTE, depart + 30);
+            } else {
+                c.set(Calendar.MINUTE, depart);
+                c.add(Calendar.MINUTE, 60);
             }
 
             remoteViews.setTextViewText(R.id.sendTimeTwo, cToString(c));
@@ -79,19 +86,15 @@ public class WidgetProvider extends AppWidgetProvider {
 
         Intent intent = new Intent(context, WidgetSettings.class);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, 0);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.settingsButton, pendingIntent);
 
 
         Intent intentOne = new Intent(context, getClass());
         intentOne.setAction(TIME_ONE);
         intentOne.putExtra("text", "test");
-        PendingIntent buttonOne = PendingIntent.getBroadcast(context, 0, intentOne,0);
+        PendingIntent buttonOne = PendingIntent.getBroadcast(context, 0, intentOne, 0);
         remoteViews.setOnClickPendingIntent(R.id.sendTimeOne, buttonOne);
-
-//        remoteViews.setOnClickPendingIntent(R.id.sendTimeOne, getPendingSelfIntent(context, TIME_ONE));
-
-//        remoteViews.setTextViewText(R.id.testText, "TESTINGupdate");
 
         appWidgetManager.updateAppWidget(watchWidget, remoteViews);
 
@@ -105,7 +108,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
         Log.d(TAG, "onReceive");
 
-        if(intent.getAction().equals(HALF_HOUR_UPDATE)) {
+        if (intent.getAction().equals(HALF_HOUR_UPDATE)) {
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             RemoteViews remoteViews;
             ComponentName watchWidget;
@@ -113,7 +116,7 @@ public class WidgetProvider extends AppWidgetProvider {
             remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
             watchWidget = new ComponentName(context, WidgetProvider.class);
             appWidgetManager.updateAppWidget(watchWidget, remoteViews);
-        }else if (intent.getAction().equals(TIME_ONE)) {
+        } else if (intent.getAction().equals(TIME_ONE)) {
 
             Log.e("widget", "time one button clicked");
 
@@ -126,7 +129,7 @@ public class WidgetProvider extends AppWidgetProvider {
             watchWidget = new ComponentName(context, WidgetProvider.class);
 
             Bundle extras = intent.getExtras();
-            if (extras != null){
+            if (extras != null) {
                 timeOne = extras.getString("text");
             } else {
                 timeOne = "time one";
@@ -143,6 +146,30 @@ public class WidgetProvider extends AppWidgetProvider {
             appWidgetManager.updateAppWidget(watchWidget, remoteViews);
 
         }
+    }
+
+    public Calendar arrivalTimeCalWidget(int depart, int offset) {
+        //initialise calendar with current arrivalTime and trim
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+
+        //arrivalTime next train
+        int minutes = c.get(Calendar.MINUTE);
+
+        if (minutes < depart) {
+            minutes = depart; //next train at e.g. :20
+        } else if (minutes < depart + 30) {
+            minutes = 30 + depart; //add up to the next train departure at e.g. :50
+        } else { //minutes>depart+30
+            minutes = depart + 60; //train departure in the next hour, :20
+        }
+
+        //set calendar
+        c.set(Calendar.MINUTE, minutes);
+        c.add(Calendar.MINUTE, offset); //add travel time
+
+        return c;
     }
 
     public String cToString(Calendar c) {

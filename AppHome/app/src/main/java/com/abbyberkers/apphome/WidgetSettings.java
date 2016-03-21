@@ -26,9 +26,6 @@ import java.util.Calendar;
 public class WidgetSettings extends AppCompatActivity {
 
     private static final String PREFS_NAME = "com.abbyberkers.apphome.WidgetSettings";
-    public static final String TIME_ONE_KEY = "time_one";
-    public static final String TIME_TWO_KEY = "time_two";
-    public static final String TIME_THREE_KEY = "time_three";
     public static final String DIRECTION_KEY = "direction";
 
 
@@ -36,7 +33,6 @@ public class WidgetSettings extends AppCompatActivity {
 
     int from = 0; //default from Eindhoven
     int to;
-    int depart; //departure numberpicker value
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +40,8 @@ public class WidgetSettings extends AppCompatActivity {
         setContentView(R.layout.activity_widget_settings);
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
+
+        Log.e("settings onCreate", "log?");
 
         String[] cities = new String[]{"Eindhoven", "Heeze", "Roosendaal"};
 
@@ -88,41 +86,7 @@ public class WidgetSettings extends AppCompatActivity {
     }
 
     /**
-     * Update the time picker when selecting a new destination
-     */
-//    public void updateDeparturesSettings() {
-//        String[] departTimes = currentDeparturesSettings();
-//        NumberPicker npDep; //NP for close departure times
-//        npDep = (NumberPicker) findViewById(R.id.numberPickerDeparturesSettings);
-//        npDep.setDisplayedValues(departTimes);
-//        npDep.setValue(2); //set default option
-//        depart = 2; //set chosen value to default
-//        if (to == from) {
-//            setDividerColor(npDep, 0);
-//        } else {
-//            setDividerColor(npDep, ContextCompat.getColor(this, R.color.divider));
-//        }
-//    }
-
-    private void setDividerColor(NumberPicker picker, int color) {
-
-        java.lang.reflect.Field[] pickerFields = NumberPicker.class.getDeclaredFields();
-        for (java.lang.reflect.Field pf : pickerFields) {
-            if (pf.getName().equals("mSelectionDivider")) {
-                pf.setAccessible(true);
-                try {
-                    ColorDrawable colorDrawable = new ColorDrawable(color);
-                    pf.set(picker, colorDrawable);
-                } catch (IllegalArgumentException | Resources.NotFoundException | IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-                break;
-            }
-        }
-    }
-
-    /**
-     * @return string array of current departures, empty strings if to==from
+     * @return string array of current departures, empty strings if from == to
      */
     public String[] currentDeparturesSettings() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
@@ -140,7 +104,7 @@ public class WidgetSettings extends AppCompatActivity {
 
     /**
      * Departure times magik values are in here
-     * @return calendar array of current departures, null objects if to==from
+     * @return calendar array of current departures, null objects if from == to
      */
     public Calendar[] currentDeparturesCalSettings() {
         int nrDepTimes = 5; //number of departure times
@@ -172,7 +136,7 @@ public class WidgetSettings extends AppCompatActivity {
         } else if (from == Heeze) {
             if (to == EHV || to == RDaal) {
                 for (int i = lo; i < hi; i++) {
-                    dep[i + 2] = arrivalTimeCal(16, 30 * i);
+                    dep[i + 2] = arrivalTimeCal(15, 30 * i);
                 }
             }
         } else if (from == RDaal) {
@@ -187,17 +151,56 @@ public class WidgetSettings extends AppCompatActivity {
     }
 
 
+    Calendar nextDeparture(){
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+
+        int minutes = cal.get(Calendar.MINUTE);
+        int depart = 0;
+
+        int EHV = 0;
+        int Heeze = 1;
+        int RDaal = 2;
+
+        //arrivalTime(14,0) gives next departure time when departure is :14 each half hour
+        if (from == EHV) {
+            if (to == Heeze) {
+                depart = 4;
+            } else if (to == RDaal) {
+                depart = 1;
+            }
+        } else if (from == Heeze) {
+            if (to == EHV || to == RDaal) {
+                depart = 15;
+            }
+        } else if (from == RDaal) {
+            if (to == EHV || to == Heeze) {
+                depart = 20;
+            }
+        }
+
+        if (minutes < depart) {
+            cal.set(Calendar.MINUTE, depart);
+        } else if (depart < minutes && minutes < depart + 30) {
+            cal.set(Calendar.MINUTE, depart + 30);
+        } else {
+            cal.set(Calendar.MINUTE, depart);
+            cal.add(Calendar.MINUTE, 60);
+        }
+
+        return cal;
+    }
 
     public void setWidget(View view){
 
         String direction = direction(from, to);
         saveDirection(context, direction);
 
-        Calendar cal = currentDeparturesCalSettings()[2];
+        Calendar cal = nextDeparture();
         cal.add(Calendar.MINUTE,1);
 
         Intent intent = new Intent(context, Receiver.class);
-//        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, 0);
 
         PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
@@ -205,12 +208,6 @@ public class WidgetSettings extends AppCompatActivity {
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 180000, pIntent);
         Log.e("setWidget", "alarm set at " + cToString(cal));
 
-//        saveTimeOne(context, cToString(currentDeparturesCalSettings()[1]));
-//        saveTimeTwo(context, cToString(currentDeparturesCalSettings()[2]));
-//        saveTimeThree(context, cToString(currentDeparturesCalSettings()[3]));
-
-        // We need to broadcast an APPWIDGET_UPDATE to our appWidget
-        // so it will update the user name TextView.
         AppWidgetManager appWidgetManager = AppWidgetManager
                 .getInstance(context);
         ComponentName thisAppWidget = new ComponentName(context
@@ -223,7 +220,7 @@ public class WidgetSettings extends AppCompatActivity {
         updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS,
                 appWidgetIds);
         context.sendBroadcast(updateIntent);
-        // Done with Configure, finish Activity.
+        // Done with Configure, finish all activities.
         finishAffinity();
 
     }
@@ -275,49 +272,10 @@ public class WidgetSettings extends AppCompatActivity {
         prefs.commit();
     }
 
-    static void saveTimeOne(Context context, String timeOne) {
-        SharedPreferences.Editor prefs = context.getSharedPreferences(
-                PREFS_NAME, 0).edit();
-        prefs.putString(TIME_ONE_KEY, timeOne);
-        prefs.commit();
-    }
-
-    static void saveTimeTwo(Context context, String timeTwo) {
-        SharedPreferences.Editor prefs = context.getSharedPreferences(
-                PREFS_NAME, 0).edit();
-        prefs.putString(TIME_TWO_KEY, timeTwo);
-        prefs.commit();
-    }
-
-    static void saveTimeThree(Context context, String timeThree) {
-        SharedPreferences.Editor prefs = context.getSharedPreferences(
-                PREFS_NAME, 0).edit();
-        prefs.putString(TIME_THREE_KEY, timeThree);
-        prefs.commit();
-    }
-
     static String loadDirection(Context context){
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
         String direction = prefs.getString(DIRECTION_KEY, "Settings");
         return direction;
-    }
-
-    static String loadTimeOne(Context context){
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
-        String timeOne = prefs.getString(TIME_ONE_KEY,"Time One");
-        return timeOne;
-    }
-
-    static String loadTimeTwo(Context context){
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME,0);
-        String timeTwo = prefs.getString(TIME_TWO_KEY,"Time Two");
-        return timeTwo;
-    }
-
-    static String loadTimeThree(Context context){
-        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME,0);
-        String timeThree = prefs.getString(TIME_THREE_KEY, "Time Three");
-        return timeThree;
     }
 
     String direction(int from, int to){
