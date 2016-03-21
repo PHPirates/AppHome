@@ -180,14 +180,8 @@ public class MainActivity extends AppCompatActivity {
             //parse xml with the DOM parser
             Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
 
-
             //create XPath object
             XPath xPath = XPathFactory.newInstance().newXPath();
-
-//            String testexpr = "/ReisMogelijkheden/ReisMogelijkheid[3]/ActueleVertrekTijd";
-//            String arrivalTime = xPath.compile(testexpr).evaluate(xmlDocument);
-//            Log.e("arrivaltime", arrivalTime);
-////            responseView.setText(arrivalTime);
 
             //generate list of departure times corresponding to nrpickers
             String depTimesExpr = "//ActueleVertrekTijd";
@@ -198,9 +192,6 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < nodeList.getLength(); i++) {
                 nsTimes.add(i, nodeList.item(i).getFirstChild().getNodeValue());
             }
-
-            Log.e("nstimes", Integer.toString(nsTimes.size()));
-            Log.e("forlnstimes", nsTimes.get(3));
 
             //get current time
             Date current = new Date();
@@ -278,15 +269,15 @@ public class MainActivity extends AppCompatActivity {
         return c;
     }
 
-    /**
-     * convert calendar object to string object in HH:mm format
-     * @param c calendar object
-     * @return string object
-     */
-    public String convertCalendarToString(Calendar c) {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-        return sdf.format(c.getTime());
-    }
+//    /**
+//     * convert calendar object to string object in HH:mm format
+//     * @param c calendar object
+//     * @return string object
+//     */
+//    public String convertCalendarToString(Calendar c) {
+//        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+//        return sdf.format(c.getTime());
+//    }
 
     /**
      * Update the time picker when selecting a new destination
@@ -448,7 +439,6 @@ public class MainActivity extends AppCompatActivity {
 //                int to = getThisTo();
 
                 if (to == from) {
-                    Log.e("asynctask", "no url possible");
                     return "no url possible";
                 } else {
                     String fromString = convertToFromToString(from);
