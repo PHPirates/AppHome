@@ -29,6 +29,7 @@ public class WidgetProvider extends AppWidgetProvider {
     String timeThree;
 
     String message;
+    int travel;
 
 //    @Override
 //    public void onEnabled(Context context){
@@ -50,6 +51,10 @@ public class WidgetProvider extends AppWidgetProvider {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+
         int minutes = c.get(Calendar.MINUTE);
 
         String direction = WidgetSettings.loadDirection(context);
@@ -62,15 +67,27 @@ public class WidgetProvider extends AppWidgetProvider {
             if (direction.equals("Eindhoven - Heeze")) {
                 depart = 4;
                 message = "Trein van ";
+                travel = 0;
             } else if (direction.equals("Eindhoven - Roosendaal")) {
                 depart = 1;
                 message = "ETA ";
-            } else if (direction.equals("Heeze - Eindhoven") || direction.equals("Heeze - Roosendaal")) {
+                travel = 89;
+            } else if (direction.equals("Heeze - Eindhoven")) {
                 depart = 15;
                 message = "ETA ";
-            } else if (direction.equals("Roosendaal - Eindhoven") || direction.equals("Roosendaal - Heeze")) {
+                travel = 15;
+            } else if(direction.equals("Heeze - Roosendaal")){
+                depart = 15;
+                message = "ETA ";
+                travel = 114;
+            } else if (direction.equals("Roosendaal - Eindhoven")) {
                 depart = 20;
                 message = "ETA ";
+                travel = 70;
+            } else if (direction.equals("Roosendaal - Heeze")) {
+                depart = 20;
+                message = "ETA ";
+                travel = 85;
             }
 
             if (minutes < depart) {
@@ -83,15 +100,17 @@ public class WidgetProvider extends AppWidgetProvider {
             }
 
             remoteViews.setTextViewText(R.id.sendTimeTwo, cToString(c));
-            timeTwo = cToString(c);
+            timeTwo = cTravelString(cal, travel);
             c.add(Calendar.MINUTE, -30);
+            cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
 //            Log.e("time two", timeTwo);
             remoteViews.setTextViewText(R.id.sendTimeOne, cToString(c));
-            timeOne = cToString(c);
+            timeOne = cTravelString(cal, travel);
 //            Log.e("time one", timeOne);
             c.add(Calendar.MINUTE, 60);
+            cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
             remoteViews.setTextViewText(R.id.sendTimeThree, cToString(c));
-            timeThree = cToString(c);
+            timeThree = cTravelString(cal, travel);
 
         }
 
@@ -185,6 +204,12 @@ public class WidgetProvider extends AppWidgetProvider {
 
     public String cToString(Calendar c) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+        return simpleDateFormat.format(c.getTime());
+    }
+
+    public String cTravelString(Calendar c, int t) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+        c.add(Calendar.MINUTE, t);
         return simpleDateFormat.format(c.getTime());
     }
 
