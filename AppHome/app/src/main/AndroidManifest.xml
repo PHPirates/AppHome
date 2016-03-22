@@ -23,10 +23,8 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="TIME_ONE" />
-            </intent-filter>
-
-            <intent-filter>
-                <action android:name="HALF_HOUR_UPDATE"/>
+                <action android:name="TIME_TWO" />
+                <action android:name="TIME_THREE" />
             </intent-filter>
 
             <meta-data

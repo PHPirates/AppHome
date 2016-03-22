@@ -20,12 +20,15 @@ import java.util.Random;
 public class WidgetProvider extends AppWidgetProvider {
 
     final String TIME_ONE = "time_one";
-    final String HALF_HOUR_UPDATE = "HALF_HOUR_UPDATE";
+    final String TIME_TWO = "time_two";
+    final String TIME_THREE = "time_three";
     private static final String TAG = "LOG_TAG";
 
     String timeOne;
     String timeTwo;
     String timeThree;
+
+    String message;
 
 //    @Override
 //    public void onEnabled(Context context){
@@ -58,12 +61,16 @@ public class WidgetProvider extends AppWidgetProvider {
 
             if (direction.equals("Eindhoven - Heeze")) {
                 depart = 4;
-            } else if(direction.equals("Eindhoven - Roosendaal")){
+                message = "Trein van ";
+            } else if (direction.equals("Eindhoven - Roosendaal")) {
                 depart = 1;
-            } else if(direction.equals("Heeze - Eindhoven") || direction.equals("Heeze - Roosendaal")){
+                message = "ETA ";
+            } else if (direction.equals("Heeze - Eindhoven") || direction.equals("Heeze - Roosendaal")) {
                 depart = 15;
-            } else if(direction.equals("Roosendaal - Eindhoven") || direction.equals("Roosendaal - Heeze")){
+                message = "ETA ";
+            } else if (direction.equals("Roosendaal - Eindhoven") || direction.equals("Roosendaal - Heeze")) {
                 depart = 20;
+                message = "ETA ";
             }
 
             if (minutes < depart) {
@@ -76,11 +83,15 @@ public class WidgetProvider extends AppWidgetProvider {
             }
 
             remoteViews.setTextViewText(R.id.sendTimeTwo, cToString(c));
+            timeTwo = cToString(c);
             c.add(Calendar.MINUTE, -30);
+//            Log.e("time two", timeTwo);
             remoteViews.setTextViewText(R.id.sendTimeOne, cToString(c));
+            timeOne = cToString(c);
+//            Log.e("time one", timeOne);
             c.add(Calendar.MINUTE, 60);
             remoteViews.setTextViewText(R.id.sendTimeThree, cToString(c));
-
+            timeThree = cToString(c);
 
         }
 
@@ -89,12 +100,23 @@ public class WidgetProvider extends AppWidgetProvider {
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.settingsButton, pendingIntent);
 
-
         Intent intentOne = new Intent(context, getClass());
         intentOne.setAction(TIME_ONE);
-        intentOne.putExtra("text", "test");
-        PendingIntent buttonOne = PendingIntent.getBroadcast(context, 0, intentOne, 0);
+        intentOne.putExtra("text", message + timeOne);
+        PendingIntent buttonOne = PendingIntent.getBroadcast(context, 0, intentOne, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.sendTimeOne, buttonOne);
+
+        Intent intentTwo = new Intent(context, getClass());
+        intentTwo.setAction(TIME_TWO);
+        intentTwo.putExtra("text", message + timeTwo);
+        PendingIntent buttonTwo = PendingIntent.getBroadcast(context, 0, intentTwo, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_UPDATE_CURRENT);
+        remoteViews.setOnClickPendingIntent(R.id.sendTimeTwo, buttonTwo);
+
+        Intent intentThree = new Intent(context, getClass());
+        intentThree.setAction(TIME_THREE);
+        intentThree.putExtra("text", message + timeThree);
+        PendingIntent buttonThree = PendingIntent.getBroadcast(context, 0, intentThree, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_UPDATE_CURRENT);
+        remoteViews.setOnClickPendingIntent(R.id.sendTimeThree, buttonThree);
 
         appWidgetManager.updateAppWidget(watchWidget, remoteViews);
 
@@ -108,26 +130,9 @@ public class WidgetProvider extends AppWidgetProvider {
 
         Log.d(TAG, "onReceive");
 
-        if (intent.getAction().equals(HALF_HOUR_UPDATE)) {
-            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-            RemoteViews remoteViews;
-            ComponentName watchWidget;
-
-            remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-            watchWidget = new ComponentName(context, WidgetProvider.class);
-            appWidgetManager.updateAppWidget(watchWidget, remoteViews);
-        } else if (intent.getAction().equals(TIME_ONE)) {
+        if (intent.getAction().equals(TIME_ONE)) {
 
             Log.e("widget", "time one button clicked");
-
-            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-
-            RemoteViews remoteViews;
-            ComponentName watchWidget;
-
-            remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-            watchWidget = new ComponentName(context, WidgetProvider.class);
-
             Bundle extras = intent.getExtras();
             if (extras != null) {
                 timeOne = extras.getString("text");
@@ -135,41 +140,47 @@ public class WidgetProvider extends AppWidgetProvider {
                 timeOne = "time one";
             }
 
-            Intent sendIntent = new Intent();
-            sendIntent.setAction(Intent.ACTION_SEND);
-            sendIntent.putExtra(Intent.EXTRA_TEXT, "test " + timeOne);
-            sendIntent.setType("text/plain");
-            sendIntent.setPackage("com.whatsapp");
-            sendIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(sendIntent);
+            appText(context, timeOne);
 
-            appWidgetManager.updateAppWidget(watchWidget, remoteViews);
+
+        } else if (intent.getAction().equals(TIME_TWO)) {
+
+            Log.e("widget", "time two button clicked");
+            Bundle extras = intent.getExtras();
+            if (extras != null) {
+                timeTwo = extras.getString("text");
+                Log.e("text", timeTwo);
+            } else {
+                timeTwo = "time two";
+            }
+
+            appText(context, timeTwo);
+
+
+        } else if (intent.getAction().equals(TIME_THREE)) {
+
+            Log.e("widget", "time three button clicked");
+            Bundle extras = intent.getExtras();
+            if (extras != null) {
+                timeThree = extras.getString("text");
+            } else {
+                timeThree = "time three";
+            }
+
+            appText(context, timeThree);
 
         }
     }
 
-    public Calendar arrivalTimeCalWidget(int depart, int offset) {
-        //initialise calendar with current arrivalTime and trim
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
+    public void appText(Context context, String text) {
 
-        //arrivalTime next train
-        int minutes = c.get(Calendar.MINUTE);
-
-        if (minutes < depart) {
-            minutes = depart; //next train at e.g. :20
-        } else if (minutes < depart + 30) {
-            minutes = 30 + depart; //add up to the next train departure at e.g. :50
-        } else { //minutes>depart+30
-            minutes = depart + 60; //train departure in the next hour, :20
-        }
-
-        //set calendar
-        c.set(Calendar.MINUTE, minutes);
-        c.add(Calendar.MINUTE, offset); //add travel time
-
-        return c;
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, text);
+        sendIntent.setType("text/plain");
+        sendIntent.setPackage("com.whatsapp");
+        sendIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(sendIntent);
     }
 
     public String cToString(Calendar c) {
