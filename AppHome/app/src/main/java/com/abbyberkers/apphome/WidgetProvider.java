@@ -101,15 +101,18 @@ public class WidgetProvider extends AppWidgetProvider {
 
             remoteViews.setTextViewText(R.id.sendTimeTwo, cToString(c));
             cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
+            cal.set(Calendar.HOUR_OF_DAY, c.get(Calendar.HOUR_OF_DAY));
             timeTwo = cTravelString(cal, travel);
             c.add(Calendar.MINUTE, -30);
             cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
+            cal.set(Calendar.HOUR_OF_DAY, c.get(Calendar.HOUR_OF_DAY));
 //            Log.e("time two", timeTwo);
             remoteViews.setTextViewText(R.id.sendTimeOne, cToString(c));
             timeOne = cTravelString(cal, travel);
 //            Log.e("time one", timeOne);
             c.add(Calendar.MINUTE, 60);
             cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
+            cal.set(Calendar.HOUR_OF_DAY, c.get(Calendar.HOUR_OF_DAY));
             remoteViews.setTextViewText(R.id.sendTimeThree, cToString(c));
             timeThree = cTravelString(cal, travel);
 
