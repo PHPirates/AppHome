@@ -293,9 +293,9 @@ public class WidgetSettings extends AppCompatActivity {
             }
         } else {
             if(to == 0){
-                return "Roosendaal - Heeze";
-            } else if(to == 1){
                 return "Roosendaal - Eindhoven";
+            } else if(to == 1){
+                return "Roosendaal - Heeze";
             }
         }
         return "from - to";
