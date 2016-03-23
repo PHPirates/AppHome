@@ -79,7 +79,7 @@ public class WidgetProvider extends AppWidgetProvider {
             } else if(direction.equals("Heeze - Roosendaal")){
                 depart = 15;
                 message = "ETA ";
-                travel = 114;
+                travel = 113;
             } else if (direction.equals("Roosendaal - Eindhoven")) {
                 depart = 20;
                 message = "ETA ";
@@ -100,6 +100,7 @@ public class WidgetProvider extends AppWidgetProvider {
             }
 
             remoteViews.setTextViewText(R.id.sendTimeTwo, cToString(c));
+            cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
             timeTwo = cTravelString(cal, travel);
             c.add(Calendar.MINUTE, -30);
             cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
