@@ -31,6 +31,10 @@ public class WidgetSettings extends AppCompatActivity {
 
     final Context context = WidgetSettings.this;
 
+    int EHV = 0;
+    int Heeze = 1;
+    int RDaal = 2;
+
     int from = 0; //default from Eindhoven
     int to;
 
@@ -117,10 +121,6 @@ public class WidgetSettings extends AppCompatActivity {
         c.set(Calendar.MILLISECOND, 0);
         Calendar[] dep = new Calendar[nrDepTimes];
 
-        int EHV = 0;
-        int Heeze = 1;
-        int RDaal = 2;
-
         //arrivalTime(14,0) gives next departure time when departure is :14 each half hour
         if (from == EHV) {
             if (to == Heeze) {
@@ -158,10 +158,6 @@ public class WidgetSettings extends AppCompatActivity {
 
         int minutes = cal.get(Calendar.MINUTE);
         int depart = 0;
-
-        int EHV = 0;
-        int Heeze = 1;
-        int RDaal = 2;
 
         //arrivalTime(14,0) gives next departure time when departure is :14 each half hour
         if (from == EHV) {
@@ -279,22 +275,22 @@ public class WidgetSettings extends AppCompatActivity {
     }
 
     String direction(int from, int to){
-        if(from == 0){
-            if(to == 1){
+        if(from == EHV){
+            if(to == Heeze){
                 return "Eindhoven - Heeze";
-            } else if(to == 2){
+            } else if(to == RDaal){
                 return "Eindhoven - Roosendaal";
             }
-        } else if(from == 1){
-            if(to == 0){
+        } else if(from == Heeze){
+            if(to == EHV){
                 return "Heeze - Eindhoven";
-            } else if(to == 2){
+            } else if(to == RDaal){
                 return "Heeze - Roosendaal";
             }
         } else {
-            if(to == 0){
+            if(to == EHV){
                 return "Roosendaal - Eindhoven";
-            } else if(to == 1){
+            } else if(to == Heeze){
                 return "Roosendaal - Heeze";
             }
         }
