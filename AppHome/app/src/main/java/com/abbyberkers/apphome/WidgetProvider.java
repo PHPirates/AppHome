@@ -71,15 +71,7 @@ public class WidgetProvider extends AppWidgetProvider {
         this.remoteContext = context;
         this.appWidgetManager = appWidgetManager;
 
-        //set loading on buttons
-        String loading = "...";
-
-        RemoteViews remoteViews;
-
-        remoteViews = new RemoteViews(remoteContext.getPackageName(), R.layout.widget_layout);
-        remoteViews.setTextViewText(R.id.sendTimeOne, loading);
-        remoteViews.setTextViewText(R.id.sendTimeTwo, loading);
-        remoteViews.setTextViewText(R.id.sendTimeThree, loading);
+        setLoading();
 
         new RetrieveFeedTask().execute(); //get xml from ns
     }
@@ -88,19 +80,11 @@ public class WidgetProvider extends AppWidgetProvider {
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
 
-        Log.e(TAG, "onReceive");
-
         if (intent.getAction().equals(TIME_ONE)) {
 
             Bundle extras = intent.getExtras();
             if (extras != null) {
                 timeOne = extras.getString("text");
-                Log.e("time one is ", timeOne);
-                if (timeOne == null) {
-                    Log.e("time is ", "null");
-                } else if (timeOne.equals("null")) {
-                    Log.e("string", "is null");
-                }
             } else {
                 timeOne = "time one";
             }
@@ -113,7 +97,6 @@ public class WidgetProvider extends AppWidgetProvider {
             Bundle extras = intent.getExtras();
             if (extras != null) {
                 timeTwo = extras.getString("text");
-                Log.e("text", timeTwo);
             } else {
                 timeTwo = "time two";
             }
@@ -133,6 +116,24 @@ public class WidgetProvider extends AppWidgetProvider {
             appText(context, timeThree);
 
         }
+    }
+
+    public void setLoading() {
+        //set loading on buttons TODO doesn't work
+        String loading = "...";
+
+        RemoteViews remoteViews;
+        ComponentName watchWidget;
+
+        remoteViews = new RemoteViews(remoteContext.getPackageName(), R.layout.widget_layout);
+        watchWidget = new ComponentName(remoteContext, WidgetProvider.class);
+
+        remoteViews.setTextViewText(R.id.settingsButton, "loading...");
+        remoteViews.setTextViewText(R.id.sendTimeOne, loading);
+        remoteViews.setTextViewText(R.id.sendTimeTwo, loading);
+        remoteViews.setTextViewText(R.id.sendTimeThree, loading);
+
+        doStuff(remoteViews, watchWidget);
     }
 
     /**
@@ -202,34 +203,13 @@ public class WidgetProvider extends AppWidgetProvider {
             timeTwo = cTravelString(currentDeps[2], travel);
             timeThree = cTravelString(currentDeps[3], travel);
 
-//
-//            if (minutes < depart) {
-//                c.set(Calendar.MINUTE, depart);
-//            } else if (depart < minutes && minutes < depart + 30) {
-//                c.set(Calendar.MINUTE, depart + 30);
-//            } else {
-//                c.set(Calendar.MINUTE, depart);
-//                c.add(Calendar.MINUTE, 60);
-//            }
-//
-//
-//            cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
-//            cal.set(Calendar.HOUR_OF_DAY, c.get(Calendar.HOUR_OF_DAY));
-//            timeTwo = cTravelString(cal, travel);
-//            c.add(Calendar.MINUTE, -30);
-//            cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
-//            cal.set(Calendar.HOUR_OF_DAY, c.get(Calendar.HOUR_OF_DAY));
-////            Log.e("time two", timeTwo);
-//
-//            timeOne = cTravelString(cal, travel);
-////            Log.e("time one", timeOne);
-//            c.add(Calendar.MINUTE, 60);
-//            cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
-//            cal.set(Calendar.HOUR_OF_DAY, c.get(Calendar.HOUR_OF_DAY));
-//            timeThree = cTravelString(cal, travel);
-
         }
 
+        doStuff(remoteViews, watchWidget);
+    }
+
+    public void doStuff(RemoteViews remoteViews, ComponentName watchWidget) {
+        //set all kinds of intents and clicklisteners and stuff???
         Intent intent = new Intent(remoteContext, WidgetSettings.class);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, 0);
         PendingIntent pendingIntent = PendingIntent.getActivity(remoteContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
@@ -254,8 +234,6 @@ public class WidgetProvider extends AppWidgetProvider {
         remoteViews.setOnClickPendingIntent(R.id.sendTimeThree, buttonThree);
 
         appWidgetManager.updateAppWidget(watchWidget, remoteViews);
-
-
     }
 
     public void appText(Context context, String text) {

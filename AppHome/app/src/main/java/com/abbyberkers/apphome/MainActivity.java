@@ -448,8 +448,16 @@ public class MainActivity extends AppCompatActivity {
                 if (to == from) {
                     return "no url possible";
                 } else {
-                    String fromString = convertToFromToString(from);
-                    String toString = convertToFromToString(to);
+                    String fromString;
+                    String toString;
+                    //if from EHV to Roosendaal, we need to take the intercity
+                    if (from == 0 && to == 2) {
+                        fromString = convertToFromToString(from);
+                        toString = "Breda";
+                    } else {
+                        fromString = convertToFromToString(from);
+                        toString = convertToFromToString(to);
+                    }
                     URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
                             + fromString + "&toStation=" + toString);
 //                    URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation=Roosendaal&toStation=Eindhoven");
