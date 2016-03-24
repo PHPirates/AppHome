@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     ProgressBar progressBar;
     String response; //set after getting xml from ns, used by
     /**
-     * response is used by {@link #getNSDepartures()} and set by the AsyncTask
+     * response is used by getNSDepartures and set by the AsyncTask
      */
 
     /**
@@ -175,6 +175,10 @@ public class MainActivity extends AppCompatActivity {
             response = "No response from NS";
         }
         try {
+
+            //TODO remove status niet mogelijk
+            //TODO remove sprinters roosendaal-EHV
+            //TODO get arrival time instead of hard coded travel time
 
             //create java DOM xml parser
             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
