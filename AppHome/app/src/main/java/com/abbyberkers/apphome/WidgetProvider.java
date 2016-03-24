@@ -13,9 +13,29 @@ import android.widget.Button;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Locale;
 import java.util.Random;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 public class WidgetProvider extends AppWidgetProvider {
 
@@ -27,6 +47,7 @@ public class WidgetProvider extends AppWidgetProvider {
     String timeOne;
     String timeTwo;
     String timeThree;
+    String response;
 
     String message;
     int travel;
@@ -66,6 +87,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
             if (direction.equals("Eindhoven - Heeze")) {
                 depart = 4;
+//                Log.e("depart", cToString(getNSDepartures()[2]));
                 message = "Trein van ";
                 travel = 0;
             } else if (direction.equals("Eindhoven - Roosendaal")) {
@@ -217,10 +239,107 @@ public class WidgetProvider extends AppWidgetProvider {
         return simpleDateFormat.format(c.getTime());
     }
 
-    protected PendingIntent getPendingSelfIntent(Context context, String action) {
-        Intent intent = new Intent(context, getClass());
-        intent.setAction(action);
-        return PendingIntent.getBroadcast(context, 0, intent, 0);
+    public Calendar[] getNSDepartures() {
+        if (response == null) {
+            Log.e("getNSdeps", "no response from ns");
+            response = "No response from NS";
+        }
+        try {
 
+            //create java DOM xml parser
+            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder;
+            builder = builderFactory.newDocumentBuilder();
+
+            //parse xml with the DOM parser
+            Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
+
+            //create XPath object
+            XPath xPath = XPathFactory.newInstance().newXPath();
+
+            //generate list of departure times corresponding to nrpickers
+            String depTimesExpr = "//ActueleVertrekTijd";
+            NodeList nodeList = (NodeList) xPath.compile(depTimesExpr).evaluate(xmlDocument, XPathConstants.NODESET);
+            List<String> nsTimes = new ArrayList<>();
+
+            //use dep times from xml
+            for (int i = 0; i < nodeList.getLength(); i++) {
+                nsTimes.add(i, nodeList.item(i).getFirstChild().getNodeValue());
+            }
+
+            //get current time
+            Date current = new Date();
+
+            //find next departure time in List
+            int nextIndex = -1;
+            //convert to date to compare
+            for (int i = 0; i < nsTimes.size(); i++) {
+                Date nsDate = convertNSToDate(nsTimes.get(i));
+                if (current.before(nsDate)) {
+                    nextIndex = i; //index of next departure time.
+                    break;
+                }
+            }
+
+            Calendar[] depTimes = new Calendar[5];
+
+            if (nextIndex == -1) {
+                Log.e("nextIndex", "no next departure time!");
+            } else {
+                //index is index of next dept time of all the xml deptimes in nsTimes
+                //get departure times around next time
+                for (int i = 0; i < depTimes.length; i++) {
+                    depTimes[i] = convertNSToCal(nsTimes.get(nextIndex - 2 + i));
+                }
+            }
+
+//            //convert to HH:mm
+//            for (int i = 0; i < nsTimes.size(); i++) {
+//                String depTime = nsTimes.get(i);
+//                depTime = convertNSToString(depTime);
+//                nsTimes.set(i,depTime);
+//            }
+
+            //test printing
+//            String res = "";
+//            for (String depTime : depTimes) {
+//                res += "\n" + convertCalendarToString(depTime);
+//            }
+//            responseView.setText(res);
+
+            return depTimes;
+        } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
+            e.printStackTrace();
+        }
+        return new Calendar[5]; //return default, null objects
+    }
+
+    /**
+     * convert a time string in ns format to a date object
+     *
+     * @param nsTime time in ns format
+     * @return date object
+     */
+    public Date convertNSToDate(String nsTime) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+            return sdf.parse(nsTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return new Date(); //default
+    }
+
+    /**
+     * convert ns time string to calendar object, uses {@link #convertNSToDate(String)}
+     *
+     * @param nsTime time in ns format
+     * @return calendar object
+     */
+    public Calendar convertNSToCal(String nsTime) {
+        Date date = convertNSToDate(nsTime);
+        Calendar c = new GregorianCalendar();
+        c.setTime(date);
+        return c;
     }
 }

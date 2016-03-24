@@ -1,6 +1,8 @@
 package com.abbyberkers.apphome;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
@@ -43,6 +45,10 @@ import javax.xml.xpath.XPathFactory;
 
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String PREFS_NAME = "com.abbyberkers.apphome.MainActivity";
+    public static final String NS_TIME_ONE = "nsTimeOne";
+
 
     int from; //default from Eindhoven
     int to;

@@ -42,8 +42,6 @@ public class WidgetSettings extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_widget_settings);
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
 
         Log.e("settings onCreate", "log?");
 
@@ -62,7 +60,6 @@ public class WidgetSettings extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 from = newVal;
-//                updateDeparturesSettings();
             }
         });
 
@@ -80,76 +77,10 @@ public class WidgetSettings extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 to = newVal;
-//                updateDeparturesSettings();
             }
         });
 
-        //get all the current departures to show in numberpicker
-        String[] departTimes = currentDeparturesSettings();
-
     }
-
-    /**
-     * @return string array of current departures, empty strings if from == to
-     */
-    public String[] currentDeparturesSettings() {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-        Calendar[] calendars = currentDeparturesCalSettings();
-        String[] deps = new String[calendars.length];
-        for (int i = 0; i < calendars.length; i++) {
-            if (calendars[i] != null) { //if from == to, add empty strings
-                deps[i] = simpleDateFormat.format(calendars[i].getTime());
-            } else {
-                deps[i] = " ";
-            }
-        }
-        return deps;
-    }
-
-    /**
-     * Departure times magik values are in here
-     * @return calendar array of current departures, null objects if from == to
-     */
-    public Calendar[] currentDeparturesCalSettings() {
-        int nrDepTimes = 5; //number of departure times
-        int lo = -2; //lower and higher bound of for loops
-        int hi = 3;
-
-        //initialise calendar with current time and trim
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
-        Calendar[] dep = new Calendar[nrDepTimes];
-
-        //arrivalTime(14,0) gives next departure time when departure is :14 each half hour
-        if (from == EHV) {
-            if (to == Heeze) {
-                for (int i = lo; i < hi; i++) {
-                    //generate departure times using travel time, back and forth in time
-                    dep[i + 2] = arrivalTimeCal(4, 30 * i);
-                }
-            } else if (to == RDaal) {
-                for (int i = lo; i < hi; i++) {
-                    dep[i + 2] = arrivalTimeCal(1, 30 * i);
-                }
-            }
-        } else if (from == Heeze) {
-            if (to == EHV || to == RDaal) {
-                for (int i = lo; i < hi; i++) {
-                    dep[i + 2] = arrivalTimeCal(15, 30 * i);
-                }
-            }
-        } else if (from == RDaal) {
-            if (to == EHV || to == Heeze) {
-                for (int i = lo; i < hi; i++) {
-                    dep[i + 2] = arrivalTimeCal(50, 30 * i);
-                }
-            }
-        }
-
-        return dep;
-    }
-
 
     Calendar nextDeparture(){
         Calendar cal = Calendar.getInstance();
@@ -159,7 +90,6 @@ public class WidgetSettings extends AppCompatActivity {
         int minutes = cal.get(Calendar.MINUTE);
         int depart = 0;
 
-        //arrivalTime(14,0) gives next departure time when departure is :14 each half hour
         if (from == EHV) {
             if (to == Heeze) {
                 depart = 4;
@@ -222,43 +152,12 @@ public class WidgetSettings extends AppCompatActivity {
     }
 
     /**
-     * @param c calendar object, probably the one chosen by the time nrpicker
-     * @return added travel time to calendar object and converted to string
+     * @param c calendar object
+     * @return c in a string
      */
     public String cToString(Calendar c) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
         return simpleDateFormat.format(c.getTime());
-    }
-
-    /**
-     * departure time should be the first departure time in a given hour
-     * @param depart Train departure time
-     * @param offset Total travel time
-     * @return departure time with offset
-     */
-
-    public Calendar arrivalTimeCal(int depart, int offset) {
-        //initialise calendar with current arrivalTime and trim
-        Calendar c = Calendar.getInstance();
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
-
-        //arrivalTime next train
-        int minutes = c.get(Calendar.MINUTE);
-
-        if (minutes < depart) {
-            minutes = depart; //next train at e.g. :20
-        } else if (minutes < depart + 30) {
-            minutes = 30 + depart; //add up to the next train departure at e.g. :50
-        } else { //minutes>depart+30
-            minutes = depart + 60; //train departure in the next hour, :20
-        }
-
-        //set calendar
-        c.set(Calendar.MINUTE, minutes);
-        c.add(Calendar.MINUTE, offset); //add travel time
-
-        return c;
     }
 
     static void saveDirection(Context context, String direction){
