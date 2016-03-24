@@ -119,7 +119,7 @@ public class WidgetProvider extends AppWidgetProvider {
     }
 
     public void setLoading() {
-        //set loading on buttons TODO doesn't work
+        //set loading on buttons
         String loading = "...";
 
         RemoteViews remoteViews;
@@ -276,6 +276,7 @@ public class WidgetProvider extends AppWidgetProvider {
             response = "No response from NS";
         }
         try {
+            String direction = WidgetSettings.loadDirection(remoteContext);
 
             //create java DOM xml parser
             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
@@ -288,9 +289,20 @@ public class WidgetProvider extends AppWidgetProvider {
             //create XPath object
             XPath xPath = XPathFactory.newInstance().newXPath();
 
-            //generate list of departure times corresponding to nrpickers
-            String depTimesExpr = "//ActueleVertrekTijd";
-            NodeList nodeList = (NodeList) xPath.compile(depTimesExpr).evaluate(xmlDocument, XPathConstants.NODESET);
+            NodeList nodeList;
+
+            //if on traject Rdaal/EHV, select intercities only
+            if ((direction.equals("Roosendaal - Eindhoven")) || (direction.equals("Eindhoven - Roosendaal"))) {
+                //select all departure times where type is Intercity
+                String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid[AantalOverstappen<1]/ActueleVertrekTijd";
+                nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
+                        xmlDocument, XPathConstants.NODESET);
+            } else {
+                //generate list of departure times corresponding to nrpickers
+                String depTimesExpr = "//ActueleVertrekTijd";
+                nodeList = (NodeList) xPath.compile(depTimesExpr).evaluate(
+                        xmlDocument, XPathConstants.NODESET);
+            }
             List<String> nsTimes = new ArrayList<>();
 
             //use dep times from xml
@@ -312,6 +324,8 @@ public class WidgetProvider extends AppWidgetProvider {
                 }
             }
 
+            //nstimes contains all ns departure times in ns-text format
+
             Calendar[] depTimes = new Calendar[5];
 
             if (nextIndex == -1) {
@@ -323,20 +337,6 @@ public class WidgetProvider extends AppWidgetProvider {
                     depTimes[i] = convertNSToCal(nsTimes.get(nextIndex - 2 + i));
                 }
             }
-
-//            //convert to HH:mm
-//            for (int i = 0; i < nsTimes.size(); i++) {
-//                String depTime = nsTimes.get(i);
-//                depTime = convertNSToString(depTime);
-//                nsTimes.set(i,depTime);
-//            }
-
-            //test printing
-//            String res = "";
-//            for (String depTime : depTimes) {
-//                res += "\n" + convertCalendarToString(depTime);
-//            }
-//            responseView.setText(res);
 
             return depTimes;
         } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
@@ -403,14 +403,17 @@ public class WidgetProvider extends AppWidgetProvider {
                         Log.e("asynctask", "from equals to");
                         return "no url possible";
                     } else {
+                        //if from EHV to Roosendaal, we need to take the intercity to Breda
+                        if (direction.equals("Eindhoven - Roosendaal")) {
+                            fromString = directions[0];
+                            toString = "Breda";
+                        } else if (direction.equals("Roosendaal - Eindhoven")) {
+                            fromString = "Breda";
+                            toString = directions[1];
+                        }
 
                         URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
                                 + fromString + "&toStation=" + toString);
-//                    URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation=Roosendaal&toStation=Eindhoven");
-
-//                String userCredentials = "t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
-//                String encoding = new String(android.util.Base64.encode(userCredentials.getBytes(), Base64.DEFAULT));
-//                encoding = encoding.replaceAll("\\s+",""); //because the base64 encoding doesn't work.
 
                         //encoded userCredentials with online encoder
                         String encoding = "dC5tLnNjaG91dGVuQHN0dWRlbnQudHVlLm5sOnNPLTY1QVp4dUVySm1tQzI4ZUlSQjg1YW9zN29HVkowQzZ0T1pJOVllSERQTFhlRXYxbmZCZw==";

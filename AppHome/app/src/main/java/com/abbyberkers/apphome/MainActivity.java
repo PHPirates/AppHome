@@ -176,10 +176,6 @@ public class MainActivity extends AppCompatActivity {
         }
         try {
 
-            //TODO remove status niet mogelijk
-            //TODO remove sprinters roosendaal-EHV
-            //TODO get arrival time instead of hard coded travel time
-
             //create java DOM xml parser
             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder;
@@ -191,9 +187,20 @@ public class MainActivity extends AppCompatActivity {
             //create XPath object
             XPath xPath = XPathFactory.newInstance().newXPath();
 
-            //generate list of departure times corresponding to nrpickers
-            String depTimesExpr = "//ActueleVertrekTijd";
-            NodeList nodeList = (NodeList) xPath.compile(depTimesExpr).evaluate(xmlDocument, XPathConstants.NODESET);
+            NodeList nodeList;
+
+            //if on traject Rdaal/EHV, select intercities only
+            if ((from == 0 && to == 2) || (from == 2 && to == 0)) {
+                //select all departure times where type is Intercity
+                String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid[AantalOverstappen<1]/ActueleVertrekTijd";
+                nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
+                        xmlDocument, XPathConstants.NODESET);
+            } else {
+                //generate list of departure times corresponding to nrpickers
+                String depTimesExpr = "//ActueleVertrekTijd";
+                nodeList = (NodeList) xPath.compile(depTimesExpr).evaluate(
+                        xmlDocument, XPathConstants.NODESET);
+            }
             List<String> nsTimes = new ArrayList<>();
 
             //use dep times from xml
@@ -215,7 +222,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            //TODO if times close to each other, remove one
             //nstimes contains all ns departure times in ns-text format
 
             Calendar[] depTimes = new Calendar[5];
@@ -229,20 +235,6 @@ public class MainActivity extends AppCompatActivity {
                     depTimes[i] = convertNSToCal(nsTimes.get(nextIndex - 2 + i));
                 }
             }
-
-//            //convert to HH:mm
-//            for (int i = 0; i < nsTimes.size(); i++) {
-//                String depTime = nsTimes.get(i);
-//                depTime = convertNSToString(depTime);
-//                nsTimes.set(i,depTime);
-//            }
-
-            //test printing
-//            String res = "";
-//            for (String depTime : depTimes) {
-//                res += "\n" + convertCalendarToString(depTime);
-//            }
-//            responseView.setText(res);
 
             return depTimes;
         } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
@@ -280,15 +272,16 @@ public class MainActivity extends AppCompatActivity {
         return c;
     }
 
-//    /**
-//     * convert calendar object to string object in HH:mm format
-//     * @param c calendar object
-//     * @return string object
-//     */
-//    public String convertCalendarToString(Calendar c) {
-//        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-//        return sdf.format(c.getTime());
-//    }
+    /**
+     * convert calendar object to string object in HH:mm format
+     *
+     * @param c calendar object
+     * @return string object
+     */
+    public String convertCalendarToString(Calendar c) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+        return sdf.format(c.getTime());
+    }
 
     /**
      * Update the time picker when selecting a new destination
