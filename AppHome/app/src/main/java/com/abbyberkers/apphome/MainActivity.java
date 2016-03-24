@@ -1,8 +1,6 @@
 package com.abbyberkers.apphome;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
@@ -212,6 +210,9 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 }
             }
+
+            //TODO if times close to each other, remove one
+            //nstimes contains all ns departure times in ns-text format
 
             Calendar[] depTimes = new Calendar[5];
 

@@ -1,24 +1,27 @@
 package com.abbyberkers.apphome;
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Button;
 import android.widget.RemoteViews;
-import android.widget.Toast;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,7 +30,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -52,6 +54,9 @@ public class WidgetProvider extends AppWidgetProvider {
     String message;
     int travel;
 
+    Context remoteContext;
+    AppWidgetManager appWidgetManager;
+
 //    @Override
 //    public void onEnabled(Context context){
 //        super.onEnabled(context);
@@ -62,11 +67,84 @@ public class WidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
                          int[] appWidgetIds) {
 
+        //set instance variables for the updateButton method to use
+        this.remoteContext = context;
+        this.appWidgetManager = appWidgetManager;
+
+        //set loading on buttons
+        String loading = "...";
+
+        RemoteViews remoteViews;
+
+        remoteViews = new RemoteViews(remoteContext.getPackageName(), R.layout.widget_layout);
+        remoteViews.setTextViewText(R.id.sendTimeOne, loading);
+        remoteViews.setTextViewText(R.id.sendTimeTwo, loading);
+        remoteViews.setTextViewText(R.id.sendTimeThree, loading);
+
+        new RetrieveFeedTask().execute(); //get xml from ns
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        super.onReceive(context, intent);
+
+        Log.e(TAG, "onReceive");
+
+        if (intent.getAction().equals(TIME_ONE)) {
+
+            Bundle extras = intent.getExtras();
+            if (extras != null) {
+                timeOne = extras.getString("text");
+                Log.e("time one is ", timeOne);
+                if (timeOne == null) {
+                    Log.e("time is ", "null");
+                } else if (timeOne.equals("null")) {
+                    Log.e("string", "is null");
+                }
+            } else {
+                timeOne = "time one";
+            }
+
+            appText(context, timeOne);
+
+
+        } else if (intent.getAction().equals(TIME_TWO)) {
+
+            Bundle extras = intent.getExtras();
+            if (extras != null) {
+                timeTwo = extras.getString("text");
+                Log.e("text", timeTwo);
+            } else {
+                timeTwo = "time two";
+            }
+
+            appText(context, timeTwo);
+
+
+        } else if (intent.getAction().equals(TIME_THREE)) {
+
+            Bundle extras = intent.getExtras();
+            if (extras != null) {
+                timeThree = extras.getString("text");
+            } else {
+                timeThree = "time three";
+            }
+
+            appText(context, timeThree);
+
+        }
+    }
+
+    /**
+     * called by the ASyncTask after it has finished setting the response
+     */
+    public void updateButtons() {
+
         RemoteViews remoteViews;
         ComponentName watchWidget;
 
-        remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_layout);
-        watchWidget = new ComponentName(context, WidgetProvider.class);
+        remoteViews = new RemoteViews(remoteContext.getPackageName(), R.layout.widget_layout);
+        watchWidget = new ComponentName(remoteContext, WidgetProvider.class);
 
         Calendar c = Calendar.getInstance();
         c.set(Calendar.SECOND, 0);
@@ -78,11 +156,10 @@ public class WidgetProvider extends AppWidgetProvider {
 
         int minutes = c.get(Calendar.MINUTE);
 
-        String direction = WidgetSettings.loadDirection(context);
+        String direction = WidgetSettings.loadDirection(remoteContext);
 
         if (direction != null) {
             remoteViews.setTextViewText(R.id.settingsButton, direction);
-            Log.e("direction", direction);
             int depart = 0;
 
             if (direction.equals("Eindhoven - Heeze")) {
@@ -98,7 +175,7 @@ public class WidgetProvider extends AppWidgetProvider {
                 depart = 15;
                 message = "ETA ";
                 travel = 15;
-            } else if(direction.equals("Heeze - Roosendaal")){
+            } else if (direction.equals("Heeze - Roosendaal")) {
                 depart = 15;
                 message = "ETA ";
                 travel = 113;
@@ -112,109 +189,73 @@ public class WidgetProvider extends AppWidgetProvider {
                 travel = 85;
             }
 
-            if (minutes < depart) {
-                c.set(Calendar.MINUTE, depart);
-            } else if (depart < minutes && minutes < depart + 30) {
-                c.set(Calendar.MINUTE, depart + 30);
-            } else {
-                c.set(Calendar.MINUTE, depart);
-                c.add(Calendar.MINUTE, 60);
-            }
 
-            remoteViews.setTextViewText(R.id.sendTimeTwo, cToString(c));
-            cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
-            cal.set(Calendar.HOUR_OF_DAY, c.get(Calendar.HOUR_OF_DAY));
-            timeTwo = cTravelString(cal, travel);
-            c.add(Calendar.MINUTE, -30);
-            cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
-            cal.set(Calendar.HOUR_OF_DAY, c.get(Calendar.HOUR_OF_DAY));
-//            Log.e("time two", timeTwo);
-            remoteViews.setTextViewText(R.id.sendTimeOne, cToString(c));
-            timeOne = cTravelString(cal, travel);
-//            Log.e("time one", timeOne);
-            c.add(Calendar.MINUTE, 60);
-            cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
-            cal.set(Calendar.HOUR_OF_DAY, c.get(Calendar.HOUR_OF_DAY));
-            remoteViews.setTextViewText(R.id.sendTimeThree, cToString(c));
-            timeThree = cTravelString(cal, travel);
+            //get five current departure calendars,
+            // because when this method is called response is set
+            Calendar[] currentDeps = getNSDepartures();
+            remoteViews.setTextViewText(R.id.sendTimeOne, cToString(currentDeps[1]));
+            remoteViews.setTextViewText(R.id.sendTimeTwo, cToString(currentDeps[2]));
+            remoteViews.setTextViewText(R.id.sendTimeThree, cToString(currentDeps[3]));
+
+            //set time to send to whatsapp
+            timeOne = cTravelString(currentDeps[1], travel);
+            timeTwo = cTravelString(currentDeps[2], travel);
+            timeThree = cTravelString(currentDeps[3], travel);
+
+//
+//            if (minutes < depart) {
+//                c.set(Calendar.MINUTE, depart);
+//            } else if (depart < minutes && minutes < depart + 30) {
+//                c.set(Calendar.MINUTE, depart + 30);
+//            } else {
+//                c.set(Calendar.MINUTE, depart);
+//                c.add(Calendar.MINUTE, 60);
+//            }
+//
+//
+//            cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
+//            cal.set(Calendar.HOUR_OF_DAY, c.get(Calendar.HOUR_OF_DAY));
+//            timeTwo = cTravelString(cal, travel);
+//            c.add(Calendar.MINUTE, -30);
+//            cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
+//            cal.set(Calendar.HOUR_OF_DAY, c.get(Calendar.HOUR_OF_DAY));
+////            Log.e("time two", timeTwo);
+//
+//            timeOne = cTravelString(cal, travel);
+////            Log.e("time one", timeOne);
+//            c.add(Calendar.MINUTE, 60);
+//            cal.set(Calendar.MINUTE, c.get(Calendar.MINUTE));
+//            cal.set(Calendar.HOUR_OF_DAY, c.get(Calendar.HOUR_OF_DAY));
+//            timeThree = cTravelString(cal, travel);
 
         }
 
-        Intent intent = new Intent(context, WidgetSettings.class);
+        Intent intent = new Intent(remoteContext, WidgetSettings.class);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, 0);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(remoteContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.settingsButton, pendingIntent);
 
-        Intent intentOne = new Intent(context, getClass());
+        Intent intentOne = new Intent(remoteContext, getClass());
         intentOne.setAction(TIME_ONE);
         intentOne.putExtra("text", message + timeOne);
-        PendingIntent buttonOne = PendingIntent.getBroadcast(context, 0, intentOne, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent buttonOne = PendingIntent.getBroadcast(remoteContext, 0, intentOne, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.sendTimeOne, buttonOne);
 
-        Intent intentTwo = new Intent(context, getClass());
+        Intent intentTwo = new Intent(remoteContext, getClass());
         intentTwo.setAction(TIME_TWO);
         intentTwo.putExtra("text", message + timeTwo);
-        PendingIntent buttonTwo = PendingIntent.getBroadcast(context, 0, intentTwo, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent buttonTwo = PendingIntent.getBroadcast(remoteContext, 0, intentTwo, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.sendTimeTwo, buttonTwo);
 
-        Intent intentThree = new Intent(context, getClass());
+        Intent intentThree = new Intent(remoteContext, getClass());
         intentThree.setAction(TIME_THREE);
         intentThree.putExtra("text", message + timeThree);
-        PendingIntent buttonThree = PendingIntent.getBroadcast(context, 0, intentThree, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent buttonThree = PendingIntent.getBroadcast(remoteContext, 0, intentThree, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.sendTimeThree, buttonThree);
 
         appWidgetManager.updateAppWidget(watchWidget, remoteViews);
 
 
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-//        // TODO Auto-generated method stub
-        super.onReceive(context, intent);
-
-        Log.d(TAG, "onReceive");
-
-        if (intent.getAction().equals(TIME_ONE)) {
-
-            Log.e("widget", "time one button clicked");
-            Bundle extras = intent.getExtras();
-            if (extras != null) {
-                timeOne = extras.getString("text");
-            } else {
-                timeOne = "time one";
-            }
-
-            appText(context, timeOne);
-
-
-        } else if (intent.getAction().equals(TIME_TWO)) {
-
-            Log.e("widget", "time two button clicked");
-            Bundle extras = intent.getExtras();
-            if (extras != null) {
-                timeTwo = extras.getString("text");
-                Log.e("text", timeTwo);
-            } else {
-                timeTwo = "time two";
-            }
-
-            appText(context, timeTwo);
-
-
-        } else if (intent.getAction().equals(TIME_THREE)) {
-
-            Log.e("widget", "time three button clicked");
-            Bundle extras = intent.getExtras();
-            if (extras != null) {
-                timeThree = extras.getString("text");
-            } else {
-                timeThree = "time three";
-            }
-
-            appText(context, timeThree);
-
-        }
     }
 
     public void appText(Context context, String text) {
@@ -233,15 +274,27 @@ public class WidgetProvider extends AppWidgetProvider {
         return simpleDateFormat.format(c.getTime());
     }
 
-    public String cTravelString(Calendar c, int t) {
+    /**
+     * @param c      calendar object, probably the one chosen by the time nrpicker
+     * @param travel optional travel time
+     * @return added travel time to calendar object and converted to string
+     */
+    public String cTravelString(Calendar c, int travel) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-        c.add(Calendar.MINUTE, t);
+        c.add(Calendar.MINUTE, travel);
+        String direction = WidgetSettings.loadDirection(remoteContext);
+        if (direction.equals("Eindhoven - Roosendaal")) { //if going to Rdaal
+            //round time to nearest ten minutes
+            int unroundedMinutes = c.get(Calendar.MINUTE);
+            int mod = unroundedMinutes % 10;
+            c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
+        }
         return simpleDateFormat.format(c.getTime());
     }
 
     public Calendar[] getNSDepartures() {
         if (response == null) {
-            Log.e("getNSdeps", "no response from ns");
+            Log.e("getNSdeps", "no response from ns or first time");
             response = "No response from NS";
         }
         try {
@@ -341,5 +394,92 @@ public class WidgetProvider extends AppWidgetProvider {
         Calendar c = new GregorianCalendar();
         c.setTime(date);
         return c;
+    }
+
+
+    class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
+
+
+        protected void onPreExecute() {
+        }
+
+        protected String doInBackground(Void... urls) {
+            InputStream in;
+            int resCode;
+
+            try {
+
+                //get directions from and to
+                String direction = WidgetSettings.loadDirection(remoteContext);
+                if (direction.equals("Settings")) { //the first time
+                    return null;
+                } else {
+                    String[] directions = direction.split(" - ");
+                    if (directions.length != 2)
+                        throw new IllegalArgumentException("String not in correct format");
+
+                    String fromString = directions[0];
+                    String toString = directions[1];
+
+                    if (fromString.equals(toString)) {
+                        Log.e("asynctask", "from equals to");
+                        return "no url possible";
+                    } else {
+
+                        URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
+                                + fromString + "&toStation=" + toString);
+//                    URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation=Roosendaal&toStation=Eindhoven");
+
+//                String userCredentials = "t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
+//                String encoding = new String(android.util.Base64.encode(userCredentials.getBytes(), Base64.DEFAULT));
+//                encoding = encoding.replaceAll("\\s+",""); //because the base64 encoding doesn't work.
+
+                        //encoded userCredentials with online encoder
+                        String encoding = "dC5tLnNjaG91dGVuQHN0dWRlbnQudHVlLm5sOnNPLTY1QVp4dUVySm1tQzI4ZUlSQjg1YW9zN29HVkowQzZ0T1pJOVllSERQTFhlRXYxbmZCZw==";
+                        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                        urlConnection.setRequestProperty("Authorization", "Basic " + encoding);
+
+                        try {
+                            resCode = urlConnection.getResponseCode();
+                            if (resCode == HttpURLConnection.HTTP_OK) {
+                                in = urlConnection.getInputStream();
+                            } else {
+                                Log.e("rescode", "rescode not ok");
+                                in = urlConnection.getErrorStream();
+                            }
+                            BufferedReader bufferedReader = new BufferedReader(
+                                    new InputStreamReader(in));
+                            StringBuilder stringBuilder = new StringBuilder();
+                            String line;
+                            while ((line = bufferedReader.readLine()) != null) {
+                                stringBuilder.append(line).append("\n");
+                            }
+                            bufferedReader.close();
+                            return stringBuilder.toString();
+                        } finally {
+                            urlConnection.disconnect();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("ERROR", e.getMessage(), e);
+                return null;
+            }
+        }
+
+        protected void onPostExecute(String response) {
+            setResponse(response);
+            updateButtons(); //update buttons
+        }
+
+    }
+
+    /**
+     * Set instance response from the ASyncTask
+     *
+     * @param response response passed
+     */
+    public void setResponse(String response) {
+        this.response = response;
     }
 }

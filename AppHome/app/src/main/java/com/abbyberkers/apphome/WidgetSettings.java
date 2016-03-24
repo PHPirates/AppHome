@@ -1,6 +1,5 @@
 package com.abbyberkers.apphome;
 
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -8,17 +7,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.graphics.drawable.ColorDrawable;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.NumberPicker;
-import android.widget.RemoteViews;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -42,8 +34,6 @@ public class WidgetSettings extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_widget_settings);
-
-        Log.e("settings onCreate", "log?");
 
         String[] cities = new String[]{"Eindhoven", "Heeze", "Roosendaal"};
 
@@ -132,7 +122,6 @@ public class WidgetSettings extends AppCompatActivity {
 
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(ALARM_SERVICE);
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 180000, pIntent);
-        Log.e("setWidget", "alarm set at " + cToString(cal));
 
         AppWidgetManager appWidgetManager = AppWidgetManager
                 .getInstance(context);
