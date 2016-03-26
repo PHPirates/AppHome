@@ -110,8 +110,8 @@ public class WidgetSettings extends AppCompatActivity {
 
     public void setWidget(View view){
 
-        String direction = direction(from, to);
-        saveDirection(context, direction);
+//        String direction = direction(from, to);
+        saveDirection(context, from, to);
 
         Calendar cal = nextDeparture();
         cal.add(Calendar.MINUTE,1);
@@ -121,7 +121,7 @@ public class WidgetSettings extends AppCompatActivity {
         PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 180000, pIntent);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 1800000, pIntent);
 
         AppWidgetManager appWidgetManager = AppWidgetManager
                 .getInstance(context);
@@ -156,10 +156,20 @@ public class WidgetSettings extends AppCompatActivity {
         prefs.commit();
     }
 
-    static String loadDirection(Context context){
+    static void saveDirection(Context context, int from, int to) {
+        SharedPreferences.Editor prefs = context.getSharedPreferences(
+                PREFS_NAME, 0).edit();
+        prefs.putInt("from", from);
+        prefs.putInt("to", to);
+        prefs.apply();
+    }
+
+    static int[] loadDirection(Context context) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
-        String direction = prefs.getString(DIRECTION_KEY, "Settings");
-        return direction;
+        int[] fromto = new int[2];
+        fromto[0] = prefs.getInt("from", -1);
+        fromto[1] = prefs.getInt("to", -1);
+        return fromto;
     }
 
     String direction(int from, int to){

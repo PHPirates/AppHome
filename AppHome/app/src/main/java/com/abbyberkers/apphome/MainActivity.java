@@ -44,13 +44,13 @@ import javax.xml.xpath.XPathFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String PREFS_NAME = "com.abbyberkers.apphome.MainActivity";
-    public static final String NS_TIME_ONE = "nsTimeOne";
-
-
     int from; //default from Eindhoven
     int to;
     int depart; //departure numberpicker value
+
+    public static final int EHV = 0;
+    public static final int Heeze = 1;
+    public static final int RDaal = 2;
 
     ProgressBar progressBar;
     String response; //set after getting xml from ns, used by
@@ -146,16 +146,16 @@ public class MainActivity extends AppCompatActivity {
      * @param toFrom the to or from variable
      * @return string of city
      */
-    public String convertToFromToString(int toFrom) {
+    public String convertCityToString(int toFrom) {
         String result;
         switch (toFrom) {
-            case 0:
+            case EHV:
                 result = "Eindhoven";
                 break;
-            case 1:
+            case Heeze:
                 result = "Heeze";
                 break;
-            case 2:
+            case RDaal:
                 result = "Roosendaal";
                 break;
             default:
@@ -166,13 +166,13 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Communicates with ASyncTask using the instance variables to, from and response
+     * also in WidgetProvider
      *
      * @return Calendar[] with five current departures
      */
     public Calendar[] getNSDepartures() {
         if (response == null) {
-            Log.e("getNSdeps", "no response from ns");
-            response = "No response from NS";
+            response = "No response from NS or first time";
         }
         try {
 
@@ -189,10 +189,11 @@ public class MainActivity extends AppCompatActivity {
 
             NodeList nodeList;
 
-            //if on traject Rdaal/EHV, select intercities only
-            if ((from == 0 && to == 2) || (from == 2 && to == 0)) {
+            //if from EHV to RDaal, to == Breda, select intercities only
+            if (from == EHV && to == RDaal) {
                 //select all departure times where type is Intercity
                 String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid[AantalOverstappen<1]/ActueleVertrekTijd";
+                // "//*[not(text()='NIET-MOGELIJK')]"
                 nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
             } else {
@@ -207,6 +208,11 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < nodeList.getLength(); i++) {
                 nsTimes.add(i, nodeList.item(i).getFirstChild().getNodeValue());
             }
+//
+//            for (int i = 0; i < nsTimes.size(); i++) {
+//                Log.e("forl", convertNSToDate(nsTimes.get(i)).toString());
+//            }
+
 
             //get current time
             Date current = new Date();
@@ -272,16 +278,16 @@ public class MainActivity extends AppCompatActivity {
         return c;
     }
 
-    /**
-     * convert calendar object to string object in HH:mm format
-     *
-     * @param c calendar object
-     * @return string object
-     */
-    public String convertCalendarToString(Calendar c) {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-        return sdf.format(c.getTime());
-    }
+//    /**
+//     * convert calendar object to string object in HH:mm format
+//     *
+//     * @param c calendar object
+//     * @return string object
+//     */
+//    public String convertCalendarToString(Calendar c) {
+//        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+//        return sdf.format(c.getTime());
+//    }
 
     /**
      * Update the time picker when selecting a new destination
@@ -353,10 +359,6 @@ public class MainActivity extends AppCompatActivity {
 
         String message = "You are here already, you stupid!";
 
-        int EHV = 0;
-        int Heeze = 1;
-        int RDaal = 2;
-
         if (from == EHV) {
             if (to == Heeze) {
                 //take the chosen calendar object of the current departures,
@@ -391,7 +393,7 @@ public class MainActivity extends AppCompatActivity {
     public String cAddTravel(Calendar c, int travel) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
         c.add(Calendar.MINUTE, travel);
-        if (from == 0 && to == 2) { //if going to Rdaal
+        if (from == EHV && to == RDaal) { //if going to Rdaal
             //round time to nearest ten minutes
             int unroundedMinutes = c.get(Calendar.MINUTE);
             int mod = unroundedMinutes % 10;
@@ -438,26 +440,21 @@ public class MainActivity extends AppCompatActivity {
             try {
                 //http://t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg@webservices.ns.nl/ns-api-treinplanner?fromStation=Roosendaal&toStation=Eindhoven
 
-                //build right url using to and from
-//                int from = getThisFrom();
-//                int to = getThisTo();
-
                 if (to == from) {
                     return "no url possible";
                 } else {
                     String fromString;
                     String toString;
                     //if from EHV to Roosendaal, we need to take the intercity
-                    if (from == 0 && to == 2) {
-                        fromString = convertToFromToString(from);
+                    if (from == EHV && to == RDaal) {
+                        fromString = convertCityToString(from);
                         toString = "Breda";
                     } else {
-                        fromString = convertToFromToString(from);
-                        toString = convertToFromToString(to);
+                        fromString = convertCityToString(from);
+                        toString = convertCityToString(to);
                     }
                     URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
                             + fromString + "&toStation=" + toString);
-//                    URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation=Roosendaal&toStation=Eindhoven");
 
 //                String userCredentials = "t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
 //                String encoding = new String(android.util.Base64.encode(userCredentials.getBytes(), Base64.DEFAULT));

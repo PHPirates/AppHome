@@ -44,24 +44,24 @@ public class WidgetProvider extends AppWidgetProvider {
     final String TIME_ONE = "time_one";
     final String TIME_TWO = "time_two";
     final String TIME_THREE = "time_three";
-    private static final String TAG = "LOG_TAG";
 
     String timeOne;
     String timeTwo;
     String timeThree;
     String response;
 
-    String message;
+    String message = "";
     int travel;
 
     Context remoteContext;
     AppWidgetManager appWidgetManager;
 
-//    @Override
-//    public void onEnabled(Context context){
-//        super.onEnabled(context);
-//        Log.d(TAG, "onEnabled");
-//    }
+    int from;
+    int to;
+
+    public static final int EHV = 0;
+    public static final int Heeze = 1;
+    public static final int RDaal = 2;
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
@@ -71,9 +71,14 @@ public class WidgetProvider extends AppWidgetProvider {
         this.remoteContext = context;
         this.appWidgetManager = appWidgetManager;
 
+        //set instance variables to be used in all kinds of methods
+        int[] direction = WidgetSettings.loadDirection(remoteContext);
+        this.from = direction[0];
+        this.to = direction[1];
+
         setLoading();
 
-        new RetrieveFeedTask().execute(); //get xml from ns
+        new RetrieveFeedTask().execute(); //execute the asynctask class
     }
 
     @Override
@@ -155,41 +160,36 @@ public class WidgetProvider extends AppWidgetProvider {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
 
-        int minutes = c.get(Calendar.MINUTE);
-
-        String direction = WidgetSettings.loadDirection(remoteContext);
+        int[] direction = WidgetSettings.loadDirection(remoteContext);
 
         if (direction != null) {
-            remoteViews.setTextViewText(R.id.settingsButton, direction);
-            int depart = 0;
+            remoteViews.setTextViewText(R.id.settingsButton, getDirection());
 
-            if (direction.equals("Eindhoven - Heeze")) {
-                depart = 4;
-//                Log.e("depart", cToString(getNSDepartures()[2]));
-                message = "Trein van ";
-                travel = 0;
-            } else if (direction.equals("Eindhoven - Roosendaal")) {
-                depart = 1;
-                message = "ETA ";
-                travel = 89;
-            } else if (direction.equals("Heeze - Eindhoven")) {
-                depart = 15;
-                message = "ETA ";
-                travel = 15;
-            } else if (direction.equals("Heeze - Roosendaal")) {
-                depart = 15;
-                message = "ETA ";
-                travel = 113;
-            } else if (direction.equals("Roosendaal - Eindhoven")) {
-                depart = 20;
-                message = "ETA ";
-                travel = 70;
-            } else if (direction.equals("Roosendaal - Heeze")) {
-                depart = 20;
-                message = "ETA ";
-                travel = 85;
+            if (from == EHV) {
+                if (to == Heeze) {
+                    message = "Trein van ";
+                    travel = 0;
+                } else if (to == RDaal) {
+                    message = "ETA ";
+                    travel = 89;
+                }
+            } else if (from == Heeze) {
+                if (to == EHV) {
+                    message = "ETA ";
+                    travel = 15;
+                } else if (to == RDaal) {
+                    message = "ETA ";
+                    travel = 113;
+                }
+            } else if (from == RDaal) {
+                if (to == EHV) {
+                    message = "ETA ";
+                    travel = 70;
+                } else if (to == Heeze) {
+                    message = "ETA ";
+                    travel = 85;
+                }
             }
-
 
             //get five current departure calendars,
             // because when this method is called response is set
@@ -206,6 +206,38 @@ public class WidgetProvider extends AppWidgetProvider {
         }
 
         doStuff(remoteViews, watchWidget);
+    }
+
+    public String getDirection() {
+        if (convertCityToString(this.from) == null) { //default, the first time
+            return "Set widget";
+        }
+        return convertCityToString(this.from) + " - " + convertCityToString(this.to);
+    }
+
+    /**
+     * Convert the instance variables to and from, set by the numberpickers,
+     * to a string to be used in {@link AsyncTask()}
+     *
+     * @param toFrom the to or from variable
+     * @return string of city
+     */
+    public String convertCityToString(int toFrom) {
+        String result;
+        switch (toFrom) {
+            case 0:
+                result = "Eindhoven";
+                break;
+            case 1:
+                result = "Heeze";
+                break;
+            case 2:
+                result = "Roosendaal";
+                break;
+            default:
+                result = null;
+        }
+        return result;
     }
 
     public void doStuff(RemoteViews remoteViews, ComponentName watchWidget) {
@@ -243,11 +275,14 @@ public class WidgetProvider extends AppWidgetProvider {
         sendIntent.putExtra(Intent.EXTRA_TEXT, text);
         sendIntent.setType("text/plain");
         sendIntent.setPackage("com.whatsapp");
-        sendIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        sendIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP); //no idea but it works
         context.startActivity(sendIntent);
     }
 
     public String cToString(Calendar c) {
+        if (c == null) {
+            return "...";
+        }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
         return simpleDateFormat.format(c.getTime());
     }
@@ -258,10 +293,12 @@ public class WidgetProvider extends AppWidgetProvider {
      * @return added travel time to calendar object and converted to string
      */
     public String cTravelString(Calendar c, int travel) {
+        if (c == null) {
+            return "I'm lost.";
+        }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
         c.add(Calendar.MINUTE, travel);
-        String direction = WidgetSettings.loadDirection(remoteContext);
-        if (direction.equals("Eindhoven - Roosendaal")) { //if going to Rdaal
+        if ((from == EHV) && (to == RDaal)) { //if going from ehv to Rdaal
             //round time to nearest ten minutes
             int unroundedMinutes = c.get(Calendar.MINUTE);
             int mod = unroundedMinutes % 10;
@@ -270,13 +307,17 @@ public class WidgetProvider extends AppWidgetProvider {
         return simpleDateFormat.format(c.getTime());
     }
 
+    /**
+     * Communicates with ASyncTask using the instance variables to, from and response
+     * also in MainActivity
+     *
+     * @return Calendar[] with five current departures
+     */
     public Calendar[] getNSDepartures() {
         if (response == null) {
-            Log.e("getNSdeps", "no response from ns or first time");
-            response = "No response from NS";
+            response = "No response from NS or first time";
         }
         try {
-            String direction = WidgetSettings.loadDirection(remoteContext);
 
             //create java DOM xml parser
             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
@@ -291,10 +332,11 @@ public class WidgetProvider extends AppWidgetProvider {
 
             NodeList nodeList;
 
-            //if on traject Rdaal/EHV, select intercities only
-            if ((direction.equals("Roosendaal - Eindhoven")) || (direction.equals("Eindhoven - Roosendaal"))) {
+            //if from EHV to RDaal, to == Breda, select intercities only
+            if (from == EHV && to == RDaal) {
                 //select all departure times where type is Intercity
                 String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid[AantalOverstappen<1]/ActueleVertrekTijd";
+                // "//*[not(text()='NIET-MOGELIJK')]"
                 nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
             } else {
@@ -309,6 +351,11 @@ public class WidgetProvider extends AppWidgetProvider {
             for (int i = 0; i < nodeList.getLength(); i++) {
                 nsTimes.add(i, nodeList.item(i).getFirstChild().getNodeValue());
             }
+//
+//            for (int i = 0; i < nsTimes.size(); i++) {
+//                Log.e("forl", convertNSToDate(nsTimes.get(i)).toString());
+//            }
+
 
             //get current time
             Date current = new Date();
@@ -387,29 +434,23 @@ public class WidgetProvider extends AppWidgetProvider {
 
             try {
 
-                //get directions from and to
-                String direction = WidgetSettings.loadDirection(remoteContext);
-                if (direction.equals("Settings")) { //the first time
+                if (from == -1 || to == -1) { //the first time
                     return null;
                 } else {
-                    String[] directions = direction.split(" - ");
-                    if (directions.length != 2)
-                        throw new IllegalArgumentException("String not in correct format");
 
-                    String fromString = directions[0];
-                    String toString = directions[1];
-
-                    if (fromString.equals(toString)) {
+                    if (from == to) {
                         Log.e("asynctask", "from equals to");
                         return "no url possible";
                     } else {
-                        //if from EHV to Roosendaal, we need to take the intercity to Breda
-                        if (direction.equals("Eindhoven - Roosendaal")) {
-                            fromString = directions[0];
+                        String fromString;
+                        String toString;
+                        //if from EHV to Roosendaal, we need to take the intercity
+                        if (from == EHV && to == RDaal) {
+                            fromString = convertCityToString(from);
                             toString = "Breda";
-                        } else if (direction.equals("Roosendaal - Eindhoven")) {
-                            fromString = "Breda";
-                            toString = directions[1];
+                        } else {
+                            fromString = convertCityToString(from);
+                            toString = convertCityToString(to);
                         }
 
                         URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
