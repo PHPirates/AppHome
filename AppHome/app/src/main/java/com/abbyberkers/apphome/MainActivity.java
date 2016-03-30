@@ -193,13 +193,14 @@ public class MainActivity extends AppCompatActivity {
             if (from == EHV && to == RDaal) {
                 //select all departure times where type is Intercity
                 String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid[AantalOverstappen<1]/ActueleVertrekTijd";
-                // "//*[not(text()='NIET-MOGELIJK')]"
                 nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
             } else {
                 //generate list of departure times corresponding to nrpickers
                 String depTimesExpr = "//ActueleVertrekTijd";
-                nodeList = (NodeList) xPath.compile(depTimesExpr).evaluate(
+                //                String testExpr = "//*[not(text()='NIET-MOGELIJK')]";
+                String testExpr = "//ActueleVertrekTijd[text()='2016-03-28T13:59:00+0200']";
+                nodeList = (NodeList) xPath.compile(testExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
             }
             List<String> nsTimes = new ArrayList<>();
@@ -208,10 +209,10 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < nodeList.getLength(); i++) {
                 nsTimes.add(i, nodeList.item(i).getFirstChild().getNodeValue());
             }
-//
-//            for (int i = 0; i < nsTimes.size(); i++) {
-//                Log.e("forl", convertNSToDate(nsTimes.get(i)).toString());
-//            }
+
+            for (int i = 0; i < nsTimes.size(); i++) {
+                Log.e("forl", nsTimes.get(i));
+            }
 
 
             //get current time
