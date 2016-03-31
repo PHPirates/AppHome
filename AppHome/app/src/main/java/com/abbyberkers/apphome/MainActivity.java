@@ -232,8 +232,12 @@ public class MainActivity extends AppCompatActivity {
 
             Calendar[] depTimes = new Calendar[5];
 
-            if (nextIndex == -1) {
-                Log.e("nextIndex", "no next departure time!");
+            if (nextIndex < 2) {
+                if (nextIndex == -1) {
+                    Log.e("nextIndex", "no next departure time!");
+                } else {
+                    Log.e("nextIndex", "is too small: " + Integer.toString(nextIndex));
+                }
             } else {
                 //index is index of next dept time of all the xml deptimes in nsTimes
                 //get departure times around next time
@@ -371,13 +375,13 @@ public class MainActivity extends AppCompatActivity {
             if (to == EHV) {
                 message = "Eindhoven ETA " + cAddTravel(getNSDepartures()[depart], 15);
             } else if (to == RDaal) {
-                message = "Yay at " + cAddTravel(getNSDepartures()[depart], 114) + ".";
+                message = "Yay at " + cAddTravel(getNSDepartures()[depart], 83) + ".";
             }
         } else if (from == RDaal) {
             if (to == EHV) {
                 message = "ETA " + cAddTravel(getNSDepartures()[depart], 70);  //20,70
             } else if (to == Heeze) {
-                message = "ETA " + cAddTravel(getNSDepartures()[depart], 113);
+                message = "ETA " + cAddTravel(getNSDepartures()[depart], 83);
             }
         }
 
