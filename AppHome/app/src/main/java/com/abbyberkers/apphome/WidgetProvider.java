@@ -179,7 +179,7 @@ public class WidgetProvider extends AppWidgetProvider {
                     travel = 15;
                 } else if (to == RDaal) {
                     message = "ETA ";
-                    travel = 113;
+                    travel = 83;
                 }
             } else if (from == RDaal) {
                 if (to == EHV) {
