@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -310,7 +311,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //*****************normal stuff****************
+    /**
+     * Called from {@link AsyncTask} when there is no internet connection
+     */
+    public void noInternetConnection() {
+        //remove select dividers
+        NumberPicker npDep; //NP for close departure times
+        npDep = (NumberPicker) findViewById(R.id.numberPickerDepartures);
+        setDividerColor(npDep, 0);
+        Toast.makeText(this, "No Internet connection available", Toast.LENGTH_LONG).show();
+    }
 
     /**
      * set divider color of departure time picker to make it invisible when
@@ -490,6 +500,9 @@ public class MainActivity extends AppCompatActivity {
                         urlConnection.disconnect();
                     }
                 }
+            } catch (IOException e) {
+                Log.e("IOException", "no internet connection");
+                return "no internet";
             } catch (Exception e) {
                 Log.e("ERROR", e.getMessage(), e);
                 return null;
@@ -498,8 +511,12 @@ public class MainActivity extends AppCompatActivity {
 
         protected void onPostExecute(String response) {
             progressBar.setVisibility(View.GONE);
-            setResponse(response);
-            updateDepartures(); //update nrpicker
+            if (response.equals("no internet")) {
+                noInternetConnection();
+            } else {
+                setResponse(response);
+                updateDepartures(); //update nrpicker
+            }
         }
     }
 }
