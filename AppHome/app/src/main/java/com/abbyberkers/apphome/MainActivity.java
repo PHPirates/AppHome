@@ -166,6 +166,48 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * get arrival time of voyage, given departure time
+     * similar to {@link #getNSDelayByDepartureTime(String)}
+     *
+     * @param depTime departure time ns-format
+     * @return arrival time
+     */
+    public String getNSArrivalTimeByDepartureTime(String depTime) {
+        String arrivalTime = "+0";
+        if (response == null) {
+            response = "No response from NS or first time";
+        }
+        try {
+            //create java DOM xml parser
+            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder;
+            builder = builderFactory.newDocumentBuilder();
+
+            //parse xml with the DOM parser
+            Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
+
+            //create XPath object
+            XPath xPath = XPathFactory.newInstance().newXPath();
+
+            String delayExpr = "/ReisMogelijkheden/ReisMogelijkheid[ActueleVertrekTijd[text()='" + depTime + "']]/ActueleAankomstTijd";
+            NodeList nodeList = (NodeList) xPath.compile(delayExpr).evaluate(
+                    xmlDocument, XPathConstants.NODESET);
+
+            if (nodeList.getLength() == 0) {
+                //there is no arrivalTime
+                return "No arrival time.";
+            }
+            //set arrivalTime using the arrivalTime found
+            arrivalTime = nodeList.item(0).getFirstChild().getNodeValue();
+
+        } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
+            e.printStackTrace();
+        }
+
+        return arrivalTime;
+    }
+
+    /**
      * get arrival delay by ns-format departure time
      *
      * @param depTime value chosen by nrpicker
@@ -288,6 +330,17 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return new Calendar[5]; //return default, null objects
+    }
+
+    /**
+     * convert ns-format to HH:mm
+     *
+     * @param nsTime ns time
+     * @return string
+     */
+    public String convertNSToString(String nsTime) {
+        Calendar c = convertNSToCal(nsTime);
+        return convertCalendarToString(c);
     }
 
     /**
@@ -438,25 +491,32 @@ public class MainActivity extends AppCompatActivity {
 
         String message = "You are here already, you stupid!";
 
+        //1. get five departure times in calendar format
+        //2. convert the chosen calendar to ns-format string
+        //3. get the corresponding arrival time
+        //4. convert it to HH:mm format
+        String nsArrivalTime = convertNSToString(getNSArrivalTimeByDepartureTime(
+                convertCalendarToNS(getNSDepartures()[depart])));
+
         if (from == EHV) {
             if (to == Heeze) {
                 //take the chosen calendar object of the current departures,
                 // and add optionally travel time to that and convert to string with cAddTravel
-                message = "Trein van " + cAddTravel(getNSDepartures()[depart], 0);
+                message = "Trein van " + convertCalendarToString(getNSDepartures()[depart]);
             } else if (to == RDaal) {
-                message = "ETA " + cAddTravel(getNSDepartures()[depart], 90);
+                message = "ETA " + nsArrivalTime;
             }
         } else if (from == Heeze) {
             if (to == EHV) {
-                message = "Eindhoven ETA " + cAddTravel(getNSDepartures()[depart], 15);
+                message = "Eindhoven ETA " + nsArrivalTime;
             } else if (to == RDaal) {
-                message = "Yay at " + cAddTravel(getNSDepartures()[depart], 83) + ".";
+                message = "Yay at " + nsArrivalTime + ".";
             }
         } else if (from == RDaal) {
             if (to == EHV) {
-                message = "ETA " + cAddTravel(getNSDepartures()[depart], 70);  //20,70
+                message = "ETA " + nsArrivalTime;
             } else if (to == Heeze) {
-                message = "ETA " + cAddTravel(getNSDepartures()[depart], 83);
+                message = "ETA " + nsArrivalTime;
             }
         }
 
