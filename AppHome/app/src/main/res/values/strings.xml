@@ -12,5 +12,6 @@
     <string name="configure">Configure</string>
     <string name="add_widget">Add widget</string>
     <string name="set_widget">Set widget</string>
+    <string name="send_delay">Send delay</string>
 
 </resources>

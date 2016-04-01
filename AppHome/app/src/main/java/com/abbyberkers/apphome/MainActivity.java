@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -165,10 +166,51 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * get arrival delay by ns-format departure time
+     *
+     * @param depTime value chosen by nrpicker
+     * @return delay
+     */
+    public String getNSDelayByDepartureTime(String depTime) {
+        String delay = "+0";
+        if (response == null) {
+            response = "No response from NS or first time";
+        }
+        try {
+            //create java DOM xml parser
+            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder;
+            builder = builderFactory.newDocumentBuilder();
+
+            //parse xml with the DOM parser
+            Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
+
+            //create XPath object
+            XPath xPath = XPathFactory.newInstance().newXPath();
+
+            String delayExpr = "/ReisMogelijkheden/ReisMogelijkheid[ActueleVertrekTijd[text()='" + depTime + "']]/AankomstVertraging";
+            NodeList nodeList = (NodeList) xPath.compile(delayExpr).evaluate(
+                    xmlDocument, XPathConstants.NODESET);
+
+            if (nodeList.getLength() == 0) {
+                //there is no delay
+                return "No delays.";
+            }
+            //set delay using the delay found
+            delay = nodeList.item(0).getFirstChild().getNodeValue();
+
+        } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
+            e.printStackTrace();
+        }
+
+        return delay;
+    }
+
+    /**
      * Communicates with ASyncTask using the instance variables to, from and response
      * also in WidgetProvider
      *
-     * @return Calendar[] with five current departures
+     * @return Calendar[] with five current departures, default is five null objects
      */
     public Calendar[] getNSDepartures() {
         if (response == null) {
@@ -208,11 +250,6 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < nodeList.getLength(); i++) {
                 nsTimes.add(i, nodeList.item(i).getFirstChild().getNodeValue());
             }
-
-            for (int i = 0; i < nsTimes.size(); i++) {
-                Log.e("forl", nsTimes.get(i));
-            }
-
 
             //get current time
             Date current = new Date();
@@ -270,6 +307,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Convert calendar object to string in ns-format
+     *
+     * @param c calendar
+     * @return string
+     */
+    public String convertCalendarToNS(Calendar c) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault());
+        return sdf.format(c.getTime());
+    }
+
+    /**
      * convert ns time string to calendar object, uses {@link #convertNSToDate(String)}
      *
      * @param nsTime time in ns format
@@ -282,16 +330,16 @@ public class MainActivity extends AppCompatActivity {
         return c;
     }
 
-//    /**
-//     * convert calendar object to string object in HH:mm format
-//     *
-//     * @param c calendar object
-//     * @return string object
-//     */
-//    public String convertCalendarToString(Calendar c) {
-//        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-//        return sdf.format(c.getTime());
-//    }
+    /**
+     * convert calendar object to string object in HH:mm format
+     *
+     * @param c calendar object
+     * @return string object
+     */
+    public String convertCalendarToString(Calendar c) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+        return sdf.format(c.getTime());
+    }
 
     /**
      * Update the time picker when selecting a new destination
@@ -352,6 +400,24 @@ public class MainActivity extends AppCompatActivity {
         return deps;
     }
 
+    /**
+     * whatsapp a delayed arrival time
+     *
+     * @param view button sendDelay
+     */
+    public void sendDelay(View view) {
+        //get the five current departure times in calendar format
+        Calendar[] departures = getNSDepartures();
+        if (departures[depart] == null) {
+            Toast.makeText(this, "Delay not possible", Toast.LENGTH_LONG).show();
+        } else {
+            //convert calendar to ns format and select the chosen departure time
+            String nsDep = convertCalendarToNS(departures[depart]);
+            String delay = getNSDelayByDepartureTime(nsDep);
+            sendWhatsApp(delay);
+        }
+    }
+
 
     /**
      * Sends the text, called on buttonclick
@@ -385,7 +451,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        sendText(message);
+        sendWhatsApp(message);
 
     }
 
@@ -420,7 +486,7 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param text the message
      */
-    public void sendText(String text) {
+    public void sendWhatsApp(String text) {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, text);
