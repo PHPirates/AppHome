@@ -192,15 +192,14 @@ public class MainActivity extends AppCompatActivity {
             //if from EHV to RDaal, to == Breda, select intercities only
             if (from == EHV && to == RDaal) {
                 //select all departure times where type is Intercity
-                String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid[AantalOverstappen<1]/ActueleVertrekTijd";
+                String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid[AantalOverstappen<1 and Status[not(text()='NIET-MOGELIJK')]]/ActueleVertrekTijd";
                 nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
             } else {
                 //generate list of departure times corresponding to nrpickers
-                String depTimesExpr = "//ActueleVertrekTijd";
-                //                String testExpr = "//*[not(text()='NIET-MOGELIJK')]";
-                String testExpr = "//ActueleVertrekTijd[text()='2016-03-28T13:59:00+0200']";
-                nodeList = (NodeList) xPath.compile(testExpr).evaluate(
+                //just the departure times where status != niet-mogelijk
+                String depTimesExpr = "/ReisMogelijkheden/ReisMogelijkheid[Status[not(text()='NIET-MOGELIJK')]]/ActueleVertrekTijd";
+                nodeList = (NodeList) xPath.compile(depTimesExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
             }
             List<String> nsTimes = new ArrayList<>();
@@ -233,8 +232,12 @@ public class MainActivity extends AppCompatActivity {
 
             Calendar[] depTimes = new Calendar[5];
 
-            if (nextIndex == -1) {
-                Log.e("nextIndex", "no next departure time!");
+            if (nextIndex < 2) {
+                if (nextIndex == -1) {
+                    Log.e("nextIndex", "no next departure time!");
+                } else {
+                    Log.e("nextindex too low: ", Integer.toString(nextIndex));
+                }
             } else {
                 //index is index of next dept time of all the xml deptimes in nsTimes
                 //get departure times around next time
