@@ -276,7 +276,20 @@ public class MainActivity extends AppCompatActivity {
             //if from EHV to RDaal, to == Breda, select intercities only
             if (from == EHV && to == RDaal) {
                 //select all departure times where type is Intercity
-                String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid[AantalOverstappen<1 and Status[not(text()='NIET-MOGELIJK')]]/ActueleVertrekTijd";
+
+                // select all ActueleVertrekTijd where the first Reisdeel has a child VervoerType with text Intercity
+
+//                String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid[AantalOverstappen<1 and Status[not(text()='NIET-MOGELIJK')]]/ActueleVertrekTijd";
+//                String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid/Reisdeel[1][child::VervoerType/self::text()='Intercity']/ActueleVertrekTijd";
+//                String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid[Reisdeel[VervoerType[text()='Intercity']]]]/ActueleVertrekTijd";
+//                String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid[Reisdeel[child::VervoerType/self::text()='Intercity']]/ActueleVertrekTijd";
+//                String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid[child::Reisdeel[child::VervoerType/self::text()='Intercity']]/ActueleVertrekTijd";
+//                String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid/Reisdeel[VervoerType[text()='Intercity']]/../ActueleVertrekTijd";
+                String depTimesICExpr = "//ReisMogelijkheid[ReisDeel[1]/VervoerType = 'Intercity']/ActueleVertrekTijd";
+                nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
+                        xmlDocument, XPathConstants.NODESET);
+            } else if (from == RDaal && to == EHV) {
+                String depTimesICExpr = "//ReisMogelijkheid[ReisDeel[last()]/VervoerType = 'Intercity']/ActueleVertrekTijd";
                 nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
             } else {
@@ -340,6 +353,13 @@ public class MainActivity extends AppCompatActivity {
      */
     public String convertNSToString(String nsTime) {
         Calendar c = convertNSToCal(nsTime);
+        if (from == EHV && to == RDaal) { //if going to Rdaal
+            //round time to nearest ten minutes
+            int unroundedMinutes = c.get(Calendar.MINUTE);
+            int mod = unroundedMinutes % 10;
+            c.add(Calendar.MINUTE, 20); //add 20 minutes for bike time
+            c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
+        }
         return convertCalendarToString(c);
     }
 
@@ -582,18 +602,17 @@ public class MainActivity extends AppCompatActivity {
                 if (to == from) {
                     return "no url possible";
                 } else {
-                    String fromString;
-                    String toString;
-                    //if from EHV to Roosendaal, we need to take the intercity
-                    if (from == EHV && to == RDaal) {
-                        fromString = convertCityToString(from);
-                        toString = "Breda";
+                    String fromString = convertCityToString(from);
+                    String toString = convertCityToString(to);
+
+                    URL url;
+                    if (from == EHV && to == RDaal) { //go via Breda to get also the intercity trips
+                        url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
+                                + fromString + "&toStation=" + toString + "&viaStation=Breda");
                     } else {
-                        fromString = convertCityToString(from);
-                        toString = convertCityToString(to);
+                        url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
+                                + fromString + "&toStation=" + toString);
                     }
-                    URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
-                            + fromString + "&toStation=" + toString);
 
 //                String userCredentials = "t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
 //                String encoding = new String(android.util.Base64.encode(userCredentials.getBytes(), Base64.DEFAULT));
