@@ -138,7 +138,7 @@ public class WidgetProvider extends AppWidgetProvider {
         remoteViews.setTextViewText(R.id.sendTimeTwo, loading);
         remoteViews.setTextViewText(R.id.sendTimeThree, loading);
 
-        doStuff(remoteViews, watchWidget);
+        setButtonOnClickListeners(remoteViews, watchWidget);
     }
 
     /**
@@ -205,7 +205,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
         }
 
-        doStuff(remoteViews, watchWidget);
+        setButtonOnClickListeners(remoteViews, watchWidget);
     }
 
     public String getDirection() {
@@ -240,12 +240,23 @@ public class WidgetProvider extends AppWidgetProvider {
         return result;
     }
 
-    public void doStuff(RemoteViews remoteViews, ComponentName watchWidget) {
-        //set all kinds of intents and clicklisteners and stuff???
+    /**
+     * sets the button onClick listeners for the widget
+     * 1. start the settings activiy
+     * 2. send first time to whatsapp with the time as text
+     * 3. send second time to whatsapp "
+     * 4. send third time to whatsapp "
+     *
+     * @param remoteViews
+     * @param watchWidget
+     */
+    public void setButtonOnClickListeners(RemoteViews remoteViews, ComponentName watchWidget) {
+
         Intent intent = new Intent(remoteContext, WidgetSettings.class);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, 0);
         PendingIntent pendingIntent = PendingIntent.getActivity(remoteContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.settingsButton, pendingIntent);
+
 
         Intent intentOne = new Intent(remoteContext, getClass());
         intentOne.setAction(TIME_ONE);

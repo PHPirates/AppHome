@@ -114,7 +114,7 @@ public class WidgetSettings extends AppCompatActivity {
         saveDirection(context, from, to);
 
         Calendar cal = nextDeparture();
-        cal.add(Calendar.MINUTE,1);
+        cal.add(Calendar.MINUTE, 1);
 
         Intent intent = new Intent(context, Receiver.class);
 
