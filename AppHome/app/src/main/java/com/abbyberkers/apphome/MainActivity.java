@@ -173,38 +173,42 @@ public class MainActivity extends AppCompatActivity {
      * @return arrival time
      */
     public String getNSArrivalTimeByDepartureTime(String depTime) {
-        String arrivalTime = "+0";
-        if (response == null) {
-            response = "No response from NS or first time";
-        }
-        try {
-            //create java DOM xml parser
-            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder;
-            builder = builderFactory.newDocumentBuilder();
-
-            //parse xml with the DOM parser
-            Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
-
-            //create XPath object
-            XPath xPath = XPathFactory.newInstance().newXPath();
-
-            String delayExpr = "/ReisMogelijkheden/ReisMogelijkheid[ActueleVertrekTijd[text()='" + depTime + "']]/ActueleAankomstTijd";
-            NodeList nodeList = (NodeList) xPath.compile(delayExpr).evaluate(
-                    xmlDocument, XPathConstants.NODESET);
-
-            if (nodeList.getLength() == 0) {
-                //there is no arrivalTime
-                return "No arrival time.";
+        if (depTime == null) {
+            return null;
+        } else {
+            String arrivalTime = "+0";
+            if (response == null) {
+                response = "No response from NS or first time";
             }
-            //set arrivalTime using the arrivalTime found
-            arrivalTime = nodeList.item(0).getFirstChild().getNodeValue();
+            try {
+                //create java DOM xml parser
+                DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder;
+                builder = builderFactory.newDocumentBuilder();
 
-        } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
-            e.printStackTrace();
+                //parse xml with the DOM parser
+                Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
+
+                //create XPath object
+                XPath xPath = XPathFactory.newInstance().newXPath();
+
+                String delayExpr = "/ReisMogelijkheden/ReisMogelijkheid[ActueleVertrekTijd[text()='" + depTime + "']]/ActueleAankomstTijd";
+                NodeList nodeList = (NodeList) xPath.compile(delayExpr).evaluate(
+                        xmlDocument, XPathConstants.NODESET);
+
+                if (nodeList.getLength() == 0) {
+                    //there is no arrivalTime
+                    return "No arrival time.";
+                }
+                //set arrivalTime using the arrivalTime found
+                arrivalTime = nodeList.item(0).getFirstChild().getNodeValue();
+
+            } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
+                e.printStackTrace();
+            }
+
+            return arrivalTime;
         }
-
-        return arrivalTime;
     }
 
     /**
@@ -273,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
 
             NodeList nodeList;
 
-            //if from EHV to RDaal, to == Breda, select intercities only
+            //if from EHV to RDaal, select intercities only
             if (from == EHV && to == RDaal) {
                 //select all departure times where type is Intercity
 
@@ -322,6 +326,12 @@ public class MainActivity extends AppCompatActivity {
 
             //nstimes contains all ns departure times in ns-text format
 
+            if (nsTimes.size() < 5) {
+                Log.e("nstimes size is ", Integer.toString(nsTimes.size()));
+                Toast.makeText(this, "Warning, due to NS messing up, results may be inaccurate",
+                        Toast.LENGTH_LONG).show();
+            }
+
             Calendar[] depTimes = new Calendar[5];
 
             if (nextIndex < 2) {
@@ -330,15 +340,18 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Log.e("nextIndex", "is too small: " + Integer.toString(nextIndex));
                 }
-            } else {
+                } else {
                 //index is index of next dept time of all the xml deptimes in nsTimes
                 //get departure times around next time
                 for (int i = 0; i < depTimes.length; i++) {
-                    depTimes[i] = convertNSToCal(nsTimes.get(nextIndex - 2 + i));
+                    if (nextIndex - 2 + i < nsTimes.size()) { //if not out of bounds... (happens when ns returns <5 times total)
+                        depTimes[i] = convertNSToCal(nsTimes.get(nextIndex - 2 + i)); //IOOBE index 5 length 5
+                    }
                 }
-            }
+                }
 
             return depTimes;
+
         } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
             e.printStackTrace();
         }
@@ -352,15 +365,19 @@ public class MainActivity extends AppCompatActivity {
      * @return string
      */
     public String convertNSToString(String nsTime) {
-        Calendar c = convertNSToCal(nsTime);
-        if (from == EHV && to == RDaal) { //if going to Rdaal
-            //round time to nearest ten minutes
-            int unroundedMinutes = c.get(Calendar.MINUTE);
-            int mod = unroundedMinutes % 10;
-            c.add(Calendar.MINUTE, 20); //add 20 minutes for bike time
-            c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
+        if (nsTime == null) {
+            return "No time selected";
+        } else {
+            Calendar c = convertNSToCal(nsTime);
+            if (from == EHV && to == RDaal) { //if going to Rdaal
+                //round time to nearest ten minutes
+                int unroundedMinutes = c.get(Calendar.MINUTE);
+                int mod = unroundedMinutes % 10;
+                c.add(Calendar.MINUTE, 20); //add 20 minutes for bike time
+                c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
+            }
+            return convertCalendarToString(c);
         }
-        return convertCalendarToString(c);
     }
 
     /**
@@ -386,8 +403,12 @@ public class MainActivity extends AppCompatActivity {
      * @return string
      */
     public String convertCalendarToNS(Calendar c) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault());
-        return sdf.format(c.getTime());
+        if (c == null) {
+            return null;
+        } else {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault());
+            return sdf.format(c.getTime());
+        }
     }
 
     /**
@@ -410,8 +431,12 @@ public class MainActivity extends AppCompatActivity {
      * @return string object
      */
     public String convertCalendarToString(Calendar c) {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-        return sdf.format(c.getTime());
+        if (c == null) {
+            return "No time selected";
+        } else {
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+            return sdf.format(c.getTime());
+        }
     }
 
     /**
