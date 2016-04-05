@@ -15,23 +15,31 @@
 
     <Button
         android:id="@+id/settingsButton"
+        android:textColor="@color/black"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/action_settings"/>
+        android:text="@string/action_settings"
+        android:background="@drawable/custom_button"/>
 
     <Button
         android:id="@+id/sendTimeOne"
+        android:textColor="@color/black"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Time One"/>
+        android:text="Time One"
+        android:background="@drawable/custom_button"/>
     <Button
         android:id="@+id/sendTimeTwo"
+        android:textColor="@color/black"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Time Two"/>
+        android:text="Time Two"
+        android:background="@drawable/custom_button"/>
     <Button
         android:id="@+id/sendTimeThree"
+        android:textColor="@color/black"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Time Three"/>
+        android:text="Time Three"
+        android:background="@drawable/custom_button"/>
 </LinearLayout>
