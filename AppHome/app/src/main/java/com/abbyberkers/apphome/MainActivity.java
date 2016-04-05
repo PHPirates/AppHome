@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         npFrom.setDisplayedValues(cities);
         npFrom.setWrapSelectorWheel(true);
         npFrom.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        setDividerColor(npFrom, ContextCompat.getColor(this, R.color.divider));
 
         npFrom.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
@@ -102,6 +103,8 @@ public class MainActivity extends AppCompatActivity {
         npTo.setDisplayedValues(cities);
         npTo.setWrapSelectorWheel(true);
         npTo.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        setDividerColor(npTo, ContextCompat.getColor(this, R.color.divider));
+
 
         npTo.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
