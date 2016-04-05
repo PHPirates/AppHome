@@ -292,7 +292,8 @@ public class MainActivity extends AppCompatActivity {
 //                String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid[Reisdeel[child::VervoerType/self::text()='Intercity']]/ActueleVertrekTijd";
 //                String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid[child::Reisdeel[child::VervoerType/self::text()='Intercity']]/ActueleVertrekTijd";
 //                String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid/Reisdeel[VervoerType[text()='Intercity']]/../ActueleVertrekTijd";
-                String depTimesICExpr = "//ReisMogelijkheid[ReisDeel[1]/VervoerType = 'Intercity']/ActueleVertrekTijd";
+//                String depTimesICExpr = "//ReisMogelijkheid[ReisDeel[1]/VervoerType = 'Intercity']/ActueleVertrekTijd";
+                String depTimesICExpr = "//ReisMogelijkheid/ActueleVertrekTijd";
                 nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
             } else if (from == RDaal && to == EHV) {
