@@ -357,6 +357,10 @@ public class MainActivity extends AppCompatActivity {
 
             //nstimes contains all ns departure times in ns-text format
 
+            if (nsTimes.size() == 0) {
+                //catching the case Asynctask is started twice when changing //TODO when changing cities fast asynctask is executed twice
+                // fast two values in the numberpicker, nsTimes will be empty
+            } else
             if (nsTimes.size() < 5) {
                 Log.e("nstimes size is ", Integer.toString(nsTimes.size()));
                 Toast.makeText(this, "Warning, due to NS messing up, results may be inaccurate",
