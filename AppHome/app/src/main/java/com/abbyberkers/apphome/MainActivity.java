@@ -1,5 +1,6 @@
 package com.abbyberkers.apphome;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
@@ -615,13 +616,12 @@ public class MainActivity extends AppCompatActivity {
      * @param text the message
      */
     public void sendWhatsApp(String text) {
-        Log.e("send", text);
-//        Intent sendIntent = new Intent();
-//        sendIntent.setAction(Intent.ACTION_SEND);
-//        sendIntent.putExtra(Intent.EXTRA_TEXT, text);
-//        sendIntent.setType("text/plain");
-//        sendIntent.setPackage("com.whatsapp");
-//        startActivity(sendIntent);
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, text);
+        sendIntent.setType("text/plain");
+        sendIntent.setPackage("com.whatsapp");
+        startActivity(sendIntent);
     }
 
 
