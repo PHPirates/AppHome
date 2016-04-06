@@ -49,9 +49,10 @@ public class WidgetProvider extends AppWidgetProvider {
     String timeTwo;
     String timeThree;
     String response;
+    String arrivalResponse; //trips from Breda to RDaal for arrival times on EHV-RDaal
+
 
     String message = "";
-    int travel;
 
     Context remoteContext;
     AppWidgetManager appWidgetManager;
@@ -168,26 +169,20 @@ public class WidgetProvider extends AppWidgetProvider {
             if (from == EHV) {
                 if (to == Heeze) {
                     message = "Trein van ";
-                    travel = 0;
                 } else if (to == RDaal) {
                     message = "ETA ";
-                    travel = 89;
                 }
             } else if (from == Heeze) {
                 if (to == EHV) {
                     message = "ETA ";
-                    travel = 15;
                 } else if (to == RDaal) {
                     message = "ETA ";
-                    travel = 83;
                 }
             } else if (from == RDaal) {
                 if (to == EHV) {
                     message = "ETA ";
-                    travel = 70;
                 } else if (to == Heeze) {
                     message = "ETA ";
-                    travel = 85;
                 }
             }
 
@@ -199,13 +194,190 @@ public class WidgetProvider extends AppWidgetProvider {
             remoteViews.setTextViewText(R.id.sendTimeThree, cToString(currentDeps[3]));
 
             //set time to send to whatsapp
-            timeOne = cTravelString(currentDeps[1], travel);
-            timeTwo = cTravelString(currentDeps[2], travel);
-            timeThree = cTravelString(currentDeps[3], travel);
-
+            if (from == EHV && to == Heeze) {
+                //if going to heeze, just set the departure time
+                timeOne = convertCalendarToString(currentDeps[1]);
+                timeTwo = convertCalendarToString(currentDeps[2]);
+                timeThree = convertCalendarToString(currentDeps[3]);
+            } else {
+                //otherwise, get arrival time
+                String[] times = new String[3];
+                for (int i = 0; i < times.length; i++) {
+                    times[i] = convertNSToString(getNSStringByDepartureTime(
+                            convertCalendarToNS(currentDeps[i + 1]), "ActueleAankomstTijd"));
+                }
+                timeOne = times[0];
+                timeTwo = times[1];
+                timeThree = times[2];
+            }
         }
 
         setButtonOnClickListeners(remoteViews, watchWidget);
+    }
+
+    /**
+     * get arrival time of voyage, given departure time
+     *
+     * @param depTime departure time ns-format
+     * @param field   do you want delays or arrival times? Should be ns node string
+     * @return arrival time
+     */
+    public String getNSStringByDepartureTime(String depTime, String field) {
+        if (depTime == null) {
+            return null;
+        } else {
+            String arrivalTime = "+0";
+            if (response == null) {
+                response = "No response from NS or first time";
+            }
+            try {
+                //create java DOM xml parser
+                DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder;
+                builder = builderFactory.newDocumentBuilder();
+
+                //create XPath object
+                XPath xPath = XPathFactory.newInstance().newXPath();
+
+                String arrivalOrDepExpr;
+
+
+                //parse xml with the DOM parser
+                Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
+
+                if (from == EHV && to == RDaal) {
+                    arrivalOrDepExpr = "/ReisMogelijkheden/ReisMogelijkheid" +
+                            "[ActueleVertrekTijd[text()='" + depTime + "']]/ActueleAankomstTijd";
+
+                    //deptime is departure time in EHV
+                    //get new deptime, the first departure time in Breda
+                    // which is later than the arrival time
+                    NodeList arrivalNodeList = (NodeList) xPath.compile(arrivalOrDepExpr).evaluate(
+                            xmlDocument, XPathConstants.NODESET);
+
+                    if (arrivalNodeList.getLength() == 0) {
+                        //there is no arrivalTime
+                        return "arr: No breda arrival time.";
+                    }
+
+                    //arrivalNodeList should contain the (hopefully only one) arrival time in Breda
+                    String bredaArrivalTime = arrivalNodeList.item(0).getFirstChild().getNodeValue();
+
+                    //get next departure times
+                    //arrivalResponse contains xml Breda-RDaal
+
+                    //if going to RDaal, means arrival time is in arrivalResponse
+                    xmlDocument = builder.parse(new ByteArrayInputStream(arrivalResponse.getBytes()));
+
+                    //get all breda departure times
+                    String depExpr = "//ActueleVertrekTijd";
+
+                    NodeList BredaDepNodeList = (NodeList) xPath.compile(depExpr).evaluate(
+                            xmlDocument, XPathConstants.NODESET);
+
+                    List<String> BredaDepNSTimes = new ArrayList<>();
+
+                    //use dep times from xml
+                    for (int i = 0; i < BredaDepNodeList.getLength(); i++) {
+                        BredaDepNSTimes.add(i, BredaDepNodeList.item(i).getFirstChild().getNodeValue());
+                    }
+
+                    //compare with breda arrival time
+                    Date BredaArrivalDate = convertNSToDate(bredaArrivalTime);
+
+                    //find next departure time in List
+                    int nextIndex = -1;
+                    //convert to date to compare
+                    for (int i = 0; i < BredaDepNSTimes.size(); i++) {
+                        Date nsDate = convertNSToDate(BredaDepNSTimes.get(i));
+                        if (BredaArrivalDate.before(nsDate)) {
+                            nextIndex = i; //i is index of next departure time.
+                            break;
+                        }
+                    }
+
+                    if (nextIndex == -1) {
+                        Log.e("breda ", "departure time mistake ");
+                    } else {
+                        //depTime becomes next Breda departure Time
+                        depTime = BredaDepNSTimes.get(nextIndex);
+                    }
+                }
+
+                //now (possibly again) arrival time with depTime.
+                // depTime may have been updated to Breda depTime
+                arrivalOrDepExpr = "/ReisMogelijkheden" +
+                        "/ReisMogelijkheid[ActueleVertrekTijd[text()='" + depTime + "']]/" + field;
+
+                NodeList nodeList = (NodeList) xPath.compile(arrivalOrDepExpr).evaluate(
+                        xmlDocument, XPathConstants.NODESET);
+
+                if (nodeList.getLength() == 0) {
+                    //there is no arrivalTime
+                    return "No delays.";
+                }
+                //set arrivalTime using the arrivalTime found
+                arrivalTime = nodeList.item(0).getFirstChild().getNodeValue();
+
+            } catch (ParserConfigurationException | SAXException |
+                    IOException | XPathExpressionException e) {
+                e.printStackTrace();
+            }
+
+            return arrivalTime;
+        }
+    }
+
+    /**
+     * convert ns-format to HH:mm
+     *
+     * @param nsTime ns time
+     * @return string
+     */
+    public String convertNSToString(String nsTime) {
+        if (nsTime == null) {
+            return "No time selected";
+        } else {
+            Calendar c = convertNSToCal(nsTime);
+            if (from == EHV && to == RDaal) { //if going to Rdaal
+                //round time to nearest ten minutes
+                int unroundedMinutes = c.get(Calendar.MINUTE);
+                int mod = unroundedMinutes % 10;
+                c.add(Calendar.MINUTE, 20); //add 20 minutes for bike time
+                c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
+            }
+            return convertCalendarToString(c);
+        }
+    }
+
+    /**
+     * Convert calendar object to string in ns-format
+     *
+     * @param c calendar
+     * @return string
+     */
+    public String convertCalendarToNS(Calendar c) {
+        if (c == null) {
+            return null;
+        } else {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault());
+            return sdf.format(c.getTime());
+        }
+    }
+
+    /**
+     * convert calendar object to string object in HH:mm format
+     *
+     * @param c calendar object
+     * @return string object
+     */
+    public String convertCalendarToString(Calendar c) {
+        if (c == null) {
+            return "No time selected";
+        } else {
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+            return sdf.format(c.getTime());
+        }
     }
 
     public String getDirection() {
@@ -247,8 +419,8 @@ public class WidgetProvider extends AppWidgetProvider {
      * 3. send second time to whatsapp "
      * 4. send third time to whatsapp "
      *
-     * @param remoteViews
-     * @param watchWidget
+     * @param remoteViews to update things on widget
+     * @param watchWidget app component
      */
     public void setButtonOnClickListeners(RemoteViews remoteViews, ComponentName watchWidget) {
 
@@ -320,7 +492,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
     /**
      * Communicates with ASyncTask using the instance variables to, from and response
-     * also in MainActivity
+     * same as in MainActivity, except without toasts
      *
      * @return Calendar[] with five current departures
      */
@@ -343,16 +515,26 @@ public class WidgetProvider extends AppWidgetProvider {
 
             NodeList nodeList;
 
-            //if from EHV to RDaal, to == Breda, select intercities only
+            //if from EHV to RDaal, select intercities only
             if (from == EHV && to == RDaal) {
                 //select all departure times where type is Intercity
-                String depTimesICExpr = "/ReisMogelijkheden/ReisMogelijkheid[AantalOverstappen<1]/ActueleVertrekTijd";
-                // "//*[not(text()='NIET-MOGELIJK')]"
+
+                // select all ActueleVertrekTijd where the first Reisdeel
+                // has a child VervoerType with text Intercity
+                String depTimesICExpr = "//ReisMogelijkheid[ReisDeel[1]/" +
+                        "VervoerType = 'Intercity']/ActueleVertrekTijd";
+                nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
+                        xmlDocument, XPathConstants.NODESET);
+            } else if (from == RDaal && to == EHV) {
+                String depTimesICExpr = "//ReisMogelijkheid[ReisDeel[last()]/" +
+                        "VervoerType = 'Intercity']/ActueleVertrekTijd";
                 nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
             } else {
                 //generate list of departure times corresponding to nrpickers
-                String depTimesExpr = "//ActueleVertrekTijd";
+                //just the departure times where status != niet-mogelijk
+                String depTimesExpr = "/ReisMogelijkheden/ReisMogelijkheid" +
+                        "[Status[not(text()='NIET-MOGELIJK')]]/ActueleVertrekTijd";
                 nodeList = (NodeList) xPath.compile(depTimesExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
             }
@@ -362,11 +544,6 @@ public class WidgetProvider extends AppWidgetProvider {
             for (int i = 0; i < nodeList.getLength(); i++) {
                 nsTimes.add(i, nodeList.item(i).getFirstChild().getNodeValue());
             }
-//
-//            for (int i = 0; i < nsTimes.size(); i++) {
-//                Log.e("forl", convertNSToDate(nsTimes.get(i)).toString());
-//            }
-
 
             //get current time
             Date current = new Date();
@@ -384,19 +561,31 @@ public class WidgetProvider extends AppWidgetProvider {
 
             //nstimes contains all ns departure times in ns-text format
 
+            if (nsTimes.size() < 5) {
+                Log.e("nstimes size is ", Integer.toString(nsTimes.size()));
+            }
+
             Calendar[] depTimes = new Calendar[5];
 
-            if (nextIndex == -1) {
-                Log.e("nextIndex", "no next departure time!");
+            if (nextIndex < 2) {
+                if (nextIndex == -1) {
+                    Log.e("nextIndex", "no next departure time!");
+                } else {
+                    Log.e("nextIndex", "is too small: " + Integer.toString(nextIndex));
+                }
             } else {
                 //index is index of next dept time of all the xml deptimes in nsTimes
                 //get departure times around next time
                 for (int i = 0; i < depTimes.length; i++) {
-                    depTimes[i] = convertNSToCal(nsTimes.get(nextIndex - 2 + i));
+                    if (nextIndex - 2 + i < nsTimes.size()) {
+                        //if not out of bounds... (happens when ns returns <5 times total)
+                        depTimes[i] = convertNSToCal(nsTimes.get(nextIndex - 2 + i));
+                    }
                 }
             }
 
             return depTimes;
+
         } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
             e.printStackTrace();
         }
@@ -433,6 +622,12 @@ public class WidgetProvider extends AppWidgetProvider {
     }
 
 
+    /**
+     * changes compared to main:
+     * no progressbar
+     * first time
+     * updatebuttons instead of updatedepartures
+     */
     class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
 
 
@@ -449,23 +644,55 @@ public class WidgetProvider extends AppWidgetProvider {
                     return null;
                 } else {
 
-                    if (from == to) {
-                        Log.e("asynctask", "from equals to");
+                    if (to == from) {
                         return "no url possible";
                     } else {
-                        String fromString;
-                        String toString;
-                        //if from EHV to Roosendaal, we need to take the intercity
-                        if (from == EHV && to == RDaal) {
-                            fromString = convertCityToString(from);
-                            toString = "Breda";
+                        String fromString = convertCityToString(from);
+                        String toString = convertCityToString(to);
+
+                        URL url;
+
+                        if (from == EHV && to == RDaal) { //go to Breda to get also the intercity trips
+                            url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
+                                    + fromString + "&toStation=Breda");
+
+                            //*************** also get trips from Breda to RDaal for arrival times *****
+                            URL arrivalURL = new URL("http://webservices.ns.nl/ns-api-treinplanner" +
+                                    "?fromStation=Breda&toStation=" + toString);
+                            String encoding = "dC5tLnNjaG91dGVuQHN0dWRlbnQudHVlLm5sOnNPLTY1QVp4dUVySm1tQzI4ZUlSQjg1YW9zN29HVkowQzZ0T1pJOVllSERQTFhlRXYxbmZCZw==";
+                            HttpURLConnection urlConnection = (HttpURLConnection) arrivalURL.openConnection();
+                            urlConnection.setRequestProperty("Authorization", "Basic " + encoding);
+
+                            try {
+                                resCode = urlConnection.getResponseCode();
+                                if (resCode == HttpURLConnection.HTTP_OK) {
+                                    in = urlConnection.getInputStream();
+                                } else {
+                                    Log.e("rescode", "rescode not ok");
+                                    in = urlConnection.getErrorStream();
+                                }
+                                BufferedReader bufferedReader = new BufferedReader(
+                                        new InputStreamReader(in));
+                                StringBuilder stringBuilder = new StringBuilder();
+                                String line;
+                                while ((line = bufferedReader.readLine()) != null) {
+                                    stringBuilder.append(line).append("\n");
+                                }
+                                bufferedReader.close();
+                                setArrivalResponse(stringBuilder.toString());
+                            } finally {
+                                urlConnection.disconnect();
+                            }
+
+                            //****************************************************************
                         } else {
-                            fromString = convertCityToString(from);
-                            toString = convertCityToString(to);
+                            url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
+                                    + fromString + "&toStation=" + toString);
                         }
 
-                        URL url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
-                                + fromString + "&toStation=" + toString);
+//                String userCredentials = "t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
+//                String encoding = new String(android.util.Base64.encode(userCredentials.getBytes(), Base64.DEFAULT));
+//                encoding = encoding.replaceAll("\\s+",""); //because the base64 encoding doesn't work.
 
                         //encoded userCredentials with online encoder
                         String encoding = "dC5tLnNjaG91dGVuQHN0dWRlbnQudHVlLm5sOnNPLTY1QVp4dUVySm1tQzI4ZUlSQjg1YW9zN29HVkowQzZ0T1pJOVllSERQTFhlRXYxbmZCZw==";
@@ -494,15 +721,22 @@ public class WidgetProvider extends AppWidgetProvider {
                         }
                     }
                 }
+            } catch (IOException e) {
+                Log.e("IOException", "no internet connection");
+                return "no internet";
             } catch (Exception e) {
                 Log.e("ERROR", e.getMessage(), e);
                 return null;
+                }
             }
-        }
 
         protected void onPostExecute(String response) {
-            setResponse(response);
-            updateButtons(); //update buttons
+            if (response.equals("no internet")) {
+                noInternetConnection();
+            } else {
+                setResponse(response);
+                updateButtons(); //update nrpicker
+            }
         }
 
     }
@@ -514,5 +748,16 @@ public class WidgetProvider extends AppWidgetProvider {
      */
     public void setResponse(String response) {
         this.response = response;
+    }
+
+    public void setArrivalResponse(String arrivalResponse) {
+        this.arrivalResponse = arrivalResponse;
+    }
+
+    /**
+     * Called from {@link AsyncTask} when there is no internet connection
+     */
+    public void noInternetConnection() {
+        //can't toast, do nothing
     }
 }
