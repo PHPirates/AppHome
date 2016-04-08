@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -46,6 +47,7 @@ public class WidgetProvider extends AppWidgetProvider {
     final String TIME_ONE = "time_one";
     final String TIME_TWO = "time_two";
     final String TIME_THREE = "time_three";
+    final String TURN = "turn";
 
     String timeOne;
     String timeTwo;
@@ -431,6 +433,10 @@ public class WidgetProvider extends AppWidgetProvider {
         PendingIntent pendingIntent = PendingIntent.getActivity(remoteContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.settingsButton, pendingIntent);
 
+        Intent intentTurn = new Intent(remoteContext, getClass());
+        intentTurn.setAction(TURN);
+        PendingIntent buttonTurn = PendingIntent.getBroadcast(remoteContext, 0, intentTurn, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_CANCEL_CURRENT);
+        remoteViews.setOnClickPendingIntent(R.id.turnButton, buttonTurn);
 
         Intent intentOne = new Intent(remoteContext, getClass());
         intentOne.setAction(TIME_ONE);
@@ -761,5 +767,6 @@ public class WidgetProvider extends AppWidgetProvider {
      */
     public void noInternetConnection() {
         //can't toast, do nothing
+        Toast.makeText(remoteContext, "toast", Toast.LENGTH_SHORT).show();
     }
 }

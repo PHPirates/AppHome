@@ -28,6 +28,7 @@
                 <action android:name="TIME_ONE" />
                 <action android:name="TIME_TWO" />
                 <action android:name="TIME_THREE" />
+                <action android:name="TURN" />
             </intent-filter>
 
             <meta-data
