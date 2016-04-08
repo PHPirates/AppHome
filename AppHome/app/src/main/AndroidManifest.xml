@@ -3,6 +3,7 @@
     package="com.abbyberkers.apphome">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -37,6 +38,12 @@
         <receiver android:name=".Receiver" android:enabled="true"/>
 
         <activity android:name=".WidgetSettings"/>
+
+        <receiver android:name=".BootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
