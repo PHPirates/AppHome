@@ -1,5 +1,6 @@
 package com.abbyberkers.apphome;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
@@ -11,6 +12,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -42,6 +45,8 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import static android.support.v4.app.ActivityCompat.finishAffinity;
+
 public class WidgetProvider extends AppWidgetProvider {
 
     final String TIME_ONE = "time_one";
@@ -63,6 +68,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
     int from;
     int to;
+    int[] direction;
 
     public static final int EHV = 0;
     public static final int Heeze = 1;
@@ -77,7 +83,7 @@ public class WidgetProvider extends AppWidgetProvider {
         this.appWidgetManager = appWidgetManager;
 
         //set instance variables to be used in all kinds of methods
-        int[] direction = WidgetSettings.loadDirection(remoteContext);
+        direction = WidgetSettings.loadDirection(remoteContext);
         this.from = direction[0];
         this.to = direction[1];
 
@@ -89,6 +95,41 @@ public class WidgetProvider extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
+
+        if(intent.getAction().equals(TURN)) {
+            Log.e("turn button", "clicked");
+
+            direction = WidgetSettings.loadDirection(context);
+            Log.e("turn button", Integer.toString(direction[0]) + " " + Integer.toString(direction[1]));
+            WidgetSettings.saveDirection(context, direction[1], direction[0]);
+            direction = WidgetSettings.loadDirection(context);
+            Log.e("turn button", Integer.toString(direction[0]) + " " + Integer.toString(direction[1]));
+
+            Calendar cal = BootReceiver.nextDeparture(direction);
+            cal.add(Calendar.MINUTE, 1);
+
+            Intent i = new Intent(context, Receiver.class);
+
+            PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, i, 0);
+
+            AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 1800000, pIntent);
+
+            AppWidgetManager appWidgetManager = AppWidgetManager
+                    .getInstance(context);
+            ComponentName thisAppWidget = new ComponentName(context
+                    .getPackageName(), WidgetProvider.class.getName());
+            Intent updateIntent = new Intent(context, WidgetProvider.class);
+            int[] appWidgetIds = appWidgetManager
+                    .getAppWidgetIds(thisAppWidget);
+            updateIntent
+                    .setAction("android.appwidget.action.APPWIDGET_UPDATE");
+            updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS,
+                    appWidgetIds);
+            context.sendBroadcast(updateIntent);
+            // Done with Configure, finish all activities.
+//            finishAffinity();
+        }
 
         if (intent.getAction().equals(TIME_ONE)) {
 
@@ -146,6 +187,12 @@ public class WidgetProvider extends AppWidgetProvider {
         setButtonOnClickListeners(remoteViews, watchWidget);
     }
 
+//    public int[] changeDirections() {
+//        int[] direction = WidgetSettings.loadDirection(remoteContext);
+//        WidgetSettings.saveDirection(remoteContext, direction[1], direction[0]);
+//        direction = WidgetSettings.loadDirection(remoteContext);
+//        return direction;
+//    }
     /**
      * called by the ASyncTask after it has finished setting the response
      */
@@ -743,7 +790,7 @@ public class WidgetProvider extends AppWidgetProvider {
                 noInternetConnection();
             } else {
                 setResponse(response);
-                updateButtons(); //update nrpicker
+                updateButtons(); //update buttons
             }
         }
 

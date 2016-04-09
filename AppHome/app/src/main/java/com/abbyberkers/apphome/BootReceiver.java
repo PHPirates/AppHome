@@ -28,7 +28,7 @@ public class BootReceiver extends BroadcastReceiver {
 
     }
 
-    Calendar nextDeparture(int[] direction) {
+    static Calendar nextDeparture(int[] direction) {
         int EHV = 0;
         int Heeze = 1;
         int RDaal = 2;

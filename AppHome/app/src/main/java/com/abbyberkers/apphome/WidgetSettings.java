@@ -161,7 +161,7 @@ public class WidgetSettings extends AppCompatActivity {
 
     static void saveDirection(Context context, int from, int to) {
         SharedPreferences.Editor prefs = context.getSharedPreferences(
-                PREFS_NAME, 0).edit();
+                PREFS_NAME, MODE_MULTI_PROCESS).edit();
         prefs.putInt("from", from);
         prefs.putInt("to", to);
         prefs.apply();
