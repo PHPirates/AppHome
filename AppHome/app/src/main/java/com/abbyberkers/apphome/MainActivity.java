@@ -49,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
     int to;
     int depart; //departure numberpicker value
 
+    boolean ASyncTaskIsRunning; //boolean to check if there is an asynctask running
+
     public static final int EHV = 0;
     public static final int Heeze = 1;
     public static final int RDaal = 2;
@@ -357,10 +359,6 @@ public class MainActivity extends AppCompatActivity {
 
             //nstimes contains all ns departure times in ns-text format
 
-            if (nsTimes.size() == 0) {
-                //catching the case Asynctask is started twice when changing //TODO when changing cities fast asynctask is executed twice
-                // fast two values in the numberpicker, nsTimes will be empty
-            } else
             if (nsTimes.size() < 5) {
                 Log.e("nstimes size is ", Integer.toString(nsTimes.size()));
                 Toast.makeText(this, "Warning, due to NS messing up, results may be inaccurate",
@@ -486,8 +484,8 @@ public class MainActivity extends AppCompatActivity {
         npDep.setValue(2); //set default option
         depart = 2; //set chosen value to default
         if (to == from) {
-            setDividerColor(npDep, 0);
-        } else {
+            setDividerColor(npDep, 0); //set divider color to invisible
+        } else { //set to default color
             setDividerColor(npDep, ContextCompat.getColor(this, R.color.divider));
         }
     }
@@ -633,6 +631,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         protected void onPreExecute() {
+            //change flag value, from false to true if first asynctask, from true to false
+            //if there is already one task running
+            ASyncTaskIsRunning = !ASyncTaskIsRunning;
             progressBar.setVisibility(View.VISIBLE);
         }
 
@@ -729,12 +730,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(String response) {
-            progressBar.setVisibility(View.GONE);
-            if (response.equals("no internet")) {
-                noInternetConnection();
+            if (!ASyncTaskIsRunning) {
+                //there has an other asynctask started while this one was running
+                ASyncTaskIsRunning = true; //set to true, because the other one is still running
             } else {
-                setResponse(response);
-                updateDepartures(); //update nrpicker
+                ASyncTaskIsRunning = false; //reset
+                progressBar.setVisibility(View.GONE);
+                if (response.equals("no internet")) {
+                    noInternetConnection();
+                } else {
+                    setResponse(response);
+                    updateDepartures(); //update nrpicker
+                }
             }
         }
     }
