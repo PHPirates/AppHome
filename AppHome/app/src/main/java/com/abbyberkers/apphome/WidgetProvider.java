@@ -7,13 +7,9 @@ import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -44,8 +40,6 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
-import static android.support.v4.app.ActivityCompat.finishAffinity;
 
 public class WidgetProvider extends AppWidgetProvider {
 
@@ -579,11 +573,11 @@ public class WidgetProvider extends AppWidgetProvider {
                         "VervoerType = 'Intercity']/ActueleVertrekTijd";
                 nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
-            } else if (from == RDaal && to == EHV) {
-                String depTimesICExpr = "//ReisMogelijkheid[ReisDeel[last()]/" +
-                        "VervoerType = 'Intercity']/ActueleVertrekTijd";
-                nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
-                        xmlDocument, XPathConstants.NODESET);
+//            } else if (from == RDaal && to == EHV) {
+//                String depTimesICExpr = "//ReisMogelijkheid[ReisDeel[last()]/" +
+//                        "VervoerType = 'Intercity']/ActueleVertrekTijd";
+//                nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
+//                        xmlDocument, XPathConstants.NODESET);
             } else {
                 //generate list of departure times corresponding to nrpickers
                 //just the departure times where status != niet-mogelijk
@@ -785,11 +779,13 @@ public class WidgetProvider extends AppWidgetProvider {
             }
 
         protected void onPostExecute(String response) {
-            if (response.equals("no internet")) {
-                noInternetConnection();
-            } else {
-                setResponse(response);
-                updateButtons(); //update buttons
+            if (response != null) {
+                if (response.equals("no internet")) {
+                    noInternetConnection();
+                } else {
+                    setResponse(response);
+                    updateButtons(); //update buttons
+                }
             }
         }
 

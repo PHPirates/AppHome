@@ -321,11 +321,11 @@ public class MainActivity extends AppCompatActivity {
                         "VervoerType = 'Intercity']/ActueleVertrekTijd";
                 nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
-            } else if (from == RDaal && to == EHV) {
-                String depTimesICExpr = "//ReisMogelijkheid[ReisDeel[last()]/" +
-                        "VervoerType = 'Intercity']/ActueleVertrekTijd";
-                nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
-                        xmlDocument, XPathConstants.NODESET);
+//            } else if (from == RDaal && to == EHV) {
+//                String depTimesICExpr = "//ReisMogelijkheid[ReisDeel[last()]/" +
+//                        "VervoerType = 'Intercity']/ActueleVertrekTijd";
+//                nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
+//                        xmlDocument, XPathConstants.NODESET);
             } else {
                 //generate list of departure times corresponding to nrpickers
                 //just the departure times where status != niet-mogelijk
