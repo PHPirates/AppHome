@@ -97,11 +97,10 @@ public class WidgetProvider extends AppWidgetProvider {
         super.onReceive(context, intent);
 
         if(intent.getAction().equals(TURN)) {
-            Log.e("turn button", "clicked");
 
             direction = WidgetSettings.loadDirection(context);
             Log.e("turn button", Integer.toString(direction[0]) + " " + Integer.toString(direction[1]));
-            WidgetSettings.saveDirection(context, direction[1], direction[0]);
+            WidgetSettings.saveDirection(context, direction[1], direction[0]); //swap from and to
             direction = WidgetSettings.loadDirection(context);
             Log.e("turn button", Integer.toString(direction[0]) + " " + Integer.toString(direction[1]));
 
