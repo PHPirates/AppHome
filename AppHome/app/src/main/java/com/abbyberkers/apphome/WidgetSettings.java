@@ -7,12 +7,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Button;
 import android.widget.NumberPicker;
 
 import java.text.SimpleDateFormat;
@@ -38,6 +35,7 @@ public class WidgetSettings extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_widget_settings);
 
+        //do same nrpicker stuff as in main
         String[] cities = new String[]{"Eindhoven", "Heeze", "Roosendaal"};
 
         NumberPicker npFrom;
@@ -75,6 +73,11 @@ public class WidgetSettings extends AppCompatActivity {
 
     }
 
+    /**
+     * same as in BootReceiver
+     *
+     * @return next departure time
+     */
     Calendar nextDeparture(){
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.SECOND, 0);
@@ -111,9 +114,12 @@ public class WidgetSettings extends AppCompatActivity {
         return cal;
     }
 
+    /**
+     * on buttonclick to set widget,
+     * @param view button setWidget
+     */
     public void setWidget(View view){
 
-//        String direction = direction(from, to);
         saveDirection(context, from, to);
 
         Calendar cal = nextDeparture();

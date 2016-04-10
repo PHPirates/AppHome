@@ -42,21 +42,28 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 public class WidgetProvider extends AppWidgetProvider {
+    /**
+     * class that does everything in the widget
+     */
 
+    //action names of buttons
     final String TIME_ONE = "time_one";
     final String TIME_TWO = "time_two";
     final String TIME_THREE = "time_three";
     final String TURN = "turn";
 
+    //strings for times on buttons
     String timeOne;
     String timeTwo;
     String timeThree;
+    //the xml response strings
     String response;
-    String arrivalResponse; //trips from Breda to RDaal for arrival times on EHV-RDaal
+    String arrivalResponse; //xml from trips from Breda to RDaal for arrival times on EHV-RDaal
 
-
+    //message to be sent to whatsapp
     String message = "";
 
+    //the context of the widget
     Context remoteContext;
     AppWidgetManager appWidgetManager;
 
@@ -68,6 +75,13 @@ public class WidgetProvider extends AppWidgetProvider {
     public static final int Heeze = 1;
     public static final int RDaal = 2;
 
+    /**
+     * When alarm goes off, we update the widget
+     *
+     * @param context          widget context
+     * @param appWidgetManager widget manager
+     * @param appWidgetIds     in case there are more widgets
+     */
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
                          int[] appWidgetIds) {
@@ -81,33 +95,40 @@ public class WidgetProvider extends AppWidgetProvider {
         this.from = direction[0];
         this.to = direction[1];
 
+        //set loading dots on widget in the meantime
         setLoading();
 
-        new RetrieveFeedTask().execute(); //execute the asynctask class
+        new RetrieveFeedTask().execute(); //execute the asynctask class to get stuff from ns
     }
 
+    /**
+     * TODO called when widget is created?
+     * @param context widget
+     * @param intent i
+     */
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
 
         if(intent.getAction().equals(TURN)) {
+            //if turn button is clicked
 
             direction = WidgetSettings.loadDirection(context);
-            Log.e("turn button", Integer.toString(direction[0]) + " " + Integer.toString(direction[1]));
             WidgetSettings.saveDirection(context, direction[1], direction[0]); //swap from and to
-            direction = WidgetSettings.loadDirection(context);
-            Log.e("turn button", Integer.toString(direction[0]) + " " + Integer.toString(direction[1]));
+            direction = WidgetSettings.loadDirection(context); //update direction
 
+            //calling to BootReceiver to avoid one extra duplicate method...
             Calendar cal = BootReceiver.nextDeparture(direction);
             cal.add(Calendar.MINUTE, 1);
 
+            //set alarm to update every half an hour
             Intent i = new Intent(context, Receiver.class);
-
             PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, i, 0);
 
             AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
             alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 1800000, pIntent);
 
+            //standard code block to update widget
             AppWidgetManager appWidgetManager = AppWidgetManager
                     .getInstance(context);
             ComponentName thisAppWidget = new ComponentName(context
@@ -120,19 +141,19 @@ public class WidgetProvider extends AppWidgetProvider {
             updateIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS,
                     appWidgetIds);
             context.sendBroadcast(updateIntent);
-            // Done with Configure, finish all activities.
-//            finishAffinity();
-        }
+        } else
 
+            //on time 1 button click
         if (intent.getAction().equals(TIME_ONE)) {
 
             Bundle extras = intent.getExtras();
-            if (extras != null) {
+            if (extras != null) { //TODO timeOne becomes ? sent from ?
                 timeOne = extras.getString("text");
             } else {
                 timeOne = "time one";
             }
 
+            //send whatsapp
             appText(context, timeOne);
 
 
@@ -162,32 +183,32 @@ public class WidgetProvider extends AppWidgetProvider {
         }
     }
 
+    /**
+     * set loading... on buttons
+     */
     public void setLoading() {
-        //set loading on buttons
         String loading = "...";
 
+        //get remoteViews and component name to update widget
         RemoteViews remoteViews;
         ComponentName watchWidget;
 
         remoteViews = new RemoteViews(remoteContext.getPackageName(), R.layout.widget_layout);
         watchWidget = new ComponentName(remoteContext, WidgetProvider.class);
 
+        //set text
         remoteViews.setTextViewText(R.id.settingsButton, "loading...");
         remoteViews.setTextViewText(R.id.sendTimeOne, loading);
         remoteViews.setTextViewText(R.id.sendTimeTwo, loading);
         remoteViews.setTextViewText(R.id.sendTimeThree, loading);
 
+        //add click listeners again
         setButtonOnClickListeners(remoteViews, watchWidget);
     }
 
-//    public int[] changeDirections() {
-//        int[] direction = WidgetSettings.loadDirection(remoteContext);
-//        WidgetSettings.saveDirection(remoteContext, direction[1], direction[0]);
-//        direction = WidgetSettings.loadDirection(remoteContext);
-//        return direction;
-//    }
     /**
      * called by the ASyncTask after it has finished setting the response
+     * updates text on the buttons to right times, and adds rights text in the whatsapp message
      */
     public void updateButtons() {
 
@@ -201,33 +222,18 @@ public class WidgetProvider extends AppWidgetProvider {
         c.set(Calendar.SECOND, 0);
         c.set(Calendar.MILLISECOND, 0);
 
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-
+        //get direction again just to check if it exists
         int[] direction = WidgetSettings.loadDirection(remoteContext);
 
         if (direction != null) {
+            //set direction on settings button
             remoteViews.setTextViewText(R.id.settingsButton, getDirection());
 
-            if (from == EHV) {
-                if (to == Heeze) {
-                    message = "Trein van ";
-                } else if (to == RDaal) {
-                    message = "ETA ";
-                }
-            } else if (from == Heeze) {
-                if (to == EHV) {
-                    message = "ETA ";
-                } else if (to == RDaal) {
-                    message = "ETA ";
-                }
-            } else if (from == RDaal) {
-                if (to == EHV) {
-                    message = "ETA ";
-                } else if (to == Heeze) {
-                    message = "ETA ";
-                }
+            //special case for Abby :)
+            if (from == EHV && to == Heeze) {
+                message = "Trein van ";
+            } else {
+                message = "ETA ";
             }
 
             //get five current departure calendars,
@@ -239,7 +245,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
             //set time to send to whatsapp
             if (from == EHV && to == Heeze) {
-                //if going to heeze, just set the departure time
+                //if going to heeze, just set the departure time for times to send to whatsapp
                 timeOne = convertCalendarToString(currentDeps[1]);
                 timeTwo = convertCalendarToString(currentDeps[2]);
                 timeThree = convertCalendarToString(currentDeps[3]);
@@ -424,6 +430,10 @@ public class WidgetProvider extends AppWidgetProvider {
         }
     }
 
+    /**
+     * uses instance variables from and to, to:
+     * @return string "fromcity - tocity", "Set widget" the first time
+     */
     public String getDirection() {
         if (convertCityToString(this.from) == null) { //default, the first time
             return "Set widget";
@@ -475,7 +485,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
         Intent intentTurn = new Intent(remoteContext, getClass());
         intentTurn.setAction(TURN);
-        PendingIntent buttonTurn = PendingIntent.getBroadcast(remoteContext, 0, intentTurn, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent buttonTurn = PendingIntent.getBroadcast(remoteContext, 0, intentTurn, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_UPDATE_CURRENT);
         remoteViews.setOnClickPendingIntent(R.id.turnButton, buttonTurn);
 
         Intent intentOne = new Intent(remoteContext, getClass());
@@ -499,6 +509,11 @@ public class WidgetProvider extends AppWidgetProvider {
         appWidgetManager.updateAppWidget(watchWidget, remoteViews);
     }
 
+    /**
+     * send whatsapp with text
+     * @param context context
+     * @param text message to send
+     */
     public void appText(Context context, String text) {
 
         Intent sendIntent = new Intent();
@@ -510,31 +525,16 @@ public class WidgetProvider extends AppWidgetProvider {
         context.startActivity(sendIntent);
     }
 
+    /**
+     * convert calendar to HH:mm string
+     * @param c calendar
+     * @return string
+     */
     public String cToString(Calendar c) {
         if (c == null) {
             return "...";
         }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-        return simpleDateFormat.format(c.getTime());
-    }
-
-    /**
-     * @param c      calendar object, probably the one chosen by the time nrpicker
-     * @param travel optional travel time
-     * @return added travel time to calendar object and converted to string
-     */
-    public String cTravelString(Calendar c, int travel) {
-        if (c == null) {
-            return "I'm lost.";
-        }
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-        c.add(Calendar.MINUTE, travel);
-        if ((from == EHV) && (to == RDaal)) { //if going from ehv to Rdaal
-            //round time to nearest ten minutes
-            int unroundedMinutes = c.get(Calendar.MINUTE);
-            int mod = unroundedMinutes % 10;
-            c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
-        }
         return simpleDateFormat.format(c.getTime());
     }
 
