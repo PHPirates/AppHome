@@ -24,7 +24,7 @@ public class BootReceiver extends BroadcastReceiver {
         Calendar cal = nextDeparture(direction);
         cal.add(Calendar.MINUTE, 1);
 
-        //TODO intent to ?
+        // intent to start Receiver which updates the alarm in its onReceive()
         Intent intent = new Intent(context, Receiver.class);
         PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 

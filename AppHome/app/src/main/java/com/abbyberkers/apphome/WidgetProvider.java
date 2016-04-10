@@ -102,7 +102,8 @@ public class WidgetProvider extends AppWidgetProvider {
     }
 
     /**
-     * TODO called when widget is created?
+     * called when a button on the widget is clicked
+     *
      * @param context widget
      * @param intent i
      */
@@ -147,7 +148,7 @@ public class WidgetProvider extends AppWidgetProvider {
         if (intent.getAction().equals(TIME_ONE)) {
 
             Bundle extras = intent.getExtras();
-            if (extras != null) { //TODO timeOne becomes ? sent from ?
+            if (extras != null) { //timeOne becomes the text to be sent to whatsapp sent from setOnButtonClickListeners
                 timeOne = extras.getString("text");
             } else {
                 timeOne = "time one";
