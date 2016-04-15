@@ -23,7 +23,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/action_settings"
+            android:text="@string/set_widget"
             android:background="@drawable/custom_button"/>
 
         <ImageButton
@@ -39,20 +39,20 @@
         android:textColor="@color/black"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Time One"
+        android:text="@string/dots"
         android:background="@drawable/custom_button"/>
     <Button
         android:id="@+id/sendTimeTwo"
         android:textColor="@color/black"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Time Two"
+        android:text="@string/dots"
         android:background="@drawable/custom_button"/>
     <Button
         android:id="@+id/sendTimeThree"
         android:textColor="@color/black"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Time Three"
+        android:text="@string/dots"
         android:background="@drawable/custom_button"/>
 </LinearLayout>

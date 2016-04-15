@@ -95,8 +95,14 @@ public class WidgetProvider extends AppWidgetProvider {
         this.from = direction[0];
         this.to = direction[1];
 
-        //set loading dots on widget in the meantime
-        setLoading();
+        //check if this is the first time that the widget is created
+        if(from == -1 || to == -1) {
+            //set "set widget"
+            setLoading("set widget");
+        } else {
+            //set loading dots on widget in the meantime
+            setLoading("loading...");
+        }
 
         new RetrieveFeedTask().execute(); //execute the asynctask class to get stuff from ns
     }
@@ -186,8 +192,9 @@ public class WidgetProvider extends AppWidgetProvider {
 
     /**
      * set loading... on buttons
+     * set set widget on buttons when the widget is first created
      */
-    public void setLoading() {
+    public void setLoading(String top) {
         String loading = "...";
 
         //get remoteViews and component name to update widget
@@ -198,7 +205,7 @@ public class WidgetProvider extends AppWidgetProvider {
         watchWidget = new ComponentName(remoteContext, WidgetProvider.class);
 
         //set text
-        remoteViews.setTextViewText(R.id.settingsButton, "loading...");
+        remoteViews.setTextViewText(R.id.settingsButton, top);
         remoteViews.setTextViewText(R.id.sendTimeOne, loading);
         remoteViews.setTextViewText(R.id.sendTimeTwo, loading);
         remoteViews.setTextViewText(R.id.sendTimeThree, loading);
