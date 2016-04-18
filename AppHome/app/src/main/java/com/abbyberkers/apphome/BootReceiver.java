@@ -9,6 +9,8 @@ import android.content.Intent;
 import java.util.Calendar;
 
 public class BootReceiver extends BroadcastReceiver {
+    BaseClass baseClass;
+
     /**
      * when boot is received
      *
@@ -17,6 +19,8 @@ public class BootReceiver extends BroadcastReceiver {
      */
     @Override
     public void onReceive(Context context, Intent i) {
+        baseClass = new BaseClass();
+
         //load direction from shared preferences
         int[] direction = WidgetSettings.loadDirection(context);
 
@@ -39,49 +43,7 @@ public class BootReceiver extends BroadcastReceiver {
      * @param direction direction
      * @return next departure time calendar
      */
-    static Calendar nextDeparture(int[] direction) {
-        //some initialisation
-        int EHV = 0;
-        int Heeze = 1;
-        int RDaal = 2;
-        int from = direction[0];
-        int to = direction[1];
-
-        //set update time according to departure times without delay
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-
-        int minutes = cal.get(Calendar.MINUTE);
-        int depart = 0;
-
-        //get departure time
-        if (from == EHV) {
-            if (to == Heeze) {
-                depart = 4;
-            } else if (to == RDaal) {
-                depart = 1;
-            }
-        } else if (from == Heeze) {
-            if (to == EHV || to == RDaal) {
-                depart = 15;
-            }
-        } else if (from == RDaal) {
-            if (to == EHV || to == Heeze) {
-                depart = 20;
-            }
-        }
-
-        //set minutes to minutes of next departure
-        if (minutes < depart) {
-            cal.set(Calendar.MINUTE, depart);
-        } else if (depart < minutes && minutes < depart + 30) {
-            cal.set(Calendar.MINUTE, depart + 30);
-        } else {
-            cal.set(Calendar.MINUTE, depart);
-            cal.add(Calendar.MINUTE, 60);
-        }
-
-        return cal;
+    public Calendar nextDeparture(int[] direction) {
+        return baseClass.nextDeparture(direction);
     }
 }

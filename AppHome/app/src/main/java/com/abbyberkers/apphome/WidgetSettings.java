@@ -16,10 +16,10 @@ import android.widget.NumberPicker;
 import java.util.Calendar;
 
 public class WidgetSettings extends AppCompatActivity {
+    BaseClass baseClass;
 
     private static final String PREFS_NAME = "com.abbyberkers.apphome.WidgetSettings";
-    public static final String DIRECTION_KEY = "direction";
-
+//    public static final String DIRECTION_KEY = "direction";
 
     final Context context = WidgetSettings.this;
 
@@ -34,6 +34,8 @@ public class WidgetSettings extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_widget_settings);
+
+        baseClass = new BaseClass();
 
         //do same nrpicker stuff as in main
         String[] cities = new String[]{"Eindhoven", "Heeze", "Roosendaal"};
@@ -74,44 +76,11 @@ public class WidgetSettings extends AppCompatActivity {
     }
 
     /**
-     * same as in BootReceiver
-     *
      * @return next departure time
      */
     Calendar nextDeparture() {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-
-        int minutes = cal.get(Calendar.MINUTE);
-        int depart = 0;
-
-        if (from == EHV) {
-            if (to == Heeze) {
-                depart = 4;
-            } else if (to == RDaal) {
-                depart = 1;
-            }
-        } else if (from == Heeze) {
-            if (to == EHV || to == RDaal) {
-                depart = 15;
-            }
-        } else if (from == RDaal) {
-            if (to == EHV || to == Heeze) {
-                depart = 20;
-            }
-        }
-
-        if (minutes < depart) {
-            cal.set(Calendar.MINUTE, depart);
-        } else if (depart < minutes && minutes < depart + 30) {
-            cal.set(Calendar.MINUTE, depart + 30);
-        } else {
-            cal.set(Calendar.MINUTE, depart);
-            cal.add(Calendar.MINUTE, 60);
-        }
-
-        return cal;
+        int[] direction = {from, to};
+        return baseClass.nextDeparture(direction);
     }
 
     /**

@@ -13,38 +13,23 @@ import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.Locale;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 public class WidgetProvider extends AppWidgetProvider {
     /**
      * class that does everything in the widget
      */
+
+    BaseClass baseClass;
 
     //action names of buttons
     final String TIME_ONE = "time_one";
@@ -117,6 +102,8 @@ public class WidgetProvider extends AppWidgetProvider {
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
 
+        baseClass = new BaseClass();
+
         if(intent.getAction().equals(TURN)) {
             //if turn button is clicked
 
@@ -125,7 +112,7 @@ public class WidgetProvider extends AppWidgetProvider {
             direction = WidgetSettings.loadDirection(context); //update direction
 
             //calling to BootReceiver to avoid one extra duplicate method...
-            Calendar cal = BootReceiver.nextDeparture(direction);
+            Calendar cal = baseClass.nextDeparture(direction);
             cal.add(Calendar.MINUTE, 1);
 
             //set alarm to update every half an hour
@@ -281,109 +268,10 @@ public class WidgetProvider extends AppWidgetProvider {
      * @return arrival time
      */
     public String getNSStringByDepartureTime(String depTime, String field) {
-        if (depTime == null) {
-            return null;
-        } else {
-            String arrivalTime = "+0";
-            if (response == null) {
-                response = "No response from NS or first time";
-            }
-            try {
-                //create java DOM xml parser
-                DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder builder;
-                builder = builderFactory.newDocumentBuilder();
-
-                //create XPath object
-                XPath xPath = XPathFactory.newInstance().newXPath();
-
-                String arrivalOrDepExpr;
-
-
-                //parse xml with the DOM parser
-                Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
-
-                if (from == EHV && to == RDaal) {
-                    arrivalOrDepExpr = "/ReisMogelijkheden/ReisMogelijkheid" +
-                            "[ActueleVertrekTijd[text()='" + depTime + "']]/ActueleAankomstTijd";
-
-                    //deptime is departure time in EHV
-                    //get new deptime, the first departure time in Breda
-                    // which is later than the arrival time
-                    NodeList arrivalNodeList = (NodeList) xPath.compile(arrivalOrDepExpr).evaluate(
-                            xmlDocument, XPathConstants.NODESET);
-
-                    if (arrivalNodeList.getLength() == 0) {
-                        //there is no arrivalTime
-                        return "arr: No breda arrival time.";
-                    }
-
-                    //arrivalNodeList should contain the (hopefully only one) arrival time in Breda
-                    String bredaArrivalTime = arrivalNodeList.item(0).getFirstChild().getNodeValue();
-
-                    //get next departure times
-                    //arrivalResponse contains xml Breda-RDaal
-
-                    //if going to RDaal, means arrival time is in arrivalResponse
-                    xmlDocument = builder.parse(new ByteArrayInputStream(arrivalResponse.getBytes()));
-
-                    //get all breda departure times
-                    String depExpr = "//ActueleVertrekTijd";
-
-                    NodeList BredaDepNodeList = (NodeList) xPath.compile(depExpr).evaluate(
-                            xmlDocument, XPathConstants.NODESET);
-
-                    List<String> BredaDepNSTimes = new ArrayList<>();
-
-                    //use dep times from xml
-                    for (int i = 0; i < BredaDepNodeList.getLength(); i++) {
-                        BredaDepNSTimes.add(i, BredaDepNodeList.item(i).getFirstChild().getNodeValue());
-                    }
-
-                    //compare with breda arrival time
-                    Date BredaArrivalDate = convertNSToDate(bredaArrivalTime);
-
-                    //find next departure time in List
-                    int nextIndex = -1;
-                    //convert to date to compare
-                    for (int i = 0; i < BredaDepNSTimes.size(); i++) {
-                        Date nsDate = convertNSToDate(BredaDepNSTimes.get(i));
-                        if (BredaArrivalDate.before(nsDate)) {
-                            nextIndex = i; //i is index of next departure time.
-                            break;
-                        }
-                    }
-
-                    if (nextIndex == -1) {
-                        Log.e("breda ", "departure time mistake ");
-                    } else {
-                        //depTime becomes next Breda departure Time
-                        depTime = BredaDepNSTimes.get(nextIndex);
-                    }
-                }
-
-                //now (possibly again) arrival time with depTime.
-                // depTime may have been updated to Breda depTime
-                arrivalOrDepExpr = "/ReisMogelijkheden" +
-                        "/ReisMogelijkheid[ActueleVertrekTijd[text()='" + depTime + "']]/" + field;
-
-                NodeList nodeList = (NodeList) xPath.compile(arrivalOrDepExpr).evaluate(
-                        xmlDocument, XPathConstants.NODESET);
-
-                if (nodeList.getLength() == 0) {
-                    //there is no arrivalTime
-                    return "No delays.";
-                }
-                //set arrivalTime using the arrivalTime found
-                arrivalTime = nodeList.item(0).getFirstChild().getNodeValue();
-
-            } catch (ParserConfigurationException | SAXException |
-                    IOException | XPathExpressionException e) {
-                e.printStackTrace();
-            }
-
-            return arrivalTime;
-        }
+        baseClass.response = this.response;
+        String res = baseClass.getNSStringByDepartureTime(depTime, field, arrivalResponse, from, to);
+        this.response = baseClass.response;
+        return res;
     }
 
     /**
@@ -393,19 +281,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * @return string
      */
     public String convertNSToString(String nsTime) {
-        if (nsTime == null) {
-            return "No time selected";
-        } else {
-            Calendar c = convertNSToCal(nsTime);
-            if (from == EHV && to == RDaal) { //if going to Rdaal
-                //round time to nearest ten minutes
-                int unroundedMinutes = c.get(Calendar.MINUTE);
-                int mod = unroundedMinutes % 10;
-                c.add(Calendar.MINUTE, 20); //add 20 minutes for bike time
-                c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
-            }
-            return convertCalendarToString(c);
-        }
+        return baseClass.convertNSToString(nsTime, from, to);
     }
 
     /**
@@ -430,12 +306,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * @return string object
      */
     public String convertCalendarToString(Calendar c) {
-        if (c == null) {
-            return "No time selected";
-        } else {
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-            return sdf.format(c.getTime());
-        }
+        return baseClass.convertCalendarToString(c);
     }
 
     /**
@@ -457,21 +328,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * @return string of city
      */
     public String convertCityToString(int toFrom) {
-        String result;
-        switch (toFrom) {
-            case 0:
-                result = "Eindhoven";
-                break;
-            case 1:
-                result = "Heeze";
-                break;
-            case 2:
-                result = "Roosendaal";
-                break;
-            default:
-                result = null;
-        }
-        return result;
+        return baseClass.convertCityToString(toFrom);
     }
 
     /**
@@ -548,104 +405,12 @@ public class WidgetProvider extends AppWidgetProvider {
 
     /**
      * Communicates with ASyncTask using the instance variables to, from and response
-     * same as in MainActivity, except without toasts
+     * also in WidgetProvider
      *
-     * @return Calendar[] with five current departures
+     * @return Calendar[] with five current departures, default is five null objects
      */
     public Calendar[] getNSDepartures() {
-        if (response == null) {
-            response = "No response from NS or first time";
-        }
-        try {
-
-            //create java DOM xml parser
-            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder;
-            builder = builderFactory.newDocumentBuilder();
-
-            //parse xml with the DOM parser
-            Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
-
-            //create XPath object
-            XPath xPath = XPathFactory.newInstance().newXPath();
-
-            NodeList nodeList;
-
-            //if from EHV to RDaal, select intercities only
-            if (from == EHV && to == RDaal) {
-                //select all departure times where type is Intercity
-
-                // select all ActueleVertrekTijd where the first Reisdeel
-                // has a child VervoerType with text Intercity
-                String depTimesICExpr = "//ReisMogelijkheid[ReisDeel[1]/" +
-                        "VervoerType = 'Intercity']/ActueleVertrekTijd";
-                nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
-                        xmlDocument, XPathConstants.NODESET);
-//            } else if (from == RDaal && to == EHV) {
-//                String depTimesICExpr = "//ReisMogelijkheid[ReisDeel[last()]/" +
-//                        "VervoerType = 'Intercity']/ActueleVertrekTijd";
-//                nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
-//                        xmlDocument, XPathConstants.NODESET);
-            } else {
-                //generate list of departure times corresponding to nrpickers
-                //just the departure times where status != niet-mogelijk
-                String depTimesExpr = "/ReisMogelijkheden/ReisMogelijkheid" +
-                        "[Status[not(text()='NIET-MOGELIJK')]]/ActueleVertrekTijd";
-                nodeList = (NodeList) xPath.compile(depTimesExpr).evaluate(
-                        xmlDocument, XPathConstants.NODESET);
-            }
-            List<String> nsTimes = new ArrayList<>();
-
-            //use dep times from xml
-            for (int i = 0; i < nodeList.getLength(); i++) {
-                nsTimes.add(i, nodeList.item(i).getFirstChild().getNodeValue());
-            }
-
-            //get current time
-            Date current = new Date();
-
-            //find next departure time in List
-            int nextIndex = -1;
-            //convert to date to compare
-            for (int i = 0; i < nsTimes.size(); i++) {
-                Date nsDate = convertNSToDate(nsTimes.get(i));
-                if (current.before(nsDate)) {
-                    nextIndex = i; //index of next departure time.
-                    break;
-                }
-            }
-
-            //nstimes contains all ns departure times in ns-text format
-
-            if (nsTimes.size() < 5) {
-                Log.e("nstimes size is ", Integer.toString(nsTimes.size()));
-            }
-
-            Calendar[] depTimes = new Calendar[5];
-
-            if (nextIndex < 2) {
-                if (nextIndex == -1) {
-                    Log.e("nextIndex", "no next departure time!");
-                } else {
-                    Log.e("nextIndex", "is too small: " + Integer.toString(nextIndex));
-                }
-            } else {
-                //index is index of next dept time of all the xml deptimes in nsTimes
-                //get departure times around next time
-                for (int i = 0; i < depTimes.length; i++) {
-                    if (nextIndex - 2 + i < nsTimes.size()) {
-                        //if not out of bounds... (happens when ns returns <5 times total)
-                        depTimes[i] = convertNSToCal(nsTimes.get(nextIndex - 2 + i));
-                    }
-                }
-            }
-
-            return depTimes;
-
-        } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
-            e.printStackTrace();
-        }
-        return new Calendar[5]; //return default, null objects
+        return baseClass.getNSDepartures(this.response, this.from, this.to, remoteContext);
     }
 
     /**
@@ -655,13 +420,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * @return date object
      */
     public Date convertNSToDate(String nsTime) {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
-            return sdf.parse(nsTime);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return new Date(); //default
+        return baseClass.convertNSToDate(nsTime);
     }
 
     /**
@@ -671,10 +430,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * @return calendar object
      */
     public Calendar convertNSToCal(String nsTime) {
-        Date date = convertNSToDate(nsTime);
-        Calendar c = new GregorianCalendar();
-        c.setTime(date);
-        return c;
+        return baseClass.convertNSToCal(nsTime);
     }
 
 

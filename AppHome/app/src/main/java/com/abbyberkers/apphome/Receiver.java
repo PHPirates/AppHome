@@ -1,18 +1,21 @@
 package com.abbyberkers.apphome;
 
-import android.app.AlarmManager;
 import android.appwidget.AppWidgetManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
-import android.widget.RemoteViews;
 
 public class Receiver extends BroadcastReceiver {
+    /**
+     * Class to update widget when alarm is received
+     *
+     * @param context widget
+     * @param intent  i
+     */
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.e("onReive", "alarm received");
+        //same standard block for updating widget
         AppWidgetManager appWidgetManager = AppWidgetManager
                 .getInstance(context);
         ComponentName thisAppWidget = new ComponentName(context
