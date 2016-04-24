@@ -32,6 +32,7 @@ public class BaseClass {
     public static final int EHV = 0;
     public static final int Heeze = 1;
     public static final int RDaal = 2;
+    final int timesNumber = 7; //number of departure times to be shown in numberpicker
 
     String response;
 
@@ -135,15 +136,15 @@ public class BaseClass {
 
             //nstimes contains all ns departure times in ns-text format
 
-            if (nsTimes.size() < 5) {
+            if (nsTimes.size() < timesNumber) {
                 Log.e("nstimes size is ", Integer.toString(nsTimes.size()));
                 Toast.makeText(context, "Warning, due to NS messing up, results may be inaccurate",
                         Toast.LENGTH_LONG).show();
             }
 
-            Calendar[] depTimes = new Calendar[5];
+            Calendar[] depTimes = new Calendar[timesNumber];
 
-            if (nextIndex < 2) {
+            if (nextIndex < timesNumber / 2) { //if index is lower than what it should be
                 if (nextIndex == -1) {
                     Log.e("nextIndex", "no next departure time!");
                 } else {
@@ -153,19 +154,20 @@ public class BaseClass {
                 //index is index of next dept time of all the xml deptimes in nsTimes
                 //get departure times around next time
                 for (int i = 0; i < depTimes.length; i++) {
-                    if (nextIndex - 2 + i < nsTimes.size()) {
-                        //if not out of bounds... (happens when ns returns <5 times total)
-                        depTimes[i] = convertNSToCal(nsTimes.get(nextIndex - 2 + i));
+                    if (nextIndex - timesNumber / 2 + i < nsTimes.size()) {
+                        //if not out of bounds... (happens when ns returns <timesNumber times total)
+                        depTimes[i] = convertNSToCal(nsTimes.get(nextIndex - timesNumber / 2 + i));
                     }
                 }
             }
 
+            Log.e("baseclass ", Integer.toString(depTimes.length));
             return depTimes;
 
         } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
             e.printStackTrace();
         }
-        return new Calendar[5]; //return default, null objects
+        return new Calendar[timesNumber]; //return default, null objects
     }
 
 
