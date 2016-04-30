@@ -35,7 +35,7 @@ public class BaseClass {
     final int timesNumber = 7; //number of departure times to be shown in numberpicker
 
     //string of cities to be used in the main activity (widget is not generic)
-    public static final String[] cities = {"Eindhoven", "Heeze", "Roosendaal"};
+    public static final String[] cities = {"Eindhoven", "Heeze", "Roosendaal", "Schiphol"};
 
     String response;
 
