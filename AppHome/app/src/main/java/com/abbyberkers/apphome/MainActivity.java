@@ -64,15 +64,13 @@ public class MainActivity extends AppCompatActivity {
         //progressbar when getting response from slow NS
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
-        String[] cities = new String[]{"Eindhoven", "Heeze", "Roosendaal"};
-
         NumberPicker npFrom;
         npFrom = (NumberPicker) findViewById(R.id.numberPickerFrom);
 
         npFrom.setMinValue(0);
-        npFrom.setMaxValue(cities.length - 1);
-        npFrom.setDisplayedValues(cities);
-        npFrom.setWrapSelectorWheel(true);
+        npFrom.setMaxValue(BaseClass.cities.length - 1);
+        npFrom.setDisplayedValues(BaseClass.cities);
+        npFrom.setWrapSelectorWheel(false);
         npFrom.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         setDividerColor(npFrom, ContextCompat.getColor(this, R.color.divider));
 
@@ -89,9 +87,9 @@ public class MainActivity extends AppCompatActivity {
         npTo = (NumberPicker) findViewById(R.id.numberPickerTo);
 
         npTo.setMinValue(0);
-        npTo.setMaxValue(cities.length - 1);
-        npTo.setDisplayedValues(cities);
-        npTo.setWrapSelectorWheel(true);
+        npTo.setMaxValue(BaseClass.cities.length - 1);
+        npTo.setDisplayedValues(BaseClass.cities);
+        npTo.setWrapSelectorWheel(false);
         npTo.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         setDividerColor(npTo, ContextCompat.getColor(this, R.color.divider));
 
@@ -346,12 +344,8 @@ public class MainActivity extends AppCompatActivity {
             } else if (to == RDaal) {
                 message = "Yay at " + nsArrivalTime + ".";
             }
-        } else if (from == RDaal) {
-            if (to == EHV) {
-                message = "ETA " + nsArrivalTime;
-            } else if (to == Heeze) {
-                message = "ETA " + nsArrivalTime;
-            }
+        } else {
+            message = "ETA " + nsArrivalTime;
         }
 
         sendWhatsApp(message);

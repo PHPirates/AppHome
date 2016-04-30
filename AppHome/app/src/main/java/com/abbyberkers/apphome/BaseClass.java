@@ -34,6 +34,9 @@ public class BaseClass {
     public static final int RDaal = 2;
     final int timesNumber = 7; //number of departure times to be shown in numberpicker
 
+    //string of cities to be used in the main activity (widget is not generic)
+    public static final String[] cities = {"Eindhoven", "Heeze", "Roosendaal"};
+
     String response;
 
     /**
@@ -161,7 +164,6 @@ public class BaseClass {
                 }
             }
 
-            Log.e("baseclass ", Integer.toString(depTimes.length));
             return depTimes;
 
         } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
@@ -228,21 +230,7 @@ public class BaseClass {
      * @return string of city
      */
     public String convertCityToString(int toFrom) {
-        String result;
-        switch (toFrom) {
-            case 0:
-                result = "Eindhoven";
-                break;
-            case 1:
-                result = "Heeze";
-                break;
-            case 2:
-                result = "Roosendaal";
-                break;
-            default:
-                result = null;
-        }
-        return result;
+        return cities[toFrom];
     }
 
 
