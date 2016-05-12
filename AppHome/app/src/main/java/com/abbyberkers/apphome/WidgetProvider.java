@@ -234,22 +234,23 @@ public class WidgetProvider extends AppWidgetProvider {
             //get five current departure calendars,
             // because when this method is called response is set
             Calendar[] currentDeps = getNSDepartures();
-            remoteViews.setTextViewText(R.id.sendTimeOne, cToString(currentDeps[1]));
-            remoteViews.setTextViewText(R.id.sendTimeTwo, cToString(currentDeps[2]));
-            remoteViews.setTextViewText(R.id.sendTimeThree, cToString(currentDeps[3]));
+            int middle = currentDeps.length / 2;
+            remoteViews.setTextViewText(R.id.sendTimeOne, cToString(currentDeps[middle - 1]));
+            remoteViews.setTextViewText(R.id.sendTimeTwo, cToString(currentDeps[middle]));
+            remoteViews.setTextViewText(R.id.sendTimeThree, cToString(currentDeps[middle + 1]));
 
             //set time to send to whatsapp
             if (from == EHV && to == Heeze) {
                 //if going to heeze, just set the departure time for times to send to whatsapp
-                timeOne = convertCalendarToString(currentDeps[1]);
-                timeTwo = convertCalendarToString(currentDeps[2]);
-                timeThree = convertCalendarToString(currentDeps[3]);
+                timeOne = convertCalendarToString(currentDeps[middle - 1]);
+                timeTwo = convertCalendarToString(currentDeps[middle]);
+                timeThree = convertCalendarToString(currentDeps[middle + 1]);
             } else {
                 //otherwise, get arrival time
                 String[] times = new String[3];
                 for (int i = 0; i < times.length; i++) {
                     times[i] = convertNSToString(getNSStringByDepartureTime(
-                            convertCalendarToNS(currentDeps[i + 1]), "ActueleAankomstTijd"));
+                            convertCalendarToNS(currentDeps[i + middle - 1]), "ActueleAankomstTijd"));
                 }
                 timeOne = times[0];
                 timeTwo = times[1];
