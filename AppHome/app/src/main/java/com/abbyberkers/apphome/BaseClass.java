@@ -2,7 +2,6 @@ package com.abbyberkers.apphome;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.Toast;
 
 import org.w3c.dom.Document;
@@ -28,11 +27,12 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-public class BaseClass {
-    public static final int EHV = 0;
-    public static final int Heeze = 1;
-    public static final int RDaal = 2;
-    final int timesNumber = 7; //number of departure times to be shown in numberpicker
+//import android.util.Log;
+
+class BaseClass {
+    private static final int EHV = 0;
+    private static final int Heeze = 1;
+    private static final int RDaal = 2;
 
     //string of cities to be used in the main activity (widget is not generic)
     public static final String[] cities = {"Eindhoven", "Heeze", "Roosendaal"};
@@ -45,7 +45,7 @@ public class BaseClass {
      * @param nsTime time in ns format
      * @return date object
      */
-    public Date convertNSToDate(String nsTime) {
+    private Date convertNSToDate(String nsTime) {
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
             return sdf.parse(nsTime);
@@ -61,7 +61,7 @@ public class BaseClass {
      * @param nsTime time in ns format
      * @return calendar object
      */
-    public Calendar convertNSToCal(String nsTime) {
+    private Calendar convertNSToCal(String nsTime) {
         Date date = convertNSToDate(nsTime);
         Calendar c = new GregorianCalendar();
         c.setTime(date);
@@ -78,6 +78,7 @@ public class BaseClass {
         if (response == null) {
             response = "No response from NS or first time";
         }
+        int timesNumber = 7;
         try {
 
             //create java DOM xml parser
@@ -140,20 +141,21 @@ public class BaseClass {
             //nstimes contains all ns departure times in ns-text format
 
             if (nsTimes.size() < timesNumber) {
-                Log.e("nstimes size is ", Integer.toString(nsTimes.size()));
+//                Log.e("nstimes size is ", Integer.toString(nsTimes.size()));
                 Toast.makeText(context, "Warning, due to NS messing up, results may be inaccurate",
                         Toast.LENGTH_LONG).show();
             }
 
             Calendar[] depTimes = new Calendar[timesNumber];
 
-            if (nextIndex < timesNumber / 2) { //if index is lower than what it should be
-                if (nextIndex == -1) {
-                    Log.e("nextIndex", "no next departure time!");
-                } else {
-                    Log.e("nextIndex", "is too small: " + Integer.toString(nextIndex));
-                }
-            } else {
+//            if (nextIndex < timesNumber / 2) { //if index is lower than what it should be
+//                if (nextIndex == -1) {
+////                    Log.e("nextIndex", "no next departure time!");
+//                } else {
+////                    Log.e("nextIndex", "is too small: " + Integer.toString(nextIndex));
+//                }
+//            } else {
+            if (!(nextIndex < timesNumber / 2)) { //if index is not lower than what it should be
                 //index is index of next dept time of all the xml deptimes in nsTimes
                 //get departure times around next time
                 for (int i = 0; i < depTimes.length; i++) {
@@ -317,9 +319,10 @@ public class BaseClass {
                         }
                     }
 
-                    if (nextIndex == -1) {
-                        Log.e("breda ", "departure time mistake ");
-                    } else {
+//                    if (nextIndex == -1) {
+////                        Log.e("breda ", "departure time mistake ");
+//                    } else {
+                    if (!(nextIndex == -1)) {
                         //depTime becomes next Breda departure Time
                         depTime = BredaDepNSTimes.get(nextIndex);
                     }

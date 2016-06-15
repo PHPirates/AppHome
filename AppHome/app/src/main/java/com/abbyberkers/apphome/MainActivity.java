@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
@@ -22,30 +21,28 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
-
 
 public class MainActivity extends AppCompatActivity {
 
     private BaseClass baseClass;
 
-    int from; //default from Eindhoven
-    int to;
-    int depart; //departure numberpicker value
+    private int from; //default from Eindhoven
+    private int to;
+    private int depart; //departure numberpicker value
 
-    boolean ASyncTaskIsRunning; //boolean to check if there is an asynctask running
+    private boolean ASyncTaskIsRunning; //boolean to check if there is an asynctask running
 
-    public static final int EHV = 0;
-    public static final int Heeze = 1;
-    public static final int RDaal = 2;
+    private static final int EHV = 0;
+    private static final int Heeze = 1;
+    private static final int RDaal = 2;
 
-    ProgressBar progressBar;
-    String response; //set after getting xml from ns, used by
+    private ProgressBar progressBar;
+    private String response; //set after getting xml from ns, used by
     /**
      * response is used by getNSDepartures and set by the AsyncTask
      */
-    String arrivalResponse; //trips from Breda to RDaal for arrival times on EHV-RDaal
+    private String arrivalResponse; //trips from Breda to RDaal for arrival times on EHV-RDaal
 
     /**
      * OnCreate
@@ -67,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         NumberPicker npFrom;
         npFrom = (NumberPicker) findViewById(R.id.numberPickerFrom);
 
+        assert npFrom != null;
         npFrom.setMinValue(0);
         npFrom.setMaxValue(BaseClass.cities.length - 1);
         npFrom.setDisplayedValues(BaseClass.cities);
@@ -86,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
         npTo = (NumberPicker) findViewById(R.id.numberPickerTo);
 
+        assert npTo != null;
         npTo.setMinValue(0);
         npTo.setMaxValue(BaseClass.cities.length - 1);
         npTo.setDisplayedValues(BaseClass.cities);
@@ -108,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
         NumberPicker npDep; //NP for close departure times
         npDep = (NumberPicker) findViewById(R.id.numberPickerDepartures);
 
+        assert npDep != null;
         npDep.setMinValue(0);
         npDep.setMaxValue(departTimes.length - 1);
         npDep.setWrapSelectorWheel(false);
@@ -127,11 +127,11 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param response response passed
      */
-    public void setResponse(String response) {
+    private void setResponse(String response) {
         this.response = response;
     }
 
-    public void setArrivalResponse(String arrivalResponse) {
+    private void setArrivalResponse(String arrivalResponse) {
         this.arrivalResponse = arrivalResponse;
     }
 
@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
      * @param toFrom the to or from variable
      * @return string of city
      */
-    public String convertCityToString(int toFrom) {
+    private String convertCityToString(int toFrom) {
         return baseClass.convertCityToString(toFrom);
     }
 
@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
      * @param field do you want delays or arrival times? Should be ns node string
      * @return arrival time
      */
-    public String getNSStringByDepartureTime(String depTime, String field) {
+    private String getNSStringByDepartureTime(String depTime, String field) {
         baseClass.response = this.response;
         String res = baseClass.getNSStringByDepartureTime(depTime, field, arrivalResponse, from, to);
         this.response = baseClass.response;
@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
      *
      * @return Calendar[] with five current departures, default is five null objects
      */
-    public Calendar[] getNSDepartures() {
+    private Calendar[] getNSDepartures() {
         return baseClass.getNSDepartures(this.response, this.from, this.to, this);
     }
 
@@ -176,19 +176,21 @@ public class MainActivity extends AppCompatActivity {
      * @param nsTime ns time
      * @return string
      */
-    public String convertNSToString(String nsTime) {
+    private String convertNSToString(String nsTime) {
         return baseClass.convertNSToString(nsTime, from, to);
     }
 
-    /**
-     * convert a time string in ns format to a date object
-     *
-     * @param nsTime time in ns format
-     * @return date object
-     */
-    public Date convertNSToDate(String nsTime) {
-        return baseClass.convertNSToDate(nsTime);
-    }
+// --Commented out by Inspection START (15-6-2016 16:41):
+//    /**
+//     * convert a time string in ns format to a date object
+//     *
+//     * @param nsTime time in ns format
+//     * @return date object
+//     */
+//    public Date convertNSToDate(String nsTime) {
+//        return baseClass.convertNSToDate(nsTime);
+//    }
+// --Commented out by Inspection STOP (15-6-2016 16:41)
 
     /**
      * Convert calendar object to string in ns-format
@@ -196,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
      * @param c calendar
      * @return string
      */
-    public String convertCalendarToNS(Calendar c) {
+    private String convertCalendarToNS(Calendar c) {
         if (c == null) {
             return null;
         } else {
@@ -205,15 +207,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * convert ns time string to calendar object, uses {@link #convertNSToDate(String)}
-     *
-     * @param nsTime time in ns format
-     * @return calendar object
-     */
-    public Calendar convertNSToCal(String nsTime) {
-        return baseClass.convertNSToCal(nsTime);
-    }
+// --Commented out by Inspection START (15-6-2016 16:41):
+//    /**
+//     * convert ns time string to calendar object, uses {@link #convertNSToDate(String)}
+//     *
+//     * @param nsTime time in ns format
+//     * @return calendar object
+//     */
+//    public Calendar convertNSToCal(String nsTime) {
+//        return baseClass.convertNSToCal(nsTime);
+//    }
+// --Commented out by Inspection STOP (15-6-2016 16:41)
 
     /**
      * convert calendar object to string object in HH:mm format
@@ -221,17 +225,18 @@ public class MainActivity extends AppCompatActivity {
      * @param c calendar object
      * @return string object
      */
-    public String convertCalendarToString(Calendar c) {
+    private String convertCalendarToString(Calendar c) {
         return baseClass.convertCalendarToString(c);
     }
 
     /**
      * Update the time picker when selecting a new destination
      */
-    public void updateDepartures() {
+    private void updateDepartures() {
         String[] departTimes = currentDepartures();
         NumberPicker npDep; //NP for close departure times
         npDep = (NumberPicker) findViewById(R.id.numberPickerDepartures);
+        assert npDep != null;
         npDep.setDisplayedValues(departTimes);
         int middle = departTimes.length / 2;
         npDep.setValue(middle); //set default option
@@ -246,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Called from {@link AsyncTask} when there is no internet connection
      */
-    public void noInternetConnection() {
+    private void noInternetConnection() {
         //remove select dividers
         NumberPicker npDep; //NP for close departure times
         npDep = (NumberPicker) findViewById(R.id.numberPickerDepartures);
@@ -280,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * @return string array of current departures, empty strings if to==from
      */
-    public String[] currentDepartures() {
+    private String[] currentDepartures() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
         Calendar[] calendars = getNSDepartures();
         String[] deps = new String[calendars.length];
@@ -299,6 +304,7 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param view button sendDelay
      */
+    @SuppressWarnings("unused") // Actually injected by sendDelayButton
     public void sendDelay(View view) {
         //get the five current departure times in calendar format
         Calendar[] departures = getNSDepartures();
@@ -319,7 +325,8 @@ public class MainActivity extends AppCompatActivity {
      * @param view button Send
      */
 
-    public void sendText(View view) {
+    @SuppressWarnings("unused")
+    public void sendText(@SuppressWarnings("UnusedParameters") View view) {
 
         String message = "You are here already, you stupid!";
 
@@ -366,7 +373,7 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param text the message
      */
-    public void sendWhatsApp(String text) {
+    private void sendWhatsApp(String text) {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, text);
@@ -376,7 +383,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
+    private class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
 
 
         protected void onPreExecute() {
@@ -417,7 +424,7 @@ public class MainActivity extends AppCompatActivity {
                             if (resCode == HttpURLConnection.HTTP_OK) {
                                 in = urlConnection.getInputStream();
                             } else {
-                                Log.e("rescode", "rescode not ok");
+//                                Log.e("rescode", "rescode not ok");
                                 in = urlConnection.getErrorStream();
                             }
                             BufferedReader bufferedReader = new BufferedReader(
@@ -453,7 +460,7 @@ public class MainActivity extends AppCompatActivity {
                         if (resCode == HttpURLConnection.HTTP_OK) {
                             in = urlConnection.getInputStream();
                         } else {
-                            Log.e("rescode", "rescode not ok");
+//                            Log.e("rescode", "rescode not ok");
                             in = urlConnection.getErrorStream();
                         }
                         BufferedReader bufferedReader = new BufferedReader(
@@ -470,10 +477,10 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             } catch (IOException e) {
-                Log.e("IOException", "no internet connection");
+//                Log.e("IOException", "no internet connection");
                 return "no internet";
             } catch (Exception e) {
-                Log.e("ERROR", e.getMessage(), e);
+//                Log.e("ERROR", e.getMessage(), e);
                 return null;
             }
         }

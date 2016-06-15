@@ -9,7 +9,7 @@ import android.content.Intent;
 import java.util.Calendar;
 
 public class BootReceiver extends BroadcastReceiver {
-    BaseClass baseClass;
+    private BaseClass baseClass;
 
     /**
      * when boot is received
@@ -19,22 +19,24 @@ public class BootReceiver extends BroadcastReceiver {
      */
     @Override
     public void onReceive(Context context, Intent i) {
-        baseClass = new BaseClass();
+        if (i.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
+            baseClass = new BaseClass();
 
-        //load direction from shared preferences
-        int[] direction = WidgetSettings.loadDirection(context);
+            //load direction from shared preferences
+            int[] direction = WidgetSettings.loadDirection(context);
 
-        //update time is one minute after next departure time
-        Calendar cal = nextDeparture(direction);
-        cal.add(Calendar.MINUTE, 1);
+            //update time is one minute after next departure time
+            Calendar cal = nextDeparture(direction);
+            cal.add(Calendar.MINUTE, 1);
 
-        // intent to start Receiver which updates the alarm in its onReceive()
-        Intent intent = new Intent(context, Receiver.class);
-        PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+            // intent to start Receiver which updates the alarm in its onReceive()
+            Intent intent = new Intent(context, Receiver.class);
+            PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
-        //set alarm to update every half an hour
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 1800000, pIntent);
+            //set alarm to update every half an hour
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 1800000, pIntent);
+        }
     }
 
     /**
@@ -43,7 +45,7 @@ public class BootReceiver extends BroadcastReceiver {
      * @param direction direction
      * @return next departure time calendar
      */
-    public Calendar nextDeparture(int[] direction) {
+    private Calendar nextDeparture(int[] direction) {
         return baseClass.nextDeparture(direction);
     }
 }

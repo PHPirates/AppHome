@@ -18,14 +18,12 @@
 
         <TableRow>
             <TextView
-                android:id="@+id/textFrom"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="@string/from"/>
 
             <TextView
-                android:id="@+id/textTo"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
@@ -53,47 +51,44 @@
 
         <TableRow>
             <Button
-                android:id="@+id/sendText"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="@string/send"
-                android:onClick="sendText"/>
+                android:onClick="sendText"
+                tools:ignore="ButtonStyle" />
 
             <Button
-                android:id="@+id/sendDelay"
+                android:id="@+id/sendDelayButton"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:text="@string/send_delay"
-                android:onClick="sendDelay" />
+                android:onClick="sendDelay"
+                tools:ignore="ButtonStyle" />
 
         </TableRow>
 
-        <TableRow>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:orientation="horizontal">
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone" />
 
-                <ProgressBar
-                    android:id="@+id/progressBar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:indeterminate="true"
-                    android:visibility="gone" />
+            <NumberPicker
+                android:id="@+id/numberPickerDepartures"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent">
 
-                <NumberPicker
-                    android:id="@+id/numberPickerDepartures"
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent">
+            </NumberPicker>
 
-                </NumberPicker>
-
-            </LinearLayout>
-
-        </TableRow>
+        </LinearLayout>
 
     </TableLayout>
 </ScrollView>

@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -21,7 +20,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 public class WidgetProvider extends AppWidgetProvider {
@@ -29,36 +27,36 @@ public class WidgetProvider extends AppWidgetProvider {
      * class that does everything in the widget
      */
 
-    BaseClass baseClass;
+    private BaseClass baseClass;
 
     //action names of buttons
-    final String TIME_ONE = "time_one";
-    final String TIME_TWO = "time_two";
-    final String TIME_THREE = "time_three";
-    final String TURN = "turn";
+    private final String TIME_ONE = "time_one";
+    private final String TIME_TWO = "time_two";
+    private final String TIME_THREE = "time_three";
+    private final String TURN = "turn";
 
     //strings for times on buttons
-    String timeOne;
-    String timeTwo;
-    String timeThree;
+    private String timeOne;
+    private String timeTwo;
+    private String timeThree;
     //the xml response strings
-    String response;
-    String arrivalResponse; //xml from trips from Breda to RDaal for arrival times on EHV-RDaal
+    private String response;
+    private String arrivalResponse; //xml from trips from Breda to RDaal for arrival times on EHV-RDaal
 
     //message to be sent to whatsapp
-    String message = "";
+    private String message = "";
 
     //the context of the widget
-    Context remoteContext;
-    AppWidgetManager appWidgetManager;
+    private Context remoteContext;
+    private AppWidgetManager appWidgetManager;
 
-    int from;
-    int to;
-    int[] direction;
+    private int from;
+    private int to;
+    private int[] direction;
 
-    public static final int EHV = 0;
-    public static final int Heeze = 1;
-    public static final int RDaal = 2;
+    private static final int EHV = 0;
+    private static final int Heeze = 1;
+    private static final int RDaal = 2;
 
     /**
      * When alarm goes off, we update the widget
@@ -181,7 +179,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * set loading... on buttons
      * set set widget on buttons when the widget is first created
      */
-    public void setLoading(String top) {
+    private void setLoading(String top) {
         String loading = "...";
 
         //get remoteViews and component name to update widget
@@ -205,7 +203,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * called by the ASyncTask after it has finished setting the response
      * updates text on the buttons to right times, and adds rights text in the whatsapp message
      */
-    public void updateButtons() {
+    private void updateButtons() {
 
         RemoteViews remoteViews;
         ComponentName watchWidget;
@@ -250,7 +248,7 @@ public class WidgetProvider extends AppWidgetProvider {
                 String[] times = new String[3];
                 for (int i = 0; i < times.length; i++) {
                     times[i] = convertNSToString(getNSStringByDepartureTime(
-                            convertCalendarToNS(currentDeps[i + middle - 1]), "ActueleAankomstTijd"));
+                            convertCalendarToNS(currentDeps[i + middle - 1])));
                 }
                 timeOne = times[0];
                 timeTwo = times[1];
@@ -265,12 +263,11 @@ public class WidgetProvider extends AppWidgetProvider {
      * get arrival time of voyage, given departure time
      *
      * @param depTime departure time ns-format
-     * @param field   do you want delays or arrival times? Should be ns node string
      * @return arrival time
      */
-    public String getNSStringByDepartureTime(String depTime, String field) {
+    private String getNSStringByDepartureTime(String depTime) {
         baseClass.response = this.response;
-        String res = baseClass.getNSStringByDepartureTime(depTime, field, arrivalResponse, from, to);
+        String res = baseClass.getNSStringByDepartureTime(depTime, "ActueleAankomstTijd", arrivalResponse, from, to);
         this.response = baseClass.response;
         return res;
     }
@@ -281,7 +278,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * @param nsTime ns time
      * @return string
      */
-    public String convertNSToString(String nsTime) {
+    private String convertNSToString(String nsTime) {
         return baseClass.convertNSToString(nsTime, from, to);
     }
 
@@ -291,7 +288,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * @param c calendar
      * @return string
      */
-    public String convertCalendarToNS(Calendar c) {
+    private String convertCalendarToNS(Calendar c) {
         if (c == null) {
             return null;
         } else {
@@ -306,7 +303,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * @param c calendar object
      * @return string object
      */
-    public String convertCalendarToString(Calendar c) {
+    private String convertCalendarToString(Calendar c) {
         return baseClass.convertCalendarToString(c);
     }
 
@@ -314,7 +311,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * uses instance variables from and to, to:
      * @return string "fromcity - tocity", "Set widget" the first time
      */
-    public String getDirection() {
+    private String getDirection() {
         if (convertCityToString(this.from) == null) { //default, the first time
             return "Set widget";
         }
@@ -328,7 +325,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * @param toFrom the to or from variable
      * @return string of city
      */
-    public String convertCityToString(int toFrom) {
+    private String convertCityToString(int toFrom) {
         return baseClass.convertCityToString(toFrom);
     }
 
@@ -342,7 +339,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * @param remoteViews to update things on widget
      * @param watchWidget app component
      */
-    public void setButtonOnClickListeners(RemoteViews remoteViews, ComponentName watchWidget) {
+    private void setButtonOnClickListeners(RemoteViews remoteViews, ComponentName watchWidget) {
 
         Intent intent = new Intent(remoteContext, WidgetSettings.class);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, 0);
@@ -380,7 +377,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * @param context context
      * @param text message to send
      */
-    public void appText(Context context, String text) {
+    private void appText(Context context, String text) {
 
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
@@ -396,7 +393,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * @param c calendar
      * @return string
      */
-    public String cToString(Calendar c) {
+    private String cToString(Calendar c) {
         if (c == null) {
             return "...";
         }
@@ -410,29 +407,33 @@ public class WidgetProvider extends AppWidgetProvider {
      *
      * @return Calendar[] with five current departures, default is five null objects
      */
-    public Calendar[] getNSDepartures() {
+    private Calendar[] getNSDepartures() {
         return baseClass.getNSDepartures(this.response, this.from, this.to, remoteContext);
     }
 
-    /**
-     * convert a time string in ns format to a date object
-     *
-     * @param nsTime time in ns format
-     * @return date object
-     */
-    public Date convertNSToDate(String nsTime) {
-        return baseClass.convertNSToDate(nsTime);
-    }
+// --Commented out by Inspection START (15-6-2016 16:42):
+//    /**
+//     * convert a time string in ns format to a date object
+//     *
+//     * @param nsTime time in ns format
+//     * @return date object
+//     */
+//    public Date convertNSToDate(String nsTime) {
+//        return baseClass.convertNSToDate(nsTime);
+//    }
+// --Commented out by Inspection STOP (15-6-2016 16:42)
 
-    /**
-     * convert ns time string to calendar object, uses {@link #convertNSToDate(String)}
-     *
-     * @param nsTime time in ns format
-     * @return calendar object
-     */
-    public Calendar convertNSToCal(String nsTime) {
-        return baseClass.convertNSToCal(nsTime);
-    }
+// --Commented out by Inspection START (15-6-2016 16:42):
+//    /**
+//     * convert ns time string to calendar object, uses {@link #convertNSToDate(String)}
+//     *
+//     * @param nsTime time in ns format
+//     * @return calendar object
+//     */
+//    public Calendar convertNSToCal(String nsTime) {
+//        return baseClass.convertNSToCal(nsTime);
+//    }
+// --Commented out by Inspection STOP (15-6-2016 16:42)
 
 
     /**
@@ -441,7 +442,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * first time
      * updatebuttons instead of updatedepartures
      */
-    class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
+    private class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
 
 
         protected void onPreExecute() {
@@ -481,7 +482,7 @@ public class WidgetProvider extends AppWidgetProvider {
                                 if (resCode == HttpURLConnection.HTTP_OK) {
                                     in = urlConnection.getInputStream();
                                 } else {
-                                    Log.e("rescode", "rescode not ok");
+//                                    Log.e("rescode", "rescode not ok");
                                     in = urlConnection.getErrorStream();
                                 }
                                 BufferedReader bufferedReader = new BufferedReader(
@@ -517,7 +518,7 @@ public class WidgetProvider extends AppWidgetProvider {
                             if (resCode == HttpURLConnection.HTTP_OK) {
                                 in = urlConnection.getInputStream();
                             } else {
-                                Log.e("rescode", "rescode not ok");
+//                                Log.e("rescode", "rescode not ok");
                                 in = urlConnection.getErrorStream();
                             }
                             BufferedReader bufferedReader = new BufferedReader(
@@ -535,10 +536,10 @@ public class WidgetProvider extends AppWidgetProvider {
                     }
                 }
             } catch (IOException e) {
-                Log.e("IOException", "no internet connection");
+//                Log.e("IOException", "no internet connection");
                 return "no internet";
             } catch (Exception e) {
-                Log.e("ERROR", e.getMessage(), e);
+//                Log.e("ERROR", e.getMessage(), e);
                 return null;
                 }
             }
@@ -561,18 +562,18 @@ public class WidgetProvider extends AppWidgetProvider {
      *
      * @param response response passed
      */
-    public void setResponse(String response) {
+    private void setResponse(String response) {
         this.response = response;
     }
 
-    public void setArrivalResponse(String arrivalResponse) {
+    private void setArrivalResponse(String arrivalResponse) {
         this.arrivalResponse = arrivalResponse;
     }
 
     /**
      * Called from {@link AsyncTask} when there is no internet connection
      */
-    public void noInternetConnection() {
+    private void noInternetConnection() {
         //can't toast, do nothing
         Toast.makeText(remoteContext, "toast", Toast.LENGTH_SHORT).show();
     }

@@ -16,19 +16,15 @@ import android.widget.NumberPicker;
 import java.util.Calendar;
 
 public class WidgetSettings extends AppCompatActivity {
-    BaseClass baseClass;
+    private BaseClass baseClass;
 
     private static final String PREFS_NAME = "com.abbyberkers.apphome.WidgetSettings";
 //    public static final String DIRECTION_KEY = "direction";
 
-    final Context context = WidgetSettings.this;
+    private final Context context = WidgetSettings.this;
 
-    int EHV = 0;
-    int Heeze = 1;
-    int RDaal = 2;
-
-    int from = 0; //default from Eindhoven
-    int to;
+    private int from = 0; //default from Eindhoven
+    private int to;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +39,7 @@ public class WidgetSettings extends AppCompatActivity {
         NumberPicker npFrom;
         npFrom = (NumberPicker) findViewById(R.id.numberPickerFromSettings);
 
+        assert npFrom != null;
         npFrom.setMinValue(0);
         npFrom.setMaxValue(cities.length - 1);
         npFrom.setDisplayedValues(cities);
@@ -60,6 +57,7 @@ public class WidgetSettings extends AppCompatActivity {
 
         npTo = (NumberPicker) findViewById(R.id.numberPickerToSettings);
 
+        assert npTo != null;
         npTo.setMinValue(0);
         npTo.setMaxValue(cities.length - 1);
         npTo.setDisplayedValues(cities);
@@ -78,7 +76,7 @@ public class WidgetSettings extends AppCompatActivity {
     /**
      * @return next departure time
      */
-    Calendar nextDeparture() {
+    private Calendar nextDeparture() {
         int[] direction = {from, to};
         return baseClass.nextDeparture(direction);
     }
@@ -88,6 +86,7 @@ public class WidgetSettings extends AppCompatActivity {
      *
      * @param view button setWidget
      */
+    @SuppressWarnings({"unused", "UnusedParameters"})
     public void setWidget(View view) {
 
         //save direction chose by numberpickers
