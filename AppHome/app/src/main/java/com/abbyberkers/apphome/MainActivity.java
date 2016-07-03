@@ -123,6 +123,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Called when opening app again, to refresh the times in the departure numberpicker (npDep).
+     */
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        new RetrieveFeedTask().execute(); //get xml from ns
+    }
+
+    /**
      * Set instance response from the ASyncTask
      *
      * @param response response passed
