@@ -7,5 +7,10 @@
     <string name="dots">…</string>
     <string name="send_delay">Send delay</string>
     <string name="switches">Switch direction</string>
+    <string name="pref_previously_started">previouslystarted</string>
+    <string name="change_user">Change user</string>
+    <string name="change_user_message">Please choose a user to use this app.</string>
+    <string name="change_user_title">Choose a user</string>
+    <string name="pref_user">user</string>
 
 </resources>
