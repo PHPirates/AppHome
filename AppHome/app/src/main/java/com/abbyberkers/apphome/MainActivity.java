@@ -2,18 +2,30 @@ package com.abbyberkers.apphome;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,7 +33,17 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -190,6 +212,16 @@ public class MainActivity extends AppCompatActivity {
         return baseClass.convertNSToString(nsTime, from, to);
     }
 
+    /**
+     * convert ns time string to calendar object
+     *
+     * @param nsTime time in ns format
+     * @return calendar object
+     */
+    private Calendar convertNSToCal(String nsTime) {
+        return baseClass.convertNSToCal(nsTime);
+    }
+
 // --Commented out by Inspection START (15-6-2016 16:41):
 //    /**
 //     * convert a time string in ns format to a date object
@@ -217,6 +249,21 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * just convert ns-format to HH:mm
+     *
+     * @param nsTime ns time
+     * @return string
+     */
+    public String convertNSToString_Bare(String nsTime) {
+        if (nsTime == null) {
+            return "No time selected";
+        } else {
+            Calendar c = convertNSToCal(nsTime);
+            return convertCalendarToString(c);
+        }
+    }
+
 // --Commented out by Inspection START (15-6-2016 16:41):
 //    /**
 //     * convert ns time string to calendar object, uses {@link #convertNSToDate(String)}
@@ -240,10 +287,99 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * find the delayed departure times in response
+     * @return hashmap, key=departure time HH:mm, value is delay +x
+     */
+    private Map<String, String> getDepartureDelays(String response) {
+        if (response != null) {
+            try {
+
+                //find vertrekvertragingen
+
+                //create java DOM xml parser
+                DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder;
+                builder = builderFactory.newDocumentBuilder();
+
+                //parse xml with the DOM parser
+                Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
+
+                //create XPath object
+                XPath xPath = XPathFactory.newInstance().newXPath();
+
+                NodeList depNodeList;
+                NodeList delayNodeList;
+
+                //select all geplandevertrektijd where the reismogelijkheid has a vertrekvertraging
+                //and vervoertype of first reisdeel is intercity
+                String depExpr =
+                        "//ReisMogelijkheid[VertrekVertraging]/GeplandeVertrekTijd";
+                //would be for breda:
+//                "//ReisMogelijkheid[VertrekVertraging and ReisDeel[1]/VervoerType = 'Intercity']/GeplandeVertrekTijd";
+                //select the corresponding vertrekvertragingen
+                String delayExpr =
+                        "//ReisMogelijkheid[VertrekVertraging]/VertrekVertraging";
+                //would be for breda:
+//                    "//ReisMogelijkheid[VertrekVertraging and ReisDeel[1]/VervoerType = 'Intercity']/VertrekVertraging";
+                    depNodeList = (NodeList) xPath.compile(depExpr).evaluate(
+                        xmlDocument, XPathConstants.NODESET);
+                delayNodeList = (NodeList) xPath.compile(delayExpr).evaluate(
+                        xmlDocument, XPathConstants.NODESET);
+
+
+                //delayNodeList.getLength() == depNodeList.getLength()
+                Map<String, String> map = new HashMap<>();
+
+                //add everything to the map, key=departure time HH:mm, value is delay +x
+                for (int i = 0; i < depNodeList.getLength(); i++) {
+                    //get node and convert to HH:mm
+                    String dep = convertNSToString_Bare(
+                            depNodeList.item(i).getFirstChild().getNodeValue());
+                    //get node and remove " min"
+                    String delay = delayNodeList.item(i).getFirstChild()
+                            .getNodeValue().split(" ")[0];
+                    map.put(dep,delay);
+                }
+
+                return map;
+
+            } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
+                e.printStackTrace();
+            }
+        }
+        return null; // never reached
+    }
+
+    /**
      * Update the time picker when selecting a new destination
      */
     private void updateDepartures() {
+        Map<String, String> map = getDepartureDelays(response);
+
         String[] departTimes = currentDepartures();
+
+        boolean delayedDepTime; //to add align spaces
+
+        //for every time, if there is a match with delayed departures, add delay
+        if (map != null) {
+            for (int i = 0; i<departTimes.length; i++) {
+                delayedDepTime = false;
+                for (Map.Entry<String, String> entry : map.entrySet()) {
+                    if (entry.getKey().equals(departTimes[i])) {
+                        delayedDepTime = true;
+                        //add the delay to it
+                        if (!departTimes[i].contains(" ")) { //watch out for empty ones
+                            departTimes[i] += " ";
+                            departTimes[i] += entry.getValue();
+                        }
+                    }
+                }
+                if (!delayedDepTime) { //align a tiny bit better
+                    departTimes[i] += "     ";
+                }
+            }
+        }
+
         NumberPicker npDep; //NP for close departure times
         npDep = (NumberPicker) findViewById(R.id.numberPickerDepartures);
         assert npDep != null;
@@ -454,6 +590,7 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
                                 + fromString + "&toStation=" + toString);
+//                        url = new URL("http://hollandpirates.bitbucket.org/ehv-hz.xml"); //test url
                     }
 
 //                String userCredentials = "t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";

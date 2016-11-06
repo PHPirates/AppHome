@@ -61,7 +61,7 @@ class BaseClass {
      * @param nsTime time in ns format
      * @return calendar object
      */
-    private Calendar convertNSToCal(String nsTime) {
+    Calendar convertNSToCal(String nsTime) {
         Date date = convertNSToDate(nsTime);
         Calendar c = new GregorianCalendar();
         c.setTime(date);
@@ -101,7 +101,7 @@ class BaseClass {
                 // select all ActueleVertrekTijd where the first Reisdeel
                 // has a child VervoerType with text Intercity
                 String depTimesICExpr = "//ReisMogelijkheid[ReisDeel[1]/" +
-                        "VervoerType = 'Intercity']/ActueleVertrekTijd";
+                        "VervoerType = 'Intercity']/GeplandeVertrekTijd";
                 nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
 //            } else if (from == RDaal && to == EHV) {
@@ -113,7 +113,7 @@ class BaseClass {
                 //generate list of departure times corresponding to nrpickers
                 //just the departure times where status != niet-mogelijk
                 String depTimesExpr = "/ReisMogelijkheden/ReisMogelijkheid" +
-                        "[Status[not(text()='NIET-MOGELIJK')]]/ActueleVertrekTijd";
+                        "[Status[not(text()='NIET-MOGELIJK')]]/GeplandeVertrekTijd";
                 nodeList = (NodeList) xPath.compile(depTimesExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
             }
@@ -353,7 +353,7 @@ class BaseClass {
     }
 
     /**
-     * convert ns-format to HH:mm
+     * convert ns-format to HH:mm including ehv-rdaal bike time
      *
      * @param nsTime ns time
      * @return string
