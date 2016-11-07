@@ -1,13 +1,21 @@
 package com.abbyberkers.apphome;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
@@ -49,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
     private int depart; //departure numberpicker value
 
     private boolean ASyncTaskIsRunning; //boolean to check if there is an asynctask running
+
+    private Menu mainMenu;
 
     private static final int EHV = 0;
     private static final int Heeze = 1;
@@ -147,6 +157,60 @@ public class MainActivity extends AppCompatActivity {
     public void onResume(){
         super.onResume();
         new RetrieveFeedTask().execute(); //get xml from ns
+
+        //check for first run, if it is, display setting
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        boolean previouslyStarted = prefs.getBoolean(getString(R.string.pref_previously_started), false);
+        if (!previouslyStarted) {
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.putBoolean(getString(R.string.pref_previously_started),Boolean.TRUE);
+            edit.apply();
+            displaySetting();
+        }
+    }
+
+    /**
+     * Display 'choose user' dialog
+     */
+    public void displaySetting() {
+        final MenuItem item = mainMenu.findItem(R.id.change_user);
+
+        new android.support.v7.app.AlertDialog.Builder(this)
+                .setTitle(R.string.change_user_title)
+                .setMessage(R.string.change_user_message)
+                .setPositiveButton("Abby", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                        SharedPreferences.Editor edit = prefs.edit();
+                        edit.putString(getString(R.string.pref_user),"Abby");
+                        edit.apply();
+                        Log.e("updating","menu");
+                        //update menu item
+                        item.setTitle("Abby");
+                    }
+                })
+                .setNegativeButton("Thomas", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                        SharedPreferences.Editor edit = prefs.edit();
+                        edit.putString(getString(R.string.pref_user),"Thomas");
+                        edit.apply();
+                        item.setTitle("Thomas");
+
+                    }
+                })
+                .show();
+    }
+
+    /**
+     * @return string user from shared prefs
+     */
+    public String getUser() {
+        //find the user
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        return prefs.getString(getString(R.string.pref_user),"none");
     }
 
     /**
@@ -206,7 +270,10 @@ public class MainActivity extends AppCompatActivity {
      * @return string
      */
     private String convertNSToString(String nsTime) {
-        return baseClass.convertNSToString(nsTime, from, to);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        String user = prefs.getString(getString(R.string.pref_user),"none");
+
+        return baseClass.convertNSToString(nsTime, from, to, user);
     }
 
     /**
@@ -551,22 +618,38 @@ public class MainActivity extends AppCompatActivity {
         String nsArrivalTime = convertNSToString(getNSStringByDepartureTime(
                 convertCalendarToNS(getNSDepartures()[depart]), "ActueleAankomstTijd"));
 
+        String user = getUser();
+        String prefix = "ETA ";
+
+        //few special cases first
         if (from == EHV) {
             if (to == Heeze) {
                 //take the chosen calendar object of the current departures,
                 // and add optionally travel time to that and convert to string with cAddTravel
-                message = "Trein van " + convertCalendarToString(getNSDepartures()[depart]);
+                if (user.equals("Abby")) {
+                    message = "Trein van " + convertCalendarToString(getNSDepartures()[depart]);
+                } else {
+                    message = prefix + nsArrivalTime;
+                }
             } else if (to == RDaal) {
-                message = "ETA " + nsArrivalTime;
+                message = prefix + nsArrivalTime;
             }
         } else if (from == Heeze) {
             if (to == EHV) {
-                message = "Eindhoven ETA " + nsArrivalTime;
+                if (user.equals("Abby")) {
+                    message = "Eindhoven ETA " + nsArrivalTime;
+                } else {
+                    message = prefix + nsArrivalTime;
+                }
             } else if (to == RDaal) {
-                message = "Yay at " + nsArrivalTime + ".";
+                if (user.equals("Abby")) {
+                    message = "Yay at " + nsArrivalTime + ".";
+                } else {
+                    message = prefix + nsArrivalTime;
+                }
             }
         } else {
-            message = "ETA " + nsArrivalTime;
+            message = prefix + nsArrivalTime;
         }
 
         sendWhatsApp(message);
@@ -727,6 +810,26 @@ public class MainActivity extends AppCompatActivity {
                     updateDepartures(); //update nrpicker
                 }
             }
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        this.mainMenu = menu;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.mainmenu,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.change_user:
+                Toast.makeText(getBaseContext(),"Identity crisis?",Toast.LENGTH_SHORT).show();
+                displaySetting();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 }

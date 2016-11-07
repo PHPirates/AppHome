@@ -279,7 +279,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * @return string
      */
     private String convertNSToString(String nsTime) {
-        return baseClass.convertNSToString(nsTime, from, to);
+        return baseClass.convertNSToString(nsTime, from, to, "none");
     }
 
     /**
