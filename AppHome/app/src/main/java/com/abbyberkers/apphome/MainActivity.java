@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
@@ -30,7 +29,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -229,7 +227,7 @@ public class MainActivity extends AppCompatActivity {
             if (date == null) return "convertStringToNS: date is null";
             Calendar calendar = new GregorianCalendar();
             calendar.setTime(date); //changes date to 1 jan 1970
-            int hour = calendar.get(Calendar.HOUR_OF_DAY); //TODO why one too much?
+            int hour = calendar.get(Calendar.HOUR_OF_DAY);
             int min = calendar.get(Calendar.MINUTE);
             Calendar c = new GregorianCalendar(); //now with correct date
             c.set(Calendar.HOUR_OF_DAY,hour);
@@ -306,8 +304,9 @@ public class MainActivity extends AppCompatActivity {
      * @return hashmap, key=departure time HH:mm, value is delay +x
      */
     private Map<String, String> getDepartureDelays(String response) {
-        if (response == null) Log.e("param response","null");
-        if (response != null) {
+        if (response == null) {
+            return null;
+        } else {
             try {
 
                 //find vertrekvertragingen
@@ -356,13 +355,9 @@ public class MainActivity extends AppCompatActivity {
                 return map;
 
             } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
-                Log.e("exception caught:",e.getMessage());
                 e.printStackTrace();
                 return null;
             }
-        } else {
-            Log.e("param response","was null after all");
-            return null;
         }
     }
 
@@ -373,11 +368,7 @@ public class MainActivity extends AppCompatActivity {
         //find out if going via breda (to look for breda delays or not)
         boolean viaBreda = to == EHV && from == RDaal || to == RDaal && from == EHV;
 
-        if (response == null) Log.e("response is","null");
         Map<String, String> mapDelay = getDepartureDelays(response);
-
-        if (arrivalResponse == null) Log.e("arrivalResponse is","null");
-
         //get delays in breda as well by arrivalResponse
         Map<String, String> mapBredaDelay = getDepartureDelays(arrivalResponse);
 
@@ -414,7 +405,6 @@ public class MainActivity extends AppCompatActivity {
                 //for every departure time, check also if getBredaDepTime(departTime, arrivalResponse)
                 //matches with any departure time in the breda hashmap
                 //if so, add bd +x
-                if (mapBredaDelay == null) Log.e("mapBredaDelay","null");
                 if (viaBreda && mapBredaDelay != null) {
                     //convert to ns for getBredaDepTime, removing the +x for that
                     //only if it does contain a +x
@@ -424,23 +414,19 @@ public class MainActivity extends AppCompatActivity {
                     }
                     nsdep = convertStringToNS(nsdep);
 
-                    if (arrivalResponse == null) Log.e("resp", "null");
-                    if (nsdep == null) Log.e("nsdep", "null");
-                    if (response == null) Log.e("response main", "null");
-                    Log.e("nsdep", nsdep);
-
                     String nsBredaDepTime = baseClass.getBredaDepTime(nsdep, arrivalResponse);
-                    if (nsBredaDepTime == null) break;
-                    Log.e("nsbd ", nsBredaDepTime);
+                    if (nsBredaDepTime == null) {
+                        break;
+                    }
                     String bredaDepTime = convertNSToString_Bare(
                             nsBredaDepTime);
                     if (bredaDepTime == null) break;
 
                     for (Map.Entry<String, String> entry : mapBredaDelay.entrySet()) {
-                        Log.e("comparing delay|bddep" + entry.getKey(), bredaDepTime);
                         if (entry.getKey().equals(bredaDepTime)) {
                             delayedBredaDepTime = true;
                             departTimes[i] += " bd " + entry.getValue();
+                            break;
                         }
 
                     }
@@ -651,16 +637,16 @@ public class MainActivity extends AppCompatActivity {
                             urlConnection = (HttpURLConnection) arrivalURL.openConnection();
                         urlConnection.setRequestProperty("Authorization", "Basic " + encoding);
 
-                        } else {
+                        } else { // going from Rdaal
                             url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
-                                    +"Roosendaal&toStation="+toString);
+                                    + fromString + "&toStation=Breda");
                             // also get trips from Breda to Eindhoven for arrival times and breda delays
-//                        URL arrivalURL = new URL("http://webservices.ns.nl/ns-api-treinplanner" +
-//                                "?fromStation=Breda&toStation=" + toString);
-                            URL arrivalURL = new URL("http://hollandpirates.bitbucket.org/bd-ehv.xml"); //TODO
+                        URL arrivalURL = new URL("http://webservices.ns.nl/ns-api-treinplanner" +
+                                "?fromStation=Breda&toStation=" + toString);
+//                            URL arrivalURL = new URL("http://hollandpirates.bitbucket.org/bd-ehv.xml");
                             String encoding = "dC5tLnNjaG91dGVuQHN0dWRlbnQudHVlLm5sOnNPLTY1QVp4dUVySm1tQzI4ZUlSQjg1YW9zN29HVkowQzZ0T1pJOVllSERQTFhlRXYxbmZCZw==";
                             urlConnection = (HttpURLConnection) arrivalURL.openConnection();
-//                        urlConnection.setRequestProperty("Authorization", "Basic " + encoding); //TODO
+                        urlConnection.setRequestProperty("Authorization", "Basic " + encoding);
 
                         }
 
@@ -669,7 +655,6 @@ public class MainActivity extends AppCompatActivity {
                             if (resCode == HttpURLConnection.HTTP_OK) {
                                 in = urlConnection.getInputStream();
                             } else {
-//                                Log.e("rescode", "rescode not ok");
                                 in = urlConnection.getErrorStream();
                             }
                             BufferedReader bufferedReader = new BufferedReader(
@@ -705,7 +690,6 @@ public class MainActivity extends AppCompatActivity {
                         if (resCode == HttpURLConnection.HTTP_OK) {
                             in = urlConnection.getInputStream();
                         } else {
-//                            Log.e("rescode", "rescode not ok");
                             in = urlConnection.getErrorStream();
                         }
                         BufferedReader bufferedReader = new BufferedReader(
@@ -722,7 +706,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             } catch (IOException e) {
-//                Log.e("IOException", "no internet connection");
                 return "no internet";
             } catch (Exception e) {
 //                Log.e("ERROR", e.getMessage(), e);

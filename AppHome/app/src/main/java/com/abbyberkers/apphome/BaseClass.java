@@ -2,13 +2,10 @@ package com.abbyberkers.apphome;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.Toast;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.ParseException;
@@ -19,7 +16,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -27,8 +23,6 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
-//import android.util.Log;
 
 class BaseClass {
     private static final int EHV = 0;
@@ -293,7 +287,9 @@ class BaseClass {
                 //convert to date to compare
                 for (int i = 0; i < BredaDepNSTimes.size(); i++) {
                     Date nsDate = convertNSToDate(BredaDepNSTimes.get(i));
-                    if (nsDate == null || BredaArrivalDate == null) return null;
+                    if (nsDate == null || BredaArrivalDate == null) {
+                        return "nsDate or BredaArrivalDate null";
+                    }
                     if (BredaArrivalDate.before(nsDate)) {
                         nextIndex = i; //i is index of next departure time.
                         break;
@@ -306,12 +302,15 @@ class BaseClass {
                 if (!(nextIndex == -1)) {
                     //depTime becomes next Breda departure Time
                     return BredaDepNSTimes.get(nextIndex);
+                } else {
+                    return "nextIndex == -1";
                 }
             } catch (SAXException | ParserConfigurationException | IOException | XPathExpressionException e) {
+//                Log.e("exception caught:",e.getMessage());
                 e.printStackTrace();
             }
         }
-        return null;
+        return "end of getBredaDepTime reached without result";
     }
 
     /**
@@ -377,6 +376,7 @@ class BaseClass {
             return "No time selected";
         } else {
             Calendar c = convertNSToCal(nsTime);
+            if (c == null) return "convertNSToCal returned null";
             if (from == EHV && to == RDaal) { //if going to Rdaal
                 //round time to nearest ten minutes
                 int unroundedMinutes = c.get(Calendar.MINUTE);
