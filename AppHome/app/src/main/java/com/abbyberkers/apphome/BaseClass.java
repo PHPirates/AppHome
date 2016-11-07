@@ -1,9 +1,7 @@
 package com.abbyberkers.apphome;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.preference.PreferenceManager;
 import android.widget.Toast;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -373,14 +371,14 @@ class BaseClass {
      * @param nsTime ns time
      * @return string
      */
-    public String convertNSToString(String nsTime, int from, int to, String user) {
+    String convertNSToString(String nsTime, int from, int to, String user) {
 
         if (nsTime == null) {
             return "No time selected";
         } else {
             Calendar c = convertNSToCal(nsTime);
             if (c == null) return "convertNSToCal returned null";
-            if (from == EHV && to == RDaal) { //if going to Rdaal
+            if (from == EHV && to == RDaal && user.equals("Thomas")) { //if going to Rdaal
                 //special cycling case for Thomas
                 //round time to nearest ten minutes
                 int unroundedMinutes = c.get(Calendar.MINUTE);
