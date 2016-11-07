@@ -2,6 +2,7 @@ package com.abbyberkers.apphome;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 
 import org.w3c.dom.Document;
@@ -35,7 +36,7 @@ class BaseClass {
     private static final int RDaal = 2;
 
     //string of cities to be used in the main activity (widget is not generic)
-    public static final String[] cities = {"Eindhoven", "Heeze", "Roosendaal"};
+    static final String[] cities = {"Eindhoven", "Heeze", "Roosendaal"};
 
     String response;
 
@@ -52,7 +53,7 @@ class BaseClass {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        return new Date(); //default
+        return null; //default
     }
 
     /**
@@ -63,6 +64,7 @@ class BaseClass {
      */
     Calendar convertNSToCal(String nsTime) {
         Date date = convertNSToDate(nsTime);
+        if (date == null) return null;
         Calendar c = new GregorianCalendar();
         c.setTime(date);
         return c;
@@ -74,23 +76,18 @@ class BaseClass {
      *
      * @return Calendar[] with five current departures, default is five null objects
      */
-    public Calendar[] getNSDepartures(String response, int from, int to, Context context) {
+    Calendar[] getNSDepartures(String response, int from, int to, Context context) {
         if (response == null) {
             response = "No response from NS or first time";
         }
-        int timesNumber = 7;
+        int timesNumber = 9;
         try {
 
-            //create java DOM xml parser
+            //setup parsing
             DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder;
-            builder = builderFactory.newDocumentBuilder();
-
-            //parse xml with the DOM parser
-            Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
-
-            //create XPath object
+            DocumentBuilder builder = builderFactory.newDocumentBuilder();
             XPath xPath = XPathFactory.newInstance().newXPath();
+            Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
 
             NodeList nodeList;
 
@@ -181,7 +178,7 @@ class BaseClass {
      * @param direction direction
      * @return next departure time calendar
      */
-    public Calendar nextDeparture(int[] direction) {
+    Calendar nextDeparture(int[] direction) {
         //some initialisation
         int from = direction[0];
         int to = direction[1];
@@ -231,10 +228,91 @@ class BaseClass {
      * @param toFrom the to or from variable
      * @return string of city
      */
-    public String convertCityToString(int toFrom) {
+    String convertCityToString(int toFrom) {
         return cities[toFrom];
     }
 
+    /**
+     * @param cityDepTime departure time ehv/rdaal
+     * @param arrivalResponse xml which contains breda departures
+     *                        uses response as well
+     * @return departure time in breda with that voyage IN NS FORMAT
+     */
+    String getBredaDepTime(String cityDepTime, String arrivalResponse) {
+        if (cityDepTime == null || response == null || arrivalResponse == null) {
+            return "getBredaDepTime: one of parameters or response is null";
+        } else {
+            try {
+                //setup parsing
+                DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = builderFactory.newDocumentBuilder();
+                XPath xPath = XPathFactory.newInstance().newXPath();
+                Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
+
+                String arrivalOrDepExpr = "/ReisMogelijkheden/ReisMogelijkheid" +
+                        "[GeplandeVertrekTijd[text()='" + cityDepTime + "']]/GeplandeAankomstTijd";
+
+                //deptime is departure time in EHV
+                //get new deptime, the first departure time in Breda
+                // which is later than the arrival time
+                NodeList arrivalNodeList = (NodeList) xPath.compile(arrivalOrDepExpr).evaluate(
+                        xmlDocument, XPathConstants.NODESET);
+
+                if (arrivalNodeList.getLength() == 0) {
+                    //there is no arrivalTime
+                    return "arr: No arrival time in Breda in response corresponding to departure time given";
+                }
+
+                //arrivalNodeList should contain the (hopefully only one) arrival time in Breda
+                String bredaArrivalTime = arrivalNodeList.item(0).getFirstChild().getNodeValue();
+
+                //get next departure times
+                //arrivalResponse contains xml Breda-RDaal
+
+                //if going to RDaal, means arrival time is in arrivalResponse
+                xmlDocument = builder.parse(new ByteArrayInputStream(arrivalResponse.getBytes()));
+
+                //get all breda departure times
+                String depExpr = "//ActueleVertrekTijd";
+
+                NodeList BredaDepNodeList = (NodeList) xPath.compile(depExpr).evaluate(
+                        xmlDocument, XPathConstants.NODESET);
+
+                List<String> BredaDepNSTimes = new ArrayList<>();
+
+                //use dep times from xml
+                for (int i = 0; i < BredaDepNodeList.getLength(); i++) {
+                    BredaDepNSTimes.add(i, BredaDepNodeList.item(i).getFirstChild().getNodeValue());
+                }
+
+                //compare with breda arrival time
+                Date BredaArrivalDate = convertNSToDate(bredaArrivalTime);
+
+                //find next departure time in List
+                int nextIndex = -1;
+                //convert to date to compare
+                for (int i = 0; i < BredaDepNSTimes.size(); i++) {
+                    Date nsDate = convertNSToDate(BredaDepNSTimes.get(i));
+                    if (nsDate == null || BredaArrivalDate == null) return null;
+                    if (BredaArrivalDate.before(nsDate)) {
+                        nextIndex = i; //i is index of next departure time.
+                        break;
+                    }
+                }
+
+                //                    if (nextIndex == -1) {
+                ////                        Log.e("breda ", "departure time mistake ");
+                //                    } else {
+                if (!(nextIndex == -1)) {
+                    //depTime becomes next Breda departure Time
+                    return BredaDepNSTimes.get(nextIndex);
+                }
+            } catch (SAXException | ParserConfigurationException | IOException | XPathExpressionException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
 
     /**
      * get arrival time of voyage, given departure time
@@ -242,10 +320,10 @@ class BaseClass {
      *
      * @param depTime departure time ns-format
      * @param field   do you want delays or arrival times? Should be ns node string
-     * @return arrival time
+     * @return arrival time IN NS FORMAT
      */
-    public String getNSStringByDepartureTime(String depTime, String field,
-                                             String arrivalResponse, int from, int to) {
+    String getNSStringByDepartureTime(String depTime, String field,
+                                      String arrivalResponse, int from, int to) {
         if (depTime == null) {
             return null;
         } else {
@@ -254,83 +332,19 @@ class BaseClass {
                 response = "No response from NS or first time";
             }
             try {
-                //create java DOM xml parser
+                //setup parsing
                 DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder builder;
-                builder = builderFactory.newDocumentBuilder();
-
-                //create XPath object
+                DocumentBuilder builder = builderFactory.newDocumentBuilder();
                 XPath xPath = XPathFactory.newInstance().newXPath();
-
-                String arrivalOrDepExpr;
-
-
-                //parse xml with the DOM parser
                 Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
 
                 if (from == EHV && to == RDaal) {
-                    arrivalOrDepExpr = "/ReisMogelijkheden/ReisMogelijkheid" +
-                            "[ActueleVertrekTijd[text()='" + depTime + "']]/ActueleAankomstTijd";
-
-                    //deptime is departure time in EHV
-                    //get new deptime, the first departure time in Breda
-                    // which is later than the arrival time
-                    NodeList arrivalNodeList = (NodeList) xPath.compile(arrivalOrDepExpr).evaluate(
-                            xmlDocument, XPathConstants.NODESET);
-
-                    if (arrivalNodeList.getLength() == 0) {
-                        //there is no arrivalTime
-                        return "arr: No breda arrival time.";
-                    }
-
-                    //arrivalNodeList should contain the (hopefully only one) arrival time in Breda
-                    String bredaArrivalTime = arrivalNodeList.item(0).getFirstChild().getNodeValue();
-
-                    //get next departure times
-                    //arrivalResponse contains xml Breda-RDaal
-
-                    //if going to RDaal, means arrival time is in arrivalResponse
-                    xmlDocument = builder.parse(new ByteArrayInputStream(arrivalResponse.getBytes()));
-
-                    //get all breda departure times
-                    String depExpr = "//ActueleVertrekTijd";
-
-                    NodeList BredaDepNodeList = (NodeList) xPath.compile(depExpr).evaluate(
-                            xmlDocument, XPathConstants.NODESET);
-
-                    List<String> BredaDepNSTimes = new ArrayList<>();
-
-                    //use dep times from xml
-                    for (int i = 0; i < BredaDepNodeList.getLength(); i++) {
-                        BredaDepNSTimes.add(i, BredaDepNodeList.item(i).getFirstChild().getNodeValue());
-                    }
-
-                    //compare with breda arrival time
-                    Date BredaArrivalDate = convertNSToDate(bredaArrivalTime);
-
-                    //find next departure time in List
-                    int nextIndex = -1;
-                    //convert to date to compare
-                    for (int i = 0; i < BredaDepNSTimes.size(); i++) {
-                        Date nsDate = convertNSToDate(BredaDepNSTimes.get(i));
-                        if (BredaArrivalDate.before(nsDate)) {
-                            nextIndex = i; //i is index of next departure time.
-                            break;
-                        }
-                    }
-
-//                    if (nextIndex == -1) {
-////                        Log.e("breda ", "departure time mistake ");
-//                    } else {
-                    if (!(nextIndex == -1)) {
-                        //depTime becomes next Breda departure Time
-                        depTime = BredaDepNSTimes.get(nextIndex);
-                    }
+                    depTime = getBredaDepTime(depTime, arrivalResponse);
                 }
 
                 //now (possibly again) arrival time with depTime.
                 // depTime may have been updated to Breda depTime
-                arrivalOrDepExpr = "/ReisMogelijkheden" +
+                String arrivalOrDepExpr = "/ReisMogelijkheden" +
                         "/ReisMogelijkheid[ActueleVertrekTijd[text()='" + depTime + "']]/" + field;
 
                 NodeList nodeList = (NodeList) xPath.compile(arrivalOrDepExpr).evaluate(
@@ -358,7 +372,7 @@ class BaseClass {
      * @param nsTime ns time
      * @return string
      */
-    public String convertNSToString(String nsTime, int from, int to) {
+    String convertNSToString(String nsTime, int from, int to) {
         if (nsTime == null) {
             return "No time selected";
         } else {
@@ -380,9 +394,9 @@ class BaseClass {
      * @param c calendar object
      * @return string object
      */
-    public String convertCalendarToString(Calendar c) {
+    String convertCalendarToString(Calendar c) {
         if (c == null) {
-            return "No time selected";
+            return "convertCalendarToString: null object passed";
         } else {
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
             return sdf.format(c.getTime());

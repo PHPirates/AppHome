@@ -2,28 +2,20 @@ package com.abbyberkers.apphome;
 
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -31,12 +23,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -160,7 +157,9 @@ public class MainActivity extends AppCompatActivity {
      * @param response response passed
      */
     private void setResponse(String response) {
+        //set responses in both classes
         this.response = response;
+        baseClass.response = response;
     }
 
     private void setArrivalResponse(String arrivalResponse) {
@@ -210,6 +209,34 @@ public class MainActivity extends AppCompatActivity {
      */
     private String convertNSToString(String nsTime) {
         return baseClass.convertNSToString(nsTime, from, to);
+    }
+
+    /**
+     * @param time string in HH:mm format
+     * @return time in NS format
+     */
+    private String convertStringToNS(String time) {
+        if (  time == null || time.contains(" ") ) { //assume correct HH:mm times
+            return "Time not formatted correctly";
+        } else {
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
+            Date date = null;
+            try {
+                date = sdf.parse(time);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            if (date == null) return "convertStringToNS: date is null";
+            Calendar calendar = new GregorianCalendar();
+            calendar.setTime(date); //changes date to 1 jan 1970
+            int hour = calendar.get(Calendar.HOUR_OF_DAY); //TODO why one too much?
+            int min = calendar.get(Calendar.MINUTE);
+            Calendar c = new GregorianCalendar(); //now with correct date
+            c.set(Calendar.HOUR_OF_DAY,hour);
+            c.set(Calendar.MINUTE,min);
+            c.set(Calendar.SECOND,0); //you'd wish trains are this precise
+            return convertCalendarToNS(c);
+        }
     }
 
     /**
@@ -264,18 +291,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-// --Commented out by Inspection START (15-6-2016 16:41):
-//    /**
-//     * convert ns time string to calendar object, uses {@link #convertNSToDate(String)}
-//     *
-//     * @param nsTime time in ns format
-//     * @return calendar object
-//     */
-//    public Calendar convertNSToCal(String nsTime) {
-//        return baseClass.convertNSToCal(nsTime);
-//    }
-// --Commented out by Inspection STOP (15-6-2016 16:41)
-
     /**
      * convert calendar object to string object in HH:mm format
      *
@@ -291,21 +306,18 @@ public class MainActivity extends AppCompatActivity {
      * @return hashmap, key=departure time HH:mm, value is delay +x
      */
     private Map<String, String> getDepartureDelays(String response) {
+        if (response == null) Log.e("param response","null");
         if (response != null) {
             try {
 
                 //find vertrekvertragingen
 
-                //create java DOM xml parser
+                //setup parsing
                 DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder builder;
-                builder = builderFactory.newDocumentBuilder();
-
-                //parse xml with the DOM parser
+                DocumentBuilder builder = builderFactory.newDocumentBuilder();
+                XPath xPath = XPathFactory.newInstance().newXPath();
                 Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
 
-                //create XPath object
-                XPath xPath = XPathFactory.newInstance().newXPath();
 
                 NodeList depNodeList;
                 NodeList delayNodeList;
@@ -344,54 +356,124 @@ public class MainActivity extends AppCompatActivity {
                 return map;
 
             } catch (ParserConfigurationException | SAXException | IOException | XPathExpressionException e) {
+                Log.e("exception caught:",e.getMessage());
                 e.printStackTrace();
+                return null;
             }
+        } else {
+            Log.e("param response","was null after all");
+            return null;
         }
-        return null; // never reached
     }
 
     /**
      * Update the time picker when selecting a new destination
      */
     private void updateDepartures() {
-        Map<String, String> map = getDepartureDelays(response);
+        //find out if going via breda (to look for breda delays or not)
+        boolean viaBreda = to == EHV && from == RDaal || to == RDaal && from == EHV;
+
+        if (response == null) Log.e("response is","null");
+        Map<String, String> mapDelay = getDepartureDelays(response);
+
+        if (arrivalResponse == null) Log.e("arrivalResponse is","null");
+
+        //get delays in breda as well by arrivalResponse
+        Map<String, String> mapBredaDelay = getDepartureDelays(arrivalResponse);
 
         String[] departTimes = currentDepartures();
 
+        //sometimes (first times) departTimes[i] is "  " for all i
+        if (departTimes[0].trim().length() > 0 ) {
+
+        if (departTimes[0] != null) {
+            //remove duplicates
+            departTimes = new LinkedHashSet<>(Arrays.asList(departTimes)).toArray(new String[0]);
+        }
+
         boolean delayedDepTime; //to add align spaces
+        boolean delayedBredaDepTime;
 
         //for every time, if there is a match with delayed departures, add delay
-        if (map != null) {
-            for (int i = 0; i<departTimes.length; i++) {
+
+            for (int i = 0; i < departTimes.length; i++) {
                 delayedDepTime = false;
-                for (Map.Entry<String, String> entry : map.entrySet()) {
-                    if (entry.getKey().equals(departTimes[i])) {
-                        delayedDepTime = true;
-                        //add the delay to it
-                        if (!departTimes[i].contains(" ")) { //watch out for empty ones
-                            departTimes[i] += " ";
-                            departTimes[i] += entry.getValue();
+                delayedBredaDepTime = false;
+                if (mapDelay != null) {
+                    for (Map.Entry<String, String> entry : mapDelay.entrySet()) {
+                        if (entry.getKey().equals(departTimes[i])) {
+                            delayedDepTime = true;
+                            //add the delay to it
+                            if (!departTimes[i].contains(" ")) { //watch out for empty ones
+                                departTimes[i] += " " + entry.getValue();
+                            }
                         }
+                    }
+                }
+                //now for breda
+                //for every departure time, check also if getBredaDepTime(departTime, arrivalResponse)
+                //matches with any departure time in the breda hashmap
+                //if so, add bd +x
+                if (mapBredaDelay == null) Log.e("mapBredaDelay","null");
+                if (viaBreda && mapBredaDelay != null) {
+                    //convert to ns for getBredaDepTime, removing the +x for that
+                    //only if it does contain a +x
+                    String nsdep = departTimes[i];
+                    if (departTimes[i].contains("+")) {
+                        nsdep = departTimes[i].split(" ")[0];
+                    }
+                    nsdep = convertStringToNS(nsdep);
+
+                    if (arrivalResponse == null) Log.e("resp", "null");
+                    if (nsdep == null) Log.e("nsdep", "null");
+                    if (response == null) Log.e("response main", "null");
+                    Log.e("nsdep", nsdep);
+
+                    String nsBredaDepTime = baseClass.getBredaDepTime(nsdep, arrivalResponse);
+                    if (nsBredaDepTime == null) break;
+                    Log.e("nsbd ", nsBredaDepTime);
+                    String bredaDepTime = convertNSToString_Bare(
+                            nsBredaDepTime);
+                    if (bredaDepTime == null) break;
+
+                    for (Map.Entry<String, String> entry : mapBredaDelay.entrySet()) {
+                        Log.e("comparing delay|bddep" + entry.getKey(), bredaDepTime);
+                        if (entry.getKey().equals(bredaDepTime)) {
+                            delayedBredaDepTime = true;
+                            departTimes[i] += " bd " + entry.getValue();
+                        }
+
                     }
                 }
                 if (!delayedDepTime) { //align a tiny bit better
                     departTimes[i] += "     ";
                 }
+                if (!delayedBredaDepTime) {
+                    departTimes[i] += "            ";
+                }
             }
+
+
         }
 
         NumberPicker npDep; //NP for close departure times
         npDep = (NumberPicker) findViewById(R.id.numberPickerDepartures);
-        assert npDep != null;
-        npDep.setDisplayedValues(departTimes);
-        int middle = departTimes.length / 2;
-        npDep.setValue(middle); //set default option
-        depart = middle; //set chosen value to default
-        if (to == from) {
-            setDividerColor(npDep, 0); //set divider color to invisible
-        } else { //set to default color
-            setDividerColor(npDep, ContextCompat.getColor(this, R.color.divider));
+        if (npDep != null) {
+            //update max and min values, in case of duplicates length could change
+            npDep.setDisplayedValues(null);
+            npDep.setMinValue(1);
+            npDep.setMaxValue(departTimes.length-1);
+            npDep.setDisplayedValues(departTimes);
+            int middle = departTimes.length / 2 +1;
+            npDep.setValue(middle); //set default option
+            depart = middle; //set chosen value to default
+            if (to == from) {
+                setDividerColor(npDep, 0); //set divider color to invisible
+            } else { //set to default color
+                setDividerColor(npDep, ContextCompat.getColor(this, R.color.divider));
+            }
         }
+
     }
 
     /**
@@ -554,16 +636,33 @@ public class MainActivity extends AppCompatActivity {
 
                     URL url;
 
-                    if (from == EHV && to == RDaal) { //go to Breda to get also the intercity trips
-                        url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
-                                + fromString + "&toStation=Breda");
+                    boolean viaBreda = (from == EHV && to == RDaal) || from == RDaal && to == EHV;
 
-                        //*************** also get trips from Breda to RDaal for arrival times *****
+                    if (viaBreda) {
+                        HttpURLConnection urlConnection;
+                        if (from == EHV) { //go to Breda to get also the intercity trips
+                            url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
+                                    + fromString + "&toStation=Breda");
+                            // also get trips from Breda to RDaal for arrival times and breda delays
                         URL arrivalURL = new URL("http://webservices.ns.nl/ns-api-treinplanner" +
                                 "?fromStation=Breda&toStation=" + toString);
-                        String encoding = "dC5tLnNjaG91dGVuQHN0dWRlbnQudHVlLm5sOnNPLTY1QVp4dUVySm1tQzI4ZUlSQjg1YW9zN29HVkowQzZ0T1pJOVllSERQTFhlRXYxbmZCZw==";
-                        HttpURLConnection urlConnection = (HttpURLConnection) arrivalURL.openConnection();
+//                            URL arrivalURL = new URL("http://hollandpirates.bitbucket.org/bd-rdaal.xml"); //debug url
+                            String encoding = "dC5tLnNjaG91dGVuQHN0dWRlbnQudHVlLm5sOnNPLTY1QVp4dUVySm1tQzI4ZUlSQjg1YW9zN29HVkowQzZ0T1pJOVllSERQTFhlRXYxbmZCZw==";
+                            urlConnection = (HttpURLConnection) arrivalURL.openConnection();
                         urlConnection.setRequestProperty("Authorization", "Basic " + encoding);
+
+                        } else {
+                            url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
+                                    +"Roosendaal&toStation="+toString);
+                            // also get trips from Breda to Eindhoven for arrival times and breda delays
+//                        URL arrivalURL = new URL("http://webservices.ns.nl/ns-api-treinplanner" +
+//                                "?fromStation=Breda&toStation=" + toString);
+                            URL arrivalURL = new URL("http://hollandpirates.bitbucket.org/bd-ehv.xml"); //TODO
+                            String encoding = "dC5tLnNjaG91dGVuQHN0dWRlbnQudHVlLm5sOnNPLTY1QVp4dUVySm1tQzI4ZUlSQjg1YW9zN29HVkowQzZ0T1pJOVllSERQTFhlRXYxbmZCZw==";
+                            urlConnection = (HttpURLConnection) arrivalURL.openConnection();
+//                        urlConnection.setRequestProperty("Authorization", "Basic " + encoding); //TODO
+
+                        }
 
                         try {
                             resCode = urlConnection.getResponseCode();
@@ -586,8 +685,7 @@ public class MainActivity extends AppCompatActivity {
                             urlConnection.disconnect();
                         }
 
-                        //****************************************************************
-                    } else {
+                    } else { //if not via breda
                         url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
                                 + fromString + "&toStation=" + toString);
 //                        url = new URL("http://hollandpirates.bitbucket.org/ehv-hz.xml"); //test url
