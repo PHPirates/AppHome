@@ -273,7 +273,7 @@ class BaseClass {
                 xmlDocument = builder.parse(new ByteArrayInputStream(arrivalResponse.getBytes()));
 
                 //get all breda departure times
-                String depExpr = "//ActueleVertrekTijd";
+                String depExpr = "//GeplandeVertrekTijd";
 
                 NodeList BredaDepNodeList = (NodeList) xPath.compile(depExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
@@ -345,7 +345,7 @@ class BaseClass {
                 //now (possibly again) arrival time with depTime.
                 // depTime may have been updated to Breda depTime
                 String arrivalOrDepExpr = "/ReisMogelijkheden" +
-                        "/ReisMogelijkheid[ActueleVertrekTijd[text()='" + depTime + "']]/" + field;
+                        "/ReisMogelijkheid[GeplandeVertrekTijd[text()='" + depTime + "']]/" + field;
 
                 NodeList nodeList = (NodeList) xPath.compile(arrivalOrDepExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
