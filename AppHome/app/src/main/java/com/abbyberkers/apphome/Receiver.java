@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 public class Receiver extends BroadcastReceiver {
     /**
@@ -15,6 +16,8 @@ public class Receiver extends BroadcastReceiver {
      */
     @Override
     public void onReceive(Context context, Intent intent) {
+
+        Log.e("Receiver", "received");
         //same standard block for updating widget
         AppWidgetManager appWidgetManager = AppWidgetManager
                 .getInstance(context);

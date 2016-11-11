@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.NumberPicker;
 
@@ -89,6 +90,8 @@ public class WidgetSettings extends AppCompatActivity {
     @SuppressWarnings({"unused", "UnusedParameters"})
     public void setWidget(View view) {
 
+        Log.e("Widget", "widget set");
+
         //save direction chose by numberpickers
         saveDirection(context, from, to);
 
@@ -99,10 +102,11 @@ public class WidgetSettings extends AppCompatActivity {
 
         //set alarm to update every half an hour
         Intent intent = new Intent(context, Receiver.class);
+        intent.setAction("alarm");
         PendingIntent pIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 1800000, pIntent);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), 60000, pIntent); //1800000 for half an hour
 
         //standard code block to update widget
         AppWidgetManager appWidgetManager = AppWidgetManager

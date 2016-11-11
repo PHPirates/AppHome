@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -68,6 +69,8 @@ public class WidgetProvider extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager,
                          int[] appWidgetIds) {
+
+        Log.e("WidgetProvider", "update");
 
         //set instance variables for the updateButton method to use
         this.remoteContext = context;
@@ -461,12 +464,14 @@ public class WidgetProvider extends AppWidgetProvider {
                     if (to == from) {
                         return "no url possible";
                     } else {
+                        Log.e("WidgetProvider", "task, update");
                         String fromString = convertCityToString(from);
                         String toString = convertCityToString(to);
 
                         URL url;
 
                         if (from == EHV && to == RDaal) { //go to Breda to get also the intercity trips
+                            Log.e("WidgetProvider", "if");
                             url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
                                     + fromString + "&toStation=Breda");
 
@@ -500,8 +505,10 @@ public class WidgetProvider extends AppWidgetProvider {
 
                             //****************************************************************
                         } else {
+                            Log.e("WidgetProvider", "else");
                             url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
                                     + fromString + "&toStation=" + toString);
+                            Log.e("WidgetProvider", url.toString());
                         }
 
 //                String userCredentials = "t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
@@ -518,7 +525,7 @@ public class WidgetProvider extends AppWidgetProvider {
                             if (resCode == HttpURLConnection.HTTP_OK) {
                                 in = urlConnection.getInputStream();
                             } else {
-//                                Log.e("rescode", "rescode not ok");
+                                Log.e("rescode", "rescode not ok");
                                 in = urlConnection.getErrorStream();
                             }
                             BufferedReader bufferedReader = new BufferedReader(
