@@ -7,3 +7,4 @@
 /build
 /captures
 /.idea/misc.xml
+!/app/build/outputs/apk/app-debug.apk
