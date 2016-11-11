@@ -9,10 +9,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -20,7 +18,6 @@ import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -168,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
                         SharedPreferences.Editor edit = prefs.edit();
                         edit.putString(getString(R.string.pref_user),"Abby");
                         edit.apply();
-                        Log.e("updating","menu");
                         //update menu item
                         item.setTitle("Abby");
                     }
@@ -600,12 +596,9 @@ public class MainActivity extends AppCompatActivity {
         this.mainMenu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.mainmenu,menu);
-        Log.e("created","menu");
         MenuItem item = mainMenu.findItem(R.id.change_user);
         if (getUser() != null) {
             item.setTitle(getUser());
-        } else {
-            Log.e("menu","null");
         }
         return true;
     }
