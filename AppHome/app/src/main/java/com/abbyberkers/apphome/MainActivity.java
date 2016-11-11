@@ -600,6 +600,13 @@ public class MainActivity extends AppCompatActivity {
         this.mainMenu = menu;
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.mainmenu,menu);
+        Log.e("created","menu");
+        MenuItem item = mainMenu.findItem(R.id.change_user);
+        if (getUser() != null) {
+            item.setTitle(getUser());
+        } else {
+            Log.e("menu","null");
+        }
         return true;
     }
 
