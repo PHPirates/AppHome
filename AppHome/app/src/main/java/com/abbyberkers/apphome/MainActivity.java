@@ -384,6 +384,7 @@ public class MainActivity extends AppCompatActivity {
      * @param text the message
      */
     private void sendWhatsApp(String text) {
+        Toast.makeText(getBaseContext(),text,Toast.LENGTH_SHORT).show();
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, text);

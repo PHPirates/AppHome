@@ -142,8 +142,8 @@ class BaseClass {
 
             if (nsTimes.size() < timesNumber) {
 //                Log.e("nstimes size is ", Integer.toString(nsTimes.size()));
-                Toast.makeText(context, "Warning, due to NS messing up, results may be inaccurate",
-                        Toast.LENGTH_LONG).show();
+//                Toast.makeText(context, "Warning, due to NS messing up, results may be inaccurate",
+//                        Toast.LENGTH_LONG).show();
             }
 
             Calendar[] depTimes = new Calendar[timesNumber];
