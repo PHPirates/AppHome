@@ -2,6 +2,7 @@ package com.abbyberkers.apphome;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -40,14 +41,9 @@ class BaseClass {
      * @param nsTime time in ns format
      * @return date object
      */
-    private Date convertNSToDate(String nsTime) {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
-            return sdf.parse(nsTime);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null; //default
+    private Date convertNSToDate(String nsTime) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+        return sdf.parse(nsTime);
     }
 
     /**
@@ -56,7 +52,7 @@ class BaseClass {
      * @param nsTime time in ns format
      * @return calendar object
      */
-    Calendar convertNSToCal(String nsTime) {
+    Calendar convertNSToCal(String nsTime) throws ParseException {
         Date date = convertNSToDate(nsTime);
         if (date == null) return null;
         Calendar c = new GregorianCalendar();
@@ -122,7 +118,13 @@ class BaseClass {
             int nextIndex = -1;
             //convert to date to compare
             for (int i = 0; i < nsTimes.size(); i++) {
-                Date nsDate = convertNSToDate(nsTimes.get(i));
+                Date nsDate = null;
+                try {
+                    nsDate = convertNSToDate(nsTimes.get(i));
+                } catch (ParseException e) {
+                    Log.e("BC.getNSDepartures","convertNSToDate("+nsTimes.get(i)+") failed");
+                }
+                if (nsDate == null) break;
                 if (current.before(nsDate)) {
                     nextIndex = i; //index of next departure time.
                     break;
@@ -133,8 +135,9 @@ class BaseClass {
 
             if (nsTimes.size() < timesNumber) {
 //                Log.e("nstimes size is ", Integer.toString(nsTimes.size()));
-                Toast.makeText(context, "Warning, due to NS messing up, results may be inaccurate",
-                        Toast.LENGTH_LONG).show();
+//                Toast.makeText(context, "Warning, due to NS messing up, results may be inaccurate",
+//                        Toast.LENGTH_LONG).show();
+                Log.e("BC.getNSDepartures","nsTimes.size < timesNumber");
             }
 
             Calendar[] depTimes = new Calendar[timesNumber];
@@ -152,7 +155,11 @@ class BaseClass {
                 for (int i = 0; i < depTimes.length; i++) {
                     if (nextIndex - timesNumber / 2 + i < nsTimes.size()) {
                         //if not out of bounds... (happens when ns returns <timesNumber times total)
-                        depTimes[i] = convertNSToCal(nsTimes.get(nextIndex - timesNumber / 2 + i));
+                        try {
+                            depTimes[i] = convertNSToCal(nsTimes.get(nextIndex - timesNumber / 2 + i));
+                        } catch (ParseException e) {
+                            Log.e("BC.getNSDepartures","convertNSToCal("+nsTimes.get(nextIndex - timesNumber / 2 + i)+") failed");
+                        }
                     }
                 }
             }
@@ -188,17 +195,17 @@ class BaseClass {
         //get departure time
         if (from == EHV) {
             if (to == Heeze) {
-                depart = 4;
+                depart = 9;
             } else if (to == RDaal) {
-                depart = 1;
+                depart = 44;
             }
         } else if (from == Heeze) {
             if (to == EHV || to == RDaal) {
-                depart = 15;
+                depart = 9;
             }
         } else if (from == RDaal) {
             if (to == EHV || to == Heeze) {
-                depart = 20;
+                depart = 27;
             }
         }
 
@@ -279,21 +286,28 @@ class BaseClass {
                     BredaDepNSTimes.add(i, BredaDepNodeList.item(i).getFirstChild().getNodeValue());
                 }
 
-                //compare with breda arrival time
-                Date BredaArrivalDate = convertNSToDate(bredaArrivalTime);
-
                 //find next departure time in List
                 int nextIndex = -1;
-                //convert to date to compare
-                for (int i = 0; i < BredaDepNSTimes.size(); i++) {
-                    Date nsDate = convertNSToDate(BredaDepNSTimes.get(i));
-                    if (nsDate == null || BredaArrivalDate == null) {
-                        return "nsDate or BredaArrivalDate null";
+
+                try {
+                    //compare with breda arrival time
+                    Date BredaArrivalDate = convertNSToDate(bredaArrivalTime);
+
+
+                    //convert to date to compare
+                    for (int i = 0; i < BredaDepNSTimes.size(); i++) {
+                        Date nsDate = convertNSToDate(BredaDepNSTimes.get(i));
+                        if (nsDate == null || BredaArrivalDate == null) {
+                            return "nsDate or BredaArrivalDate null";
+                        }
+                        if (BredaArrivalDate.before(nsDate)) {
+                            nextIndex = i; //i is index of next departure time.
+                            break;
+                        }
                     }
-                    if (BredaArrivalDate.before(nsDate)) {
-                        nextIndex = i; //i is index of next departure time.
-                        break;
-                    }
+                } catch (ParseException e) {
+                    Log.e("BC.getBredaDepTime","convertNSToDate failed");
+                    return null;
                 }
 
                 //                    if (nextIndex == -1) {
@@ -303,14 +317,16 @@ class BaseClass {
                     //depTime becomes next Breda departure Time
                     return BredaDepNSTimes.get(nextIndex);
                 } else {
-                    return "nextIndex == -1";
+                    Log.e("BC.getBredaDepTime","nextIndex == -1");
+                    return null;
                 }
             } catch (SAXException | ParserConfigurationException | IOException | XPathExpressionException e) {
 //                Log.e("exception caught:",e.getMessage());
                 e.printStackTrace();
             }
         }
-        return "end of getBredaDepTime reached without result";
+        Log.e("BC.getBredaDepTime","end reached without result");
+        return null;
     }
 
     /**
@@ -324,6 +340,7 @@ class BaseClass {
     String getNSStringByDepartureTime(String depTime, String field,
                                       String arrivalResponse, int from, int to) {
         if (depTime == null) {
+            Log.e("BC.getNSStringBy...","depTime == null");
             return null;
         } else {
             String arrivalTime = "+0";
@@ -371,7 +388,7 @@ class BaseClass {
      * @param nsTime ns time
      * @return string
      */
-    String convertNSToString(String nsTime, int from, int to, String user) {
+    String convertNSToString(String nsTime, int from, int to, String user) throws ParseException {
 
         if (nsTime == null) {
             return "No time selected";
@@ -382,7 +399,7 @@ class BaseClass {
                 //special cycling case for Thomas
                 //round time to nearest ten minutes
                 int unroundedMinutes = c.get(Calendar.MINUTE);
-                int mod = unroundedMinutes % 10;
+                int mod = unroundedMinutes % 5;
                 c.add(Calendar.MINUTE, 20); //add 20 minutes for bike time
                 c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
             }
@@ -398,7 +415,8 @@ class BaseClass {
      */
     String convertCalendarToString(Calendar c) {
         if (c == null) {
-            return "convertCalendarToString: null object passed";
+            Log.e("BC.convertC..ToString","null passed");
+            return null;
         } else {
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
             return sdf.format(c.getTime());

@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -266,10 +267,9 @@ public class MainActivity extends AppCompatActivity {
      * @param nsTime ns time
      * @return string
      */
-    private String convertNSToString(String nsTime) {
+    private String convertNSToString(String nsTime) throws ParseException {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         String user = prefs.getString(getString(R.string.pref_user),"none");
-
         return baseClass.convertNSToString(nsTime, from, to, user);
     }
 
@@ -277,18 +277,17 @@ public class MainActivity extends AppCompatActivity {
      * @param time string in HH:mm format
      * @return time in NS format
      */
-    private String convertStringToNS(String time) {
+    private String convertStringToNS(String time) throws ParseException {
         if (  time == null || time.contains(" ") ) { //assume correct HH:mm times
-            return "Time not formatted correctly";
+            Log.e("convertStringToNS","time not formatted correctly");
+            return null;
         } else {
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-            Date date = null;
-            try {
-                date = sdf.parse(time);
-            } catch (ParseException e) {
-                e.printStackTrace();
+            Date date = sdf.parse(time);
+            if (date == null) {
+                Log.e("convertStringToNS","date == null");
+                return null;
             }
-            if (date == null) return "convertStringToNS: date is null";
             Calendar calendar = new GregorianCalendar();
             calendar.setTime(date); //changes date to 1 jan 1970
             int hour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -307,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
      * @param nsTime time in ns format
      * @return calendar object
      */
-    private Calendar convertNSToCal(String nsTime) {
+    private Calendar convertNSToCal(String nsTime) throws ParseException {
         return baseClass.convertNSToCal(nsTime);
     }
 
@@ -331,6 +330,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private String convertCalendarToNS(Calendar c) {
         if (c == null) {
+            Log.e("convertCalendarToNS","null passed");
             return null;
         } else {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault());
@@ -344,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
      * @param nsTime ns time
      * @return string
      */
-    public String convertNSToString_Bare(String nsTime) {
+    public String convertNSToString_Bare(String nsTime) throws ParseException {
         if (nsTime == null) {
             return "No time selected";
         } else {
@@ -369,6 +369,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private Map<String, String> getDepartureDelays(String response) {
         if (response == null) {
+            Log.e("getDepartureDelays","null passed");
             return null;
         } else {
             try {
@@ -407,13 +408,16 @@ public class MainActivity extends AppCompatActivity {
 
                 //add everything to the map, key=departure time HH:mm, value is delay +x
                 for (int i = 0; i < depNodeList.getLength(); i++) {
-                    //get node and convert to HH:mm
-                    String dep = convertNSToString_Bare(
-                            depNodeList.item(i).getFirstChild().getNodeValue());
-                    //get node and remove " min"
-                    String delay = delayNodeList.item(i).getFirstChild()
-                            .getNodeValue().split(" ")[0];
-                    map.put(dep,delay);
+                    try {
+                        //get node and convert to HH:mm
+                        String dep = convertNSToString_Bare(depNodeList.item(i).getFirstChild().getNodeValue());
+                        //get node and remove " min"
+                        String delay = delayNodeList.item(i).getFirstChild()
+                                .getNodeValue().split(" ")[0];
+                        map.put(dep, delay);
+                    } catch (ParseException e) {
+                        Log.e("getDepartureDelays","convertNSToString failed");
+                    }
                 }
 
                 return map;
@@ -470,29 +474,37 @@ public class MainActivity extends AppCompatActivity {
                 //matches with any departure time in the breda hashmap
                 //if so, add bd +x
                 if (viaBreda && mapBredaDelay != null) {
-                    //convert to ns for getBredaDepTime, removing the +x for that
-                    //only if it does contain a +x
-                    String nsdep = departTimes[i];
-                    if (departTimes[i].contains("+")) {
-                        nsdep = departTimes[i].split(" ")[0];
-                    }
-                    nsdep = convertStringToNS(nsdep);
+                    try {
+                        //convert to ns for getBredaDepTime, removing the +x for that
+                        //only if it does contain a +x
+                        String nsdep = departTimes[i];
+                        if (departTimes[i].contains("+")) {
+                            nsdep = departTimes[i].split(" ")[0];
+                        }
+                        nsdep = convertStringToNS(nsdep);
 
-                    String nsBredaDepTime = baseClass.getBredaDepTime(nsdep, arrivalResponse);
-                    if (nsBredaDepTime == null) {
-                        break;
-                    }
-                    String bredaDepTime = convertNSToString_Bare(
-                            nsBredaDepTime);
-                    if (bredaDepTime == null) break;
-
-                    for (Map.Entry<String, String> entry : mapBredaDelay.entrySet()) {
-                        if (entry.getKey().equals(bredaDepTime)) {
-                            delayedBredaDepTime = true;
-                            departTimes[i] += " bd " + entry.getValue();
+                        String nsBredaDepTime = baseClass.getBredaDepTime(nsdep, arrivalResponse);
+                        if (nsBredaDepTime == null) {
+                            Log.e("updateDepartures", "nsBredaDepTime == null");
+                            break;
+                        }
+                        String bredaDepTime = convertNSToString_Bare(
+                                nsBredaDepTime);
+                        if (bredaDepTime == null) {
+                            Log.e("updateDepartures", "bredaDepTime == null");
                             break;
                         }
 
+                        for (Map.Entry<String, String> entry : mapBredaDelay.entrySet()) {
+                            if (entry.getKey().equals(bredaDepTime)) {
+                                delayedBredaDepTime = true;
+                                departTimes[i] += " bd " + entry.getValue();
+                                break;
+                            }
+
+                        }
+                    } catch (ParseException e) {
+                        Log.e("updateDepartures","converting nsdep or nsBredaDepTime failed");
                     }
                 }
                 if (!delayedDepTime) { //align a tiny bit better
@@ -608,47 +620,56 @@ public class MainActivity extends AppCompatActivity {
 
         String message = "You are here already, you stupid!";
 
-        //1. get five departure times in calendar format
-        //2. convert the chosen calendar to ns-format string
-        //3. get the corresponding arrival time
-        //4. convert it to HH:mm format
-        String nsArrivalTime = convertNSToString(getNSStringByDepartureTime(
-                convertCalendarToNS(getNSDepartures()[depart]), "ActueleAankomstTijd"));
+        try {
 
-        String user = getUser();
-        String prefix = "ETA ";
+            //1. get five departure times in calendar format
+            //2. convert the chosen calendar to ns-format string
+            //3. get the corresponding arrival time
+            //4. convert it to HH:mm format
+            String nsArrivalTime = convertNSToString(getNSStringByDepartureTime(
+                    convertCalendarToNS(getNSDepartures()[depart]), "ActueleAankomstTijd"));
 
-        //few special cases first
-        if (from == EHV) {
-            if (to == Heeze) {
-                //take the chosen calendar object of the current departures,
-                // and add optionally travel time to that and convert to string with cAddTravel
-                if (user.equals("Abby")) {
-                    message = "Trein van " + convertCalendarToString(getNSDepartures()[depart]);
-                } else {
+            String user = getUser();
+            String prefix = "ETA ";
+
+            //few special cases first
+            if (from == EHV) {
+                if (to == Heeze) {
+                    //take the chosen calendar object of the current departures,
+                    // and add optionally travel time to that and convert to string with cAddTravel
+                    if (user.equals("Abby")) {
+                        message = "Trein van " + convertCalendarToString(getNSDepartures()[depart]);
+                    } else {
+                        message = prefix + nsArrivalTime;
+                    }
+                } else if (to == RDaal) {
                     message = prefix + nsArrivalTime;
                 }
-            } else if (to == RDaal) {
+            } else if (from == Heeze) {
+                if (to == EHV) {
+                    if (user.equals("Abby")) {
+                        message = "Eindhoven ETA " + nsArrivalTime;
+                    } else {
+                        message = prefix + nsArrivalTime;
+                    }
+                } else if (to == RDaal) {
+                    if (user.equals("Abby")) {
+                        message = "Yay at " + nsArrivalTime + ".";
+                    } else {
+                        message = prefix + nsArrivalTime;
+                    }
+                }
+            } else {
                 message = prefix + nsArrivalTime;
             }
-        } else if (from == Heeze) {
-            if (to == EHV) {
-                if (user.equals("Abby")) {
-                    message = "Eindhoven ETA " + nsArrivalTime;
-                } else {
-                    message = prefix + nsArrivalTime;
-                }
-            } else if (to == RDaal) {
-                if (user.equals("Abby")) {
-                    message = "Yay at " + nsArrivalTime + ".";
-                } else {
-                    message = prefix + nsArrivalTime;
-                }
-            }
-        } else {
-            message = prefix + nsArrivalTime;
+
+        } catch (ParseException e) {
+            Log.e("sendText", "parsing to nsArrivalTime failed");
+            message = "ParseException thrown";
         }
 
+        Toast.makeText(getBaseContext(),message,Toast.LENGTH_SHORT).show();
+        Log.e("test","test1");
         sendWhatsApp(message);
 
     }

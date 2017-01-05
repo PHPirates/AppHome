@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -250,8 +251,12 @@ public class WidgetProvider extends AppWidgetProvider {
                 //otherwise, get arrival time
                 String[] times = new String[3];
                 for (int i = 0; i < times.length; i++) {
-                    times[i] = convertNSToString(getNSStringByDepartureTime(
-                            convertCalendarToNS(currentDeps[i + middle - 1])));
+                    try {
+                        times[i] = convertNSToString(getNSStringByDepartureTime(
+                                convertCalendarToNS(currentDeps[i + middle - 1])));
+                    } catch (ParseException e) {
+                        Log.e("WP.updateButtons","failed to convert departure");
+                    }
                 }
                 timeOne = times[0];
                 timeTwo = times[1];
@@ -281,7 +286,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * @param nsTime ns time
      * @return string
      */
-    private String convertNSToString(String nsTime) {
+    private String convertNSToString(String nsTime) throws ParseException {
         return baseClass.convertNSToString(nsTime, from, to, "none");
     }
 
