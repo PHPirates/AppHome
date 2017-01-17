@@ -626,8 +626,11 @@ public class MainActivity extends AppCompatActivity {
             //2. convert the chosen calendar to ns-format string
             //3. get the corresponding arrival time
             //4. convert it to HH:mm format
-            String nsArrivalTime = convertNSToString(getNSStringByDepartureTime(
-                    convertCalendarToNS(getNSDepartures()[depart]), "ActueleAankomstTijd"));
+            Calendar nsDepartureCal = getNSDepartures()[depart-1]; //todo numberpicker values start at one instead of zero?
+            String nsDepartureString = convertCalendarToNS(nsDepartureCal);
+            String nsString = getNSStringByDepartureTime(
+                    nsDepartureString, "ActueleAankomstTijd");
+            String nsArrivalTime = convertNSToString(nsString);
 
             String user = getUser();
             String prefix = "ETA ";

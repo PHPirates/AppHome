@@ -114,7 +114,7 @@ class BaseClass {
             //get current time
             Date current = new Date();
 
-            //find next departure time in List
+            //find next departure time in List (next as in 'the first departure time from now() )
             int nextIndex = -1;
             //convert to date to compare
             for (int i = 0; i < nsTimes.size(); i++) {
@@ -142,24 +142,19 @@ class BaseClass {
 
             Calendar[] depTimes = new Calendar[timesNumber];
 
-//            if (nextIndex < timesNumber / 2) { //if index is lower than what it should be
-//                if (nextIndex == -1) {
-////                    Log.e("nextIndex", "no next departure time!");
-//                } else {
-////                    Log.e("nextIndex", "is too small: " + Integer.toString(nextIndex));
-//                }
-//            } else {
-            if (!(nextIndex < timesNumber / 2)) { //if index is not lower than what it should be
-                //index is index of next dept time of all the xml deptimes in nsTimes
-                //get departure times around next time
-                for (int i = 0; i < depTimes.length; i++) {
-                    if (nextIndex - timesNumber / 2 + i < nsTimes.size()) {
-                        //if not out of bounds... (happens when ns returns <timesNumber times total)
-                        try {
-                            depTimes[i] = convertNSToCal(nsTimes.get(nextIndex - timesNumber / 2 + i));
-                        } catch (ParseException e) {
-                            Log.e("BC.getNSDepartures","convertNSToCal("+nsTimes.get(nextIndex - timesNumber / 2 + i)+") failed");
-                        }
+            //index is index of next dept time of all the xml deptimes in nsTimes
+            //get departure times around next time
+            for (int i = 0; i < depTimes.length; i++) { //for all null values in depTimes to be replaced
+                int j = nextIndex - timesNumber / 2 + i; //calculate index for times around next departure time
+                //say with aiming for 5 times, this would be the two times before the next time,
+                //the next time and the two after = 5 times around next time
+                if ( (j < nsTimes.size() ) && (j >= 0) ) { //todo leaving out j>=0 crashes the app without any error instead of say an IOOBE
+                    //if not out of bounds... (happens when ns returns <timesNumber times in total)
+                    // in that case fills up with nulls at both ends, is converted to spaces in currentDepartures()
+                    try {
+                        depTimes[i] = convertNSToCal(nsTimes.get(j));
+                    } catch (ParseException e) {
+                        Log.e("BC.getNSDepartures","convertNSToCal("+nsTimes.get(j)+") failed");
                     }
                 }
             }
@@ -356,6 +351,7 @@ class BaseClass {
 
                 if (from == EHV && to == RDaal) {
                     depTime = getBredaDepTime(depTime, arrivalResponse);
+                    xmlDocument = builder.parse(new ByteArrayInputStream(arrivalResponse.getBytes())); //don't forget to update what to search in... oops
                 }
 
                 //now (possibly again) arrival time with depTime.
@@ -368,7 +364,7 @@ class BaseClass {
 
                 if (nodeList.getLength() == 0) {
                     //there is no arrivalTime
-                    return "No delays.";
+                    return "No arrival time found";
                 }
                 //set arrivalTime using the arrivalTime found
                 arrivalTime = nodeList.item(0).getFirstChild().getNodeValue();
