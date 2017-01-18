@@ -626,7 +626,7 @@ public class MainActivity extends AppCompatActivity {
             //2. convert the chosen calendar to ns-format string
             //3. get the corresponding arrival time
             //4. convert it to HH:mm format
-            Calendar nsDepartureCal = getNSDepartures()[depart-1]; //todo numberpicker values start at one instead of zero?
+            Calendar nsDepartureCal = getNSDepartures()[depart-1]; //numberpicker values start at one instead of zero
             String nsDepartureString = convertCalendarToNS(nsDepartureCal);
             String nsString = getNSStringByDepartureTime(
                     nsDepartureString, "ActueleAankomstTijd");
@@ -641,7 +641,7 @@ public class MainActivity extends AppCompatActivity {
                     //take the chosen calendar object of the current departures,
                     // and add optionally travel time to that and convert to string with cAddTravel
                     if (user.equals("Abby")) {
-                        message = "Trein van " + convertCalendarToString(getNSDepartures()[depart]);
+                        message = "Trein van " + convertCalendarToString(nsDepartureCal);
                     } else {
                         message = prefix + nsArrivalTime;
                     }
@@ -671,8 +671,6 @@ public class MainActivity extends AppCompatActivity {
             message = "ParseException thrown";
         }
 
-        Toast.makeText(getBaseContext(),message,Toast.LENGTH_SHORT).show();
-        Log.e("test","test1");
         sendWhatsApp(message);
 
     }
@@ -692,6 +690,8 @@ public class MainActivity extends AppCompatActivity {
      * @param text the message
      */
     private void sendWhatsApp(String text) {
+        Toast.makeText(getBaseContext(),text,Toast.LENGTH_SHORT).show();
+
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, text);

@@ -363,8 +363,9 @@ class BaseClass {
                         xmlDocument, XPathConstants.NODESET);
 
                 if (nodeList.getLength() == 0) {
-                    //there is no arrivalTime
-                    return "No arrival time found";
+                    //there is no arrivalTime or delay found (no delay can be expected, hence the message which the user will see
+                    Log.e("BC.getNSStringByDep","no arrival time or delay found");
+                    return "Geen vertraging vandaag!";
                 }
                 //set arrivalTime using the arrivalTime found
                 arrivalTime = nodeList.item(0).getFirstChild().getNodeValue();
@@ -391,7 +392,7 @@ class BaseClass {
         } else {
             Calendar c = convertNSToCal(nsTime);
             if (c == null) return "convertNSToCal returned null";
-            if (from == EHV && to == RDaal && user.equals("Thomas")) { //if going to Rdaal
+            if (to == RDaal && user.equals("Thomas")) { //if Thomas going to Rdaal
                 //special cycling case for Thomas
                 //round time to nearest ten minutes
                 int unroundedMinutes = c.get(Calendar.MINUTE);
