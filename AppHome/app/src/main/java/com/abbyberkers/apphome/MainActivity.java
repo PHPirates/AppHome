@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 from = newVal;
-                new RetrieveFeedTask().execute(); //get xml from ns
+                updateNumberpicker();
             }
         });
 
@@ -123,22 +123,36 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 to = newVal;
-                new RetrieveFeedTask().execute(); //get xml from ns
+                updateNumberpicker();
             }
         });
 
-        //get all the current departures to show in numberpicker
-        String[] departTimes = currentDepartures();
+        //first check whether user is already set, then set defaults, then request times
+
+        checkUserConfigured();
+
+        //set a proper default
+        String user = getUser();
+        if (user.equals("Thomas")) {
+            npFrom.setValue(EHV);
+            from = EHV;
+            npTo.setValue(RDaal);
+            to = RDaal;
+        } else if (user.equals("Abby")) {
+            from = EHV;
+            npFrom.setValue(EHV);
+            to = Heeze;
+            npTo.setValue(Heeze);
+        }
 
         NumberPicker npDep; //NP for close departure times
         npDep = (NumberPicker) findViewById(R.id.numberPickerDepartures);
 
         assert npDep != null;
         npDep.setMinValue(0);
-        npDep.setMaxValue(departTimes.length - 1);
+        npDep.setMaxValue(1);
         npDep.setWrapSelectorWheel(false);
-        npDep.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        updateDepartures();
+        npDep.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); //todo ?
 
         npDep.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
@@ -146,6 +160,8 @@ public class MainActivity extends AppCompatActivity {
                 depart = newVal;
             }
         });
+
+        updateNumberpicker(); //update departures
     }
 
     /**
@@ -155,8 +171,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-        new RetrieveFeedTask().execute(); //get xml from ns
+        updateNumberpicker(); //get xml from ns
+        checkUserConfigured();
+    }
 
+    public void checkUserConfigured() {
         //check for first run, if it is, display setting
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         boolean previouslyStarted = prefs.getBoolean(getString(R.string.pref_previously_started), false);
@@ -430,9 +449,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Update the time picker when selecting a new destination
+     * updates numberpicker with fresh data from NS
      */
-    private void updateDepartures() {
+    private void updateNumberpicker() {
+        new RetrieveFeedTask().execute();
+    }
+
+    /**
+     * Update the time picker GIVEN new data from NS
+     */
+    private void processNSDataForNumberpicker() {
         //find out if going via breda (to look for breda delays or not)
         boolean viaBreda = to == EHV && from == RDaal || to == RDaal && from == EHV;
 
@@ -485,13 +511,13 @@ public class MainActivity extends AppCompatActivity {
 
                         String nsBredaDepTime = baseClass.getBredaDepTime(nsdep, arrivalResponse, from, to);
                         if (nsBredaDepTime == null) {
-                            Log.e("updateDepartures", "nsBredaDepTime == null");
+                            Log.e("processNSDataForNp", "nsBredaDepTime == null");
                             break;
                         }
                         String bredaDepTime = convertNSToString_Bare(
                                 nsBredaDepTime);
                         if (bredaDepTime == null) {
-                            Log.e("updateDepartures", "bredaDepTime == null");
+                            Log.e("processNSDataForNp", "bredaDepTime == null");
                             break;
                         }
 
@@ -504,7 +530,7 @@ public class MainActivity extends AppCompatActivity {
 
                         }
                     } catch (ParseException e) {
-                        Log.e("updateDepartures","converting nsdep or nsBredaDepTime failed");
+                        Log.e("processNSDataForNp","converting nsdep or nsBredaDepTime failed");
                     }
                 }
                 if (!delayedDepTime) { //align a tiny bit better
@@ -701,6 +727,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Requests data from NS and updates numberpicker (processNSDataForNumberpicker())
+     */
     private class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
 
 
@@ -828,7 +857,7 @@ public class MainActivity extends AppCompatActivity {
                     noInternetConnection();
                 } else {
                     setResponse(response);
-                    updateDepartures(); //update nrpicker
+                    processNSDataForNumberpicker(); //update nrpicker
                 }
             }
         }
