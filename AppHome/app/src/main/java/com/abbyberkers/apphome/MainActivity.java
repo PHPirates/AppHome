@@ -483,7 +483,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         nsdep = convertStringToNS(nsdep);
 
-                        String nsBredaDepTime = baseClass.getBredaDepTime(nsdep, arrivalResponse);
+                        String nsBredaDepTime = baseClass.getBredaDepTime(nsdep, arrivalResponse, from, to);
                         if (nsBredaDepTime == null) {
                             Log.e("updateDepartures", "nsBredaDepTime == null");
                             break;
@@ -598,11 +598,11 @@ public class MainActivity extends AppCompatActivity {
     public void sendDelay(View view) {
         //get the five current departure times in calendar format
         Calendar[] departures = getNSDepartures();
-        if (departures[depart] == null) {
+        if (departures[depart-1] == null) {
             Toast.makeText(this, "Delay not possible", Toast.LENGTH_LONG).show();
         } else {
             //convert calendar to ns format and select the chosen departure time
-            String nsDep = convertCalendarToNS(departures[depart]);
+            String nsDep = convertCalendarToNS(departures[depart-1]);
             String delay = getNSStringByDepartureTime(nsDep, "AankomstVertraging");
             sendWhatsApp(delay);
         }
@@ -726,7 +726,7 @@ public class MainActivity extends AppCompatActivity {
 
                     URL url;
 
-                    boolean viaBreda = (from == EHV && to == RDaal) || from == RDaal && to == EHV;
+                    boolean viaBreda = (from == EHV && to == RDaal) || (from == RDaal && to == EHV);
 
                     if (viaBreda) {
                         HttpURLConnection urlConnection;

@@ -91,6 +91,7 @@ class BaseClass {
                         "VervoerType = 'Intercity']/GeplandeVertrekTijd";
                 nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
+                //selecting intercities in breda is done when finding arrival times:
 //            } else if (from == RDaal && to == EHV) {
 //                String depTimesICExpr = "//ReisMogelijkheid[ReisDeel[last()]/" +
 //                        "VervoerType = 'Intercity']/ActueleVertrekTijd";
@@ -234,7 +235,7 @@ class BaseClass {
      *                        uses response as well
      * @return departure time in breda with that voyage IN NS FORMAT
      */
-    String getBredaDepTime(String cityDepTime, String arrivalResponse) {
+    String getBredaDepTime(String cityDepTime, String arrivalResponse, int from, int to) { //from and to are needed because of breda troubles (see below)
         if (cityDepTime == null || response == null || arrivalResponse == null) {
             return "getBredaDepTime: one of parameters or response is null";
         } else {
@@ -249,8 +250,6 @@ class BaseClass {
                         "[GeplandeVertrekTijd[text()='" + cityDepTime + "']]/GeplandeAankomstTijd";
 
                 //deptime is departure time in EHV
-                //get new deptime, the first departure time in Breda
-                // which is later than the arrival time
                 NodeList arrivalNodeList = (NodeList) xPath.compile(arrivalOrDepExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
 
@@ -296,7 +295,17 @@ class BaseClass {
                             return "nsDate or BredaArrivalDate null";
                         }
                         if (BredaArrivalDate.before(nsDate)) {
-                            nextIndex = i; //i is index of next departure time.
+                            //BREDA TROUBLE
+                            //i should be second (i+1) next departure time on rdaal-ehv because
+                            // ns selects same intercity you just left again if taking first time,
+                            // select the first (i) on ehv-rdaal
+
+                            if (from == RDaal && to == EHV) {
+                                nextIndex = i+1;
+                            } else {
+                                nextIndex = i;
+                            }
+
                             break;
                         }
                     }
@@ -349,17 +358,19 @@ class BaseClass {
                 XPath xPath = XPathFactory.newInstance().newXPath();
                 Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
 
-                if (from == EHV && to == RDaal) {
-                    depTime = getBredaDepTime(depTime, arrivalResponse);
+                if (from == EHV && to == RDaal || from == RDaal && to == EHV) { //only viaBreda on this trajectory
+                    depTime = getBredaDepTime(depTime, arrivalResponse, from, to);
                     xmlDocument = builder.parse(new ByteArrayInputStream(arrivalResponse.getBytes())); //don't forget to update what to search in... oops
                 }
 
                 //now (possibly again) arrival time with depTime.
                 // depTime may have been updated to Breda depTime
-                String arrivalOrDepExpr = "/ReisMogelijkheden" +
+                String arrivalOrDelayExpr = "/ReisMogelijkheden" +
                         "/ReisMogelijkheid[GeplandeVertrekTijd[text()='" + depTime + "']]/" + field;
+                //(it is named so because the value depends on the field given)
 
-                NodeList nodeList = (NodeList) xPath.compile(arrivalOrDepExpr).evaluate(
+
+                NodeList nodeList = (NodeList) xPath.compile(arrivalOrDelayExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
 
                 if (nodeList.getLength() == 0) {
@@ -373,6 +384,7 @@ class BaseClass {
             } catch (ParserConfigurationException | SAXException |
                     IOException | XPathExpressionException e) {
                 e.printStackTrace();
+                Log.e("BC.getNSStringByDep","Parsing failed");
             }
 
             return arrivalTime;
