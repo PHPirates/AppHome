@@ -8,13 +8,22 @@ android {
         applicationId "com.abbyberkers.apphome"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 3
-        versionName "1.4"
+        versionCode 4
+        versionName "1.5"
     }
-    buildTypes {
-        release {
+    buildTypes{
+        release{
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),'proguard-rules.pro'
+            applicationVariants.all{variant->
+                variant.outputs.each{output->
+                    def newName=output.outputFile.name
+                    newName=newName.replace("app-","AppHome-")
+                    newName=newName.replace("-release","-release"+variant.versionName)
+//noinspectionGroovyAssignabilityCheck
+                    output.outputFile=new File(output.outputFile.parent,newName)
+                }
+            }
         }
     }
 }
