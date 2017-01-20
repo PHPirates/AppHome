@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -101,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 from = newVal;
-                new RetrieveFeedTask().execute(); //get xml from ns
+                updateNumberpicker();
             }
         });
 
@@ -122,22 +123,36 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 to = newVal;
-                new RetrieveFeedTask().execute(); //get xml from ns
+                updateNumberpicker();
             }
         });
 
-        //get all the current departures to show in numberpicker
-        String[] departTimes = currentDepartures();
+        //first check whether user is already set, then set defaults, then request times
+
+        checkUserConfigured();
+
+        //set a proper default
+        String user = getUser();
+        if (user.equals("Thomas")) {
+            npFrom.setValue(EHV);
+            from = EHV;
+            npTo.setValue(RDaal);
+            to = RDaal;
+        } else if (user.equals("Abby")) {
+            from = EHV;
+            npFrom.setValue(EHV);
+            to = Heeze;
+            npTo.setValue(Heeze);
+        }
 
         NumberPicker npDep; //NP for close departure times
         npDep = (NumberPicker) findViewById(R.id.numberPickerDepartures);
 
         assert npDep != null;
         npDep.setMinValue(0);
-        npDep.setMaxValue(departTimes.length - 1);
+        npDep.setMaxValue(1);
         npDep.setWrapSelectorWheel(false);
-        npDep.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
-        updateDepartures();
+        npDep.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); //todo ?
 
         npDep.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
@@ -145,6 +160,8 @@ public class MainActivity extends AppCompatActivity {
                 depart = newVal;
             }
         });
+
+        updateNumberpicker(); //update departures
     }
 
     /**
@@ -154,8 +171,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-        new RetrieveFeedTask().execute(); //get xml from ns
+        updateNumberpicker(); //get xml from ns
+        checkUserConfigured();
+    }
 
+    public void checkUserConfigured() {
         //check for first run, if it is, display setting
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         boolean previouslyStarted = prefs.getBoolean(getString(R.string.pref_previously_started), false);
@@ -266,10 +286,9 @@ public class MainActivity extends AppCompatActivity {
      * @param nsTime ns time
      * @return string
      */
-    private String convertNSToString(String nsTime) {
+    private String convertNSToString(String nsTime) throws ParseException {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         String user = prefs.getString(getString(R.string.pref_user),"none");
-
         return baseClass.convertNSToString(nsTime, from, to, user);
     }
 
@@ -277,18 +296,17 @@ public class MainActivity extends AppCompatActivity {
      * @param time string in HH:mm format
      * @return time in NS format
      */
-    private String convertStringToNS(String time) {
+    private String convertStringToNS(String time) throws ParseException {
         if (  time == null || time.contains(" ") ) { //assume correct HH:mm times
-            return "Time not formatted correctly";
+            Log.e("convertStringToNS","time not formatted correctly");
+            return null;
         } else {
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-            Date date = null;
-            try {
-                date = sdf.parse(time);
-            } catch (ParseException e) {
-                e.printStackTrace();
+            Date date = sdf.parse(time);
+            if (date == null) {
+                Log.e("convertStringToNS","date == null");
+                return null;
             }
-            if (date == null) return "convertStringToNS: date is null";
             Calendar calendar = new GregorianCalendar();
             calendar.setTime(date); //changes date to 1 jan 1970
             int hour = calendar.get(Calendar.HOUR_OF_DAY);
@@ -307,7 +325,7 @@ public class MainActivity extends AppCompatActivity {
      * @param nsTime time in ns format
      * @return calendar object
      */
-    private Calendar convertNSToCal(String nsTime) {
+    private Calendar convertNSToCal(String nsTime) throws ParseException {
         return baseClass.convertNSToCal(nsTime);
     }
 
@@ -331,6 +349,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private String convertCalendarToNS(Calendar c) {
         if (c == null) {
+            Log.e("convertCalendarToNS","null passed");
             return null;
         } else {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault());
@@ -344,7 +363,7 @@ public class MainActivity extends AppCompatActivity {
      * @param nsTime ns time
      * @return string
      */
-    public String convertNSToString_Bare(String nsTime) {
+    public String convertNSToString_Bare(String nsTime) throws ParseException {
         if (nsTime == null) {
             return "No time selected";
         } else {
@@ -369,6 +388,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private Map<String, String> getDepartureDelays(String response) {
         if (response == null) {
+            Log.e("getDepartureDelays","null passed");
             return null;
         } else {
             try {
@@ -407,13 +427,16 @@ public class MainActivity extends AppCompatActivity {
 
                 //add everything to the map, key=departure time HH:mm, value is delay +x
                 for (int i = 0; i < depNodeList.getLength(); i++) {
-                    //get node and convert to HH:mm
-                    String dep = convertNSToString_Bare(
-                            depNodeList.item(i).getFirstChild().getNodeValue());
-                    //get node and remove " min"
-                    String delay = delayNodeList.item(i).getFirstChild()
-                            .getNodeValue().split(" ")[0];
-                    map.put(dep,delay);
+                    try {
+                        //get node and convert to HH:mm
+                        String dep = convertNSToString_Bare(depNodeList.item(i).getFirstChild().getNodeValue());
+                        //get node and remove " min"
+                        String delay = delayNodeList.item(i).getFirstChild()
+                                .getNodeValue().split(" ")[0];
+                        map.put(dep, delay);
+                    } catch (ParseException e) {
+                        Log.e("getDepartureDelays","convertNSToString failed");
+                    }
                 }
 
                 return map;
@@ -426,9 +449,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Update the time picker when selecting a new destination
+     * updates numberpicker with fresh data from NS
      */
-    private void updateDepartures() {
+    private void updateNumberpicker() {
+        new RetrieveFeedTask().execute();
+    }
+
+    /**
+     * Update the time picker GIVEN new data from NS
+     */
+    private void processNSDataForNumberpicker() {
         //find out if going via breda (to look for breda delays or not)
         boolean viaBreda = to == EHV && from == RDaal || to == RDaal && from == EHV;
 
@@ -470,29 +500,37 @@ public class MainActivity extends AppCompatActivity {
                 //matches with any departure time in the breda hashmap
                 //if so, add bd +x
                 if (viaBreda && mapBredaDelay != null) {
-                    //convert to ns for getBredaDepTime, removing the +x for that
-                    //only if it does contain a +x
-                    String nsdep = departTimes[i];
-                    if (departTimes[i].contains("+")) {
-                        nsdep = departTimes[i].split(" ")[0];
-                    }
-                    nsdep = convertStringToNS(nsdep);
+                    try {
+                        //convert to ns for getBredaDepTime, removing the +x for that
+                        //only if it does contain a +x
+                        String nsdep = departTimes[i];
+                        if (departTimes[i].contains("+")) {
+                            nsdep = departTimes[i].split(" ")[0];
+                        }
+                        nsdep = convertStringToNS(nsdep);
 
-                    String nsBredaDepTime = baseClass.getBredaDepTime(nsdep, arrivalResponse);
-                    if (nsBredaDepTime == null) {
-                        break;
-                    }
-                    String bredaDepTime = convertNSToString_Bare(
-                            nsBredaDepTime);
-                    if (bredaDepTime == null) break;
-
-                    for (Map.Entry<String, String> entry : mapBredaDelay.entrySet()) {
-                        if (entry.getKey().equals(bredaDepTime)) {
-                            delayedBredaDepTime = true;
-                            departTimes[i] += " bd " + entry.getValue();
+                        String nsBredaDepTime = baseClass.getBredaDepTime(nsdep, arrivalResponse, from, to);
+                        if (nsBredaDepTime == null) {
+                            Log.e("processNSDataForNp", "nsBredaDepTime == null");
+                            break;
+                        }
+                        String bredaDepTime = convertNSToString_Bare(
+                                nsBredaDepTime);
+                        if (bredaDepTime == null) {
+                            Log.e("processNSDataForNp", "bredaDepTime == null");
                             break;
                         }
 
+                        for (Map.Entry<String, String> entry : mapBredaDelay.entrySet()) {
+                            if (entry.getKey().equals(bredaDepTime)) {
+                                delayedBredaDepTime = true;
+                                departTimes[i] += " bd " + entry.getValue();
+                                break;
+                            }
+
+                        }
+                    } catch (ParseException e) {
+                        Log.e("processNSDataForNp","converting nsdep or nsBredaDepTime failed");
                     }
                 }
                 if (!delayedDepTime) { //align a tiny bit better
@@ -586,11 +624,11 @@ public class MainActivity extends AppCompatActivity {
     public void sendDelay(View view) {
         //get the five current departure times in calendar format
         Calendar[] departures = getNSDepartures();
-        if (departures[depart] == null) {
+        if (departures[depart-1] == null) {
             Toast.makeText(this, "Delay not possible", Toast.LENGTH_LONG).show();
         } else {
             //convert calendar to ns format and select the chosen departure time
-            String nsDep = convertCalendarToNS(departures[depart]);
+            String nsDep = convertCalendarToNS(departures[depart-1]);
             String delay = getNSStringByDepartureTime(nsDep, "AankomstVertraging");
             sendWhatsApp(delay);
         }
@@ -608,45 +646,55 @@ public class MainActivity extends AppCompatActivity {
 
         String message = "You are here already, you stupid!";
 
-        //1. get five departure times in calendar format
-        //2. convert the chosen calendar to ns-format string
-        //3. get the corresponding arrival time
-        //4. convert it to HH:mm format
-        String nsArrivalTime = convertNSToString(getNSStringByDepartureTime(
-                convertCalendarToNS(getNSDepartures()[depart]), "ActueleAankomstTijd"));
+        try {
 
-        String user = getUser();
-        String prefix = "ETA ";
+            //1. get five departure times in calendar format
+            //2. convert the chosen calendar to ns-format string
+            //3. get the corresponding arrival time
+            //4. convert it to HH:mm format
+            Calendar nsDepartureCal = getNSDepartures()[depart-1]; //numberpicker values start at one instead of zero
+            String nsDepartureString = convertCalendarToNS(nsDepartureCal);
+            String nsString = getNSStringByDepartureTime(
+                    nsDepartureString, "ActueleAankomstTijd");
+            String nsArrivalTime = convertNSToString(nsString);
 
-        //few special cases first
-        if (from == EHV) {
-            if (to == Heeze) {
-                //take the chosen calendar object of the current departures,
-                // and add optionally travel time to that and convert to string with cAddTravel
-                if (user.equals("Abby")) {
-                    message = "Trein van " + convertCalendarToString(getNSDepartures()[depart]);
-                } else {
+            String user = getUser();
+            String prefix = "ETA ";
+
+            //few special cases first
+            if (from == EHV) {
+                if (to == Heeze) {
+                    //take the chosen calendar object of the current departures,
+                    // and add optionally travel time to that and convert to string with cAddTravel
+                    if (user.equals("Abby")) {
+                        message = "Trein van " + convertCalendarToString(nsDepartureCal);
+                    } else {
+                        message = prefix + nsArrivalTime;
+                    }
+                } else if (to == RDaal) {
                     message = prefix + nsArrivalTime;
                 }
-            } else if (to == RDaal) {
+            } else if (from == Heeze) {
+                if (to == EHV) {
+                    if (user.equals("Abby")) {
+                        message = "Eindhoven ETA " + nsArrivalTime;
+                    } else {
+                        message = prefix + nsArrivalTime;
+                    }
+                } else if (to == RDaal) {
+                    if (user.equals("Abby")) {
+                        message = "Yay at " + nsArrivalTime + ".";
+                    } else {
+                        message = prefix + nsArrivalTime;
+                    }
+                }
+            } else {
                 message = prefix + nsArrivalTime;
             }
-        } else if (from == Heeze) {
-            if (to == EHV) {
-                if (user.equals("Abby")) {
-                    message = "Eindhoven ETA " + nsArrivalTime;
-                } else {
-                    message = prefix + nsArrivalTime;
-                }
-            } else if (to == RDaal) {
-                if (user.equals("Abby")) {
-                    message = "Yay at " + nsArrivalTime + ".";
-                } else {
-                    message = prefix + nsArrivalTime;
-                }
-            }
-        } else {
-            message = prefix + nsArrivalTime;
+
+        } catch (ParseException e) {
+            Log.e("sendText", "parsing to nsArrivalTime failed");
+            message = "ParseException thrown";
         }
 
         sendWhatsApp(message);
@@ -668,6 +716,8 @@ public class MainActivity extends AppCompatActivity {
      * @param text the message
      */
     private void sendWhatsApp(String text) {
+        Toast.makeText(getBaseContext(),text,Toast.LENGTH_SHORT).show();
+
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, text);
@@ -677,6 +727,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Requests data from NS and updates numberpicker (processNSDataForNumberpicker())
+     */
     private class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
 
 
@@ -702,7 +755,7 @@ public class MainActivity extends AppCompatActivity {
 
                     URL url;
 
-                    boolean viaBreda = (from == EHV && to == RDaal) || from == RDaal && to == EHV;
+                    boolean viaBreda = (from == EHV && to == RDaal) || (from == RDaal && to == EHV);
 
                     if (viaBreda) {
                         HttpURLConnection urlConnection;
@@ -804,7 +857,7 @@ public class MainActivity extends AppCompatActivity {
                     noInternetConnection();
                 } else {
                     setResponse(response);
-                    updateDepartures(); //update nrpicker
+                    processNSDataForNumberpicker(); //update nrpicker
                 }
             }
         }
