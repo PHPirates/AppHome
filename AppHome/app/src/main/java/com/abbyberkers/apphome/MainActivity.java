@@ -553,6 +553,7 @@ public class MainActivity extends AppCompatActivity {
             npDep.setMaxValue(departTimes.length-1);
             npDep.setDisplayedValues(departTimes);
             int middle = departTimes.length / 2 +1;
+            npDep.setWrapSelectorWheel(false);
             npDep.setValue(middle); //set default option
             depart = middle; //set chosen value to default
             if (to == from) {
