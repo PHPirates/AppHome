@@ -1,5 +1,3 @@
-**Note: latest version is broken**
-
 **AppHome**
 
 We use this app in order to have quick access to departure and arrival times of trains on the trajectories we travel often. Selecting source and destination cities, it display departure times, possible delays in departure time, and if going via Breda from Eindhoven to Roosendaal or vice versa a possible departure delay of the train leaving Breda is displayed. Hitting the 'send' button will guide you to sending a Whatsapp with arrival time given the chosen departure time, and hitting 'send delay' will send an arrival delay if there is one.

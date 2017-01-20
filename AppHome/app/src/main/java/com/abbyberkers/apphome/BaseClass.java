@@ -25,6 +25,8 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import static java.lang.Math.min;
+
 class BaseClass {
     private static final int EHV = 0;
     private static final int Heeze = 1;
@@ -141,7 +143,9 @@ class BaseClass {
                 Log.e("BC.getNSDepartures","nsTimes.size < timesNumber");
             }
 
-            Calendar[] depTimes = new Calendar[timesNumber];
+            //sometimes # of ns times is smaller than how much we expect, and then we do not want nulls in the array
+            int arraySize = min(timesNumber, nsTimes.size()); //hence the minimum of those
+            Calendar[] depTimes = new Calendar[arraySize];
 
             //index is index of next dept time of all the xml deptimes in nsTimes
             //get departure times around next time
@@ -152,6 +156,7 @@ class BaseClass {
                 if ( (j < nsTimes.size() ) && (j >= 0) ) { //todo leaving out j>=0 crashes the app without any error instead of say an IOOBE
                     //if not out of bounds... (happens when ns returns <timesNumber times in total)
                     // in that case fills up with nulls at both ends, is converted to spaces in currentDepartures()
+                    // todo instead of nulls, just shorten the array -> no empty rows in numberpicker
                     try {
                         depTimes[i] = convertNSToCal(nsTimes.get(j));
                     } catch (ParseException e) {
@@ -314,14 +319,11 @@ class BaseClass {
                     return null;
                 }
 
-                //                    if (nextIndex == -1) {
-                ////                        Log.e("breda ", "departure time mistake ");
-                //                    } else {
-                if (!(nextIndex == -1)) {
+                if (nextIndex >= 0 && nextIndex < BredaDepNSTimes.size()) {
                     //depTime becomes next Breda departure Time
                     return BredaDepNSTimes.get(nextIndex);
                 } else {
-                    Log.e("BC.getBredaDepTime","nextIndex == -1");
+                    Log.e("BC.getBredaDepTime","nextIndex out of bounds, probably -1");
                     return null;
                 }
             } catch (SAXException | ParserConfigurationException | IOException | XPathExpressionException e) {

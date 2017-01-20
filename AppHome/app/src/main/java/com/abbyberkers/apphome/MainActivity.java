@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
         npDep.setMinValue(0);
         npDep.setMaxValue(1);
         npDep.setWrapSelectorWheel(false);
-        npDep.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); //todo ?
+        npDep.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS); //todo what does this do?
 
         npDep.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
