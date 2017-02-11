@@ -409,7 +409,7 @@ class BaseClass {
                 //round time to nearest ten minutes
                 int unroundedMinutes = c.get(Calendar.MINUTE);
                 int mod = unroundedMinutes % 5;
-                c.add(Calendar.MINUTE, 20); //add 20 minutes for bike time
+                c.add(Calendar.MINUTE, 25); //add minutes for bike time
                 c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
             }
             return convertCalendarToString(c);

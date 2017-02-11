@@ -10,4 +10,4 @@ There is also a widget which displays three departure times given a trajectory, 
 
 [Download latest debug](https://bitbucket.org/slideclimb/apphome/raw/c5049ffd8e9acfbd0beebf88aef372ded5ecfcce/apphome/app/build/outputs/apk/app-debug.apk) (see tags if this is ahead of the release)
 
-![660948335-Screenshot_20161106-175617 (Custom).png](https://bitbucket.org/repo/aqojbG/images/2856234104-660948335-Screenshot_20161106-175617%20\(Custom\).png) ![Screenshot_20161113-122201 (Custom).png](https://bitbucket.org/repo/aqojbG/images/4219494483-Screenshot_20161113-122201%20\(Custom\).png)
+![Image of app](ScreenshotApp.png?raw=true "App Screenshot") ![Widget Screenshot](ScreenshotWidget.png?raw=true "Widget Screenshot")
