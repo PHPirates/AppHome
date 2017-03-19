@@ -364,6 +364,7 @@ public class MainActivity extends AppCompatActivity {
      * @return string
      */
     public String convertNSToString_Bare(String nsTime) throws ParseException {
+
         if (nsTime == null) {
             return "No time selected";
         } else {

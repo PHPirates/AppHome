@@ -3,7 +3,7 @@ package com.abbyberkers.apphome;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -29,6 +29,9 @@ class BaseClass {
     private static final int EHV = 0;
     private static final int Heeze = 1;
     private static final int RDaal = 2;
+
+    private static final ConvertTimeToWords TIMES_WORDS = new ConvertTimeToWords(true);
+    private static final ConvertTimeToWords TIMES_NUMBERS = new ConvertTimeToWords(false);
 
     //string of cities to be used in the main activity (widget is not generic)
     static final String[] cities = {"Eindhoven", "Heeze", "Roosendaal"};
@@ -412,7 +415,8 @@ class BaseClass {
                 c.add(Calendar.MINUTE, 25); //add minutes for bike time
                 c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
             }
-            return convertCalendarToString(c);
+            String plainNumberedTime = convertCalendarToString(c); // time in HH:mm format
+            return TIMES_WORDS.getTimeString(plainNumberedTime); // return the time written out
         }
     }
 
