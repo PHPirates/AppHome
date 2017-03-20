@@ -661,7 +661,8 @@ public class MainActivity extends AppCompatActivity {
             String nsArrivalTime = convertNSToString(nsString);
 
             String user = getUser();
-            String prefix = "ETA ";
+            String prefix = "Ik ben rond ";
+            String postfix = " thuis.";
 
             //few special cases first
             if (from == EHV) {
@@ -671,27 +672,27 @@ public class MainActivity extends AppCompatActivity {
                     if (user.equals("Abby")) {
                         message = "Trein van " + convertCalendarToString(nsDepartureCal);
                     } else {
-                        message = prefix + nsArrivalTime;
+                        message = prefix + nsArrivalTime + postfix;
                     }
                 } else if (to == RDaal) {
-                    message = prefix + nsArrivalTime;
+                    message = prefix + nsArrivalTime + postfix;
                 }
             } else if (from == Heeze) {
                 if (to == EHV) {
                     if (user.equals("Abby")) {
                         message = "Eindhoven ETA " + nsArrivalTime;
                     } else {
-                        message = prefix + nsArrivalTime;
+                        message = prefix + nsArrivalTime + postfix;
                     }
                 } else if (to == RDaal) {
                     if (user.equals("Abby")) {
                         message = "Yay at " + nsArrivalTime + ".";
                     } else {
-                        message = prefix + nsArrivalTime;
+                        message = prefix + nsArrivalTime + postfix;
                     }
                 }
             } else {
-                message = prefix + nsArrivalTime;
+                message = prefix + nsArrivalTime + postfix;
             }
 
         } catch (ParseException e) {
