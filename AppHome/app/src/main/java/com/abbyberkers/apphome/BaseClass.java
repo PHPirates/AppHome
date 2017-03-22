@@ -30,9 +30,6 @@ class BaseClass {
     private static final int Heeze = 1;
     private static final int RDaal = 2;
 
-    private static final ConvertTimeToWords TIMES_WORDS = new ConvertTimeToWords(true);
-    private static final ConvertTimeToWords TIMES_NUMBERS = new ConvertTimeToWords(false);
-
     //string of cities to be used in the main activity (widget is not generic)
     static final String[] cities = {"Eindhoven", "Heeze", "Roosendaal"};
 
@@ -416,7 +413,7 @@ class BaseClass {
                 c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
             }
             String plainNumberedTime = convertCalendarToString(c); // time in HH:mm format
-            return TIMES_WORDS.getTimeString(plainNumberedTime); // return the time written out
+            return new TimeToWordsConverter(true).getTimeString(plainNumberedTime); // return the time written out
         }
     }
 

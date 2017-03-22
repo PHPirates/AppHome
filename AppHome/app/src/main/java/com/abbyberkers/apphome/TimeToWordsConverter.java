@@ -1,9 +1,10 @@
 package com.abbyberkers.apphome;
 
+import android.util.Log;
 import android.util.SparseArray;
 
 
-public class ConvertTimeToWords {
+public class TimeToWordsConverter {
 
     private static final SparseArray<String> MINUTES_MAP = new SparseArray<>();
     private static final SparseArray<String> HOURS_MAP = new SparseArray<>();
@@ -12,7 +13,7 @@ public class ConvertTimeToWords {
      * Constructor.
      * Creates a map with String values to be able to quickly get the minutes expression.
      */
-    ConvertTimeToWords(boolean words) {
+    TimeToWordsConverter(boolean words) {
 
         createArrays(words);
     }
