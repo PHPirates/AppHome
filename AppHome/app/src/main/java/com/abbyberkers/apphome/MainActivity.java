@@ -661,8 +661,12 @@ public class MainActivity extends AppCompatActivity {
             String nsArrivalTime = convertNSToString(nsString);
 
             String user = getUser();
-            String prefix = "Ik ben rond ";
-            String postfix = " thuis.";
+            String prefix = "ETA ";
+            String postfix = ".";
+            if (user.equals("Thomas")) {
+                prefix = "Ik ben rond ";
+                postfix = " thuis.";
+            }
 
             //few special cases first
             if (from == EHV) {
