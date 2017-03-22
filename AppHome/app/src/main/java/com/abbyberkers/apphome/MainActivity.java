@@ -663,40 +663,30 @@ public class MainActivity extends AppCompatActivity {
             String user = getUser();
             String prefix = "ETA ";
             String postfix = ".";
+
+            message = prefix + nsArrivalTime + postfix;
+
+            //few special cases to overrule the default message
             if (user.equals("Thomas")) {
-                prefix = "Ik ben rond ";
-                postfix = " thuis.";
+                if (to == RDaal) {
+                    message = "Ik ben rond " + nsArrivalTime + " thuis.";
+                } else if (to == Heeze) {
+                    message = "Yay at " + nsArrivalTime + ".";
+                }
             }
 
-            //few special cases first
-            if (from == EHV) {
-                if (to == Heeze) {
+            if (user.equals("Abby")) {
+                if (from == EHV && to == Heeze) {
                     //take the chosen calendar object of the current departures,
                     // and add optionally travel time to that and convert to string with cAddTravel
-                    if (user.equals("Abby")) {
-                        message = "Trein van " + convertCalendarToString(nsDepartureCal);
-                    } else {
-                        message = prefix + nsArrivalTime + postfix;
-                    }
-                } else if (to == RDaal) {
-                    message = prefix + nsArrivalTime + postfix;
-                }
-            } else if (from == Heeze) {
-                if (to == EHV) {
-                    if (user.equals("Abby")) {
+                    message = "Trein van " + convertCalendarToString(nsDepartureCal);
+                } else if (from == Heeze) {
+                    if (to == EHV) {
                         message = "Eindhoven ETA " + nsArrivalTime;
-                    } else {
-                        message = prefix + nsArrivalTime + postfix;
-                    }
-                } else if (to == RDaal) {
-                    if (user.equals("Abby")) {
+                    } else if (to == RDaal) {
                         message = "Yay at " + nsArrivalTime + ".";
-                    } else {
-                        message = prefix + nsArrivalTime + postfix;
                     }
                 }
-            } else {
-                message = prefix + nsArrivalTime + postfix;
             }
 
         } catch (ParseException e) {
