@@ -413,7 +413,7 @@ class BaseClass {
                 c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
             }
             String plainNumberedTime = convertCalendarToString(c); // time in HH:mm format
-            return new TimeToWordsConverter(true).getTimeString(plainNumberedTime); // return the time written out
+            return new TimeToWordsConverter(false, true).getTimeString(plainNumberedTime); // return the time written out
         }
     }
 

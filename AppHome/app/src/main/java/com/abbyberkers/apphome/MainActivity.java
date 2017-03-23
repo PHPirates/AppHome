@@ -680,12 +680,11 @@ public class MainActivity extends AppCompatActivity {
                     //take the chosen calendar object of the current departures,
                     // and add optionally travel time to that and convert to string with cAddTravel
                     message = "Trein van " + convertCalendarToString(nsDepartureCal);
-                } else if (from == Heeze) {
-                    if (to == EHV) {
+                } else if (from == Heeze && to == EHV) {
                         message = "Eindhoven ETA " + nsArrivalTime;
-                    } else if (to == RDaal) {
-                        message = "Yay at " + nsArrivalTime + ".";
-                    }
+
+                } else if (to == RDaal) {
+                    message = "Yay at " + nsArrivalTime + ".";
                 }
             }
 
