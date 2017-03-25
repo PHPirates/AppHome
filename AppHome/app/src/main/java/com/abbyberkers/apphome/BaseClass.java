@@ -404,16 +404,23 @@ class BaseClass {
         } else {
             Calendar c = convertNSToCal(nsTime);
             if (c == null) return "convertNSToCal returned null";
-            if (to == RDaal && user.equals("Thomas")) { //if Thomas going to Rdaal
-                //special cycling case for Thomas
-                //round time to nearest ten minutes
-                int unroundedMinutes = c.get(Calendar.MINUTE);
-                int mod = unroundedMinutes % 5;
-                c.add(Calendar.MINUTE, 25); //add minutes for bike time
-                c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
+            if (user.equals("Thomas") && to == RDaal) {
+                //if Thomas going to Rdaal
+                    //special cycling case for Thomas
+                    //round time to nearest ten minutes
+                    int unroundedMinutes = c.get(Calendar.MINUTE);
+                    int mod = unroundedMinutes % 5;
+                    c.add(Calendar.MINUTE, 25); //add minutes for bike time
+                    c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
+
+            } else if((user.equals("Abby") && to == RDaal) || (user.equals("Thomas") && to == Heeze)) {
+                String plainNumberedTime = convertCalendarToString(c);
+                // return time written out in English
+                return new TimeToWordsConverter(false, true).getTimeString(plainNumberedTime);
             }
             String plainNumberedTime = convertCalendarToString(c); // time in HH:mm format
-            return new TimeToWordsConverter(false, true).getTimeString(plainNumberedTime); // return the time written out
+            // return the time written out
+            return new TimeToWordsConverter(true, true).getTimeString(plainNumberedTime);
         }
     }
 

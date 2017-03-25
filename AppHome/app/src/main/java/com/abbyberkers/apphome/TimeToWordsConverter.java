@@ -51,7 +51,7 @@ public class TimeToWordsConverter {
         if(minutes < 17) {
             return HOURS_MAP.get(hour % 12);
         } else {
-            return HOURS_MAP.get(hour % 12 + 1);
+            return HOURS_MAP.get((hour + 1) % 12);
         }
     }
 
@@ -113,7 +113,7 @@ public class TimeToWordsConverter {
                 MINUTES_MAP.put(15, "quarter past");
                 MINUTES_MAP.put(20, "twenty past");
                 MINUTES_MAP.put(25, "twenty-five past");
-                MINUTES_MAP.put(30, "thirty");
+                MINUTES_MAP.put(30, "thirty past");
                 MINUTES_MAP.put(35, "twenty-five to");
                 MINUTES_MAP.put(40, "twenty to");
                 MINUTES_MAP.put(45, "quarter to");
