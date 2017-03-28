@@ -416,11 +416,13 @@ class BaseClass {
             } else if((user.equals("Abby") && to == RDaal) || (user.equals("Thomas") && to == Heeze)) {
                 String plainNumberedTime = convertCalendarToString(c);
                 // return time written out in English
-                return new TimeToWordsConverter(false, true).getTimeString(plainNumberedTime);
+                return new TimeToWordsConverter(TimeToWordsConverter.Language.ENGLISH,
+                        TimeToWordsConverter.TimeType.WORDS).getTimeString(plainNumberedTime);
             }
             String plainNumberedTime = convertCalendarToString(c); // time in HH:mm format
             // return the time written out
-            return new TimeToWordsConverter(true, true).getTimeString(plainNumberedTime);
+            return new TimeToWordsConverter(TimeToWordsConverter.Language.DUTCH,
+                    TimeToWordsConverter.TimeType.WORDS).getTimeString(plainNumberedTime);
         }
     }
 

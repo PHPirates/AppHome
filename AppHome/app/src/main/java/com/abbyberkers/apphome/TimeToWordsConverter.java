@@ -6,6 +6,22 @@ import android.util.SparseArray;
 
 public class TimeToWordsConverter {
 
+    /**
+     * Language option.
+     */
+    public enum Language {
+        DUTCH,
+        ENGLISH
+    }
+
+    /**
+     * Get time in different formats.
+     */
+    public enum TimeType {
+        NUMBERS, // e.g. 10 past 7
+        WORDS // e.g. ten past seven
+    }
+
     private static final SparseArray<String> MINUTES_MAP = new SparseArray<>();
     private static final SparseArray<String> HOURS_MAP = new SparseArray<>();
 
@@ -13,9 +29,9 @@ public class TimeToWordsConverter {
      * Constructor.
      * Creates a map with String values to be able to quickly get the minutes expression.
      */
-    TimeToWordsConverter(boolean dutch, boolean words) {
+    TimeToWordsConverter(Language language, TimeType type) {
 
-        createArrays(dutch, words);
+        createArrays(language, type);
     }
 
     /**
@@ -56,9 +72,9 @@ public class TimeToWordsConverter {
     }
 
 
-    private void createArrays(boolean dutch, boolean words) {
-        if(dutch) {
-            if (words) {
+    private void createArrays(Language language, TimeType type) {
+        if(language == Language.DUTCH) {
+            if (type == TimeType.WORDS) {
                 MINUTES_MAP.put(0, "uur");
                 MINUTES_MAP.put(5, "vijf over");
                 MINUTES_MAP.put(10, "tien over");
@@ -106,7 +122,7 @@ public class TimeToWordsConverter {
                 }
             }
         } else {
-            if (words) {
+            if (type == TimeType.WORDS) {
                 MINUTES_MAP.put(0, "o'clock");
                 MINUTES_MAP.put(5, "five past");
                 MINUTES_MAP.put(10, "ten past");

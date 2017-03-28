@@ -698,15 +698,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * departure time should be the first departure time in a given hour
-     *
-     * @param depart Train departure time
-     * @param offset Total travel time
-     * @return departure time with offset
-     */
-
-
-    /**
      * send message to whatsapp
      *
      * @param text the message
