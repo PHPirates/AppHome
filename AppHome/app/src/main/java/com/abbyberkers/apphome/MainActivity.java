@@ -364,6 +364,7 @@ public class MainActivity extends AppCompatActivity {
      * @return string
      */
     public String convertNSToString_Bare(String nsTime) throws ParseException {
+
         if (nsTime == null) {
             return "No time selected";
         } else {
@@ -661,36 +662,30 @@ public class MainActivity extends AppCompatActivity {
 
             String user = getUser();
             String prefix = "ETA ";
+            String postfix = ".";
 
-            //few special cases first
-            if (from == EHV) {
-                if (to == Heeze) {
+            message = prefix + nsArrivalTime + postfix;
+
+            //few special cases to overrule the default message
+            if (user.equals("Thomas")) {
+                if (to == RDaal) {
+                    message = "Ik ben rond " + nsArrivalTime + " thuis.";
+                } else if (to == Heeze) {
+                    message = "Yay at " + nsArrivalTime + ".";
+                }
+            }
+
+            if (user.equals("Abby")) {
+                if (from == EHV && to == Heeze) {
                     //take the chosen calendar object of the current departures,
                     // and add optionally travel time to that and convert to string with cAddTravel
-                    if (user.equals("Abby")) {
-                        message = "Trein van " + convertCalendarToString(nsDepartureCal);
-                    } else {
-                        message = prefix + nsArrivalTime;
-                    }
-                } else if (to == RDaal) {
-                    message = prefix + nsArrivalTime;
-                }
-            } else if (from == Heeze) {
-                if (to == EHV) {
-                    if (user.equals("Abby")) {
+                    message = "Trein van " + convertCalendarToString(nsDepartureCal);
+                } else if (from == Heeze && to == EHV) {
                         message = "Eindhoven ETA " + nsArrivalTime;
-                    } else {
-                        message = prefix + nsArrivalTime;
-                    }
+
                 } else if (to == RDaal) {
-                    if (user.equals("Abby")) {
-                        message = "Yay at " + nsArrivalTime + ".";
-                    } else {
-                        message = prefix + nsArrivalTime;
-                    }
+                    message = "Yay at " + nsArrivalTime + ".";
                 }
-            } else {
-                message = prefix + nsArrivalTime;
             }
 
         } catch (ParseException e) {
@@ -701,15 +696,6 @@ public class MainActivity extends AppCompatActivity {
         sendWhatsApp(message);
 
     }
-
-    /**
-     * departure time should be the first departure time in a given hour
-     *
-     * @param depart Train departure time
-     * @param offset Total travel time
-     * @return departure time with offset
-     */
-
 
     /**
      * send message to whatsapp

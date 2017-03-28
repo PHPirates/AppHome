@@ -3,7 +3,7 @@ package com.abbyberkers.apphome;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -404,15 +404,25 @@ class BaseClass {
         } else {
             Calendar c = convertNSToCal(nsTime);
             if (c == null) return "convertNSToCal returned null";
-            if (to == RDaal && user.equals("Thomas")) { //if Thomas going to Rdaal
-                //special cycling case for Thomas
-                //round time to nearest ten minutes
-                int unroundedMinutes = c.get(Calendar.MINUTE);
-                int mod = unroundedMinutes % 5;
-                c.add(Calendar.MINUTE, 25); //add minutes for bike time
-                c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
+            if (user.equals("Thomas") && to == RDaal) {
+                //if Thomas going to Rdaal
+                    //special cycling case for Thomas
+                    //round time to nearest ten minutes
+                    int unroundedMinutes = c.get(Calendar.MINUTE);
+                    int mod = unroundedMinutes % 5;
+                    c.add(Calendar.MINUTE, 25); //add minutes for bike time
+                    c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
+
+            } else if((user.equals("Abby") && to == RDaal) || (user.equals("Thomas") && to == Heeze)) {
+                String plainNumberedTime = convertCalendarToString(c);
+                // return time written out in English
+                return new TimeToWordsConverter(TimeToWordsConverter.Language.ENGLISH,
+                        TimeToWordsConverter.TimeType.WORDS).getTimeString(plainNumberedTime);
             }
-            return convertCalendarToString(c);
+            String plainNumberedTime = convertCalendarToString(c); // time in HH:mm format
+            // return the time written out
+            return new TimeToWordsConverter(TimeToWordsConverter.Language.DUTCH,
+                    TimeToWordsConverter.TimeType.WORDS).getTimeString(plainNumberedTime);
         }
     }
 
