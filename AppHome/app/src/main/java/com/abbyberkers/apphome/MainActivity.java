@@ -191,34 +191,36 @@ public class MainActivity extends AppCompatActivity {
      * Display 'choose user' dialog
      */
     public void displaySetting() {
-        final MenuItem item = mainMenu.findItem(R.id.change_user);
+        if (mainMenu != null) {
+            final MenuItem item = mainMenu.findItem(R.id.change_user);
 
-        new android.support.v7.app.AlertDialog.Builder(this)
-                .setTitle(R.string.change_user_title)
-                .setMessage(R.string.change_user_message)
-                .setPositiveButton("Abby", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-                        SharedPreferences.Editor edit = prefs.edit();
-                        edit.putString(getString(R.string.pref_user),"Abby");
-                        edit.apply();
-                        //update menu item
-                        item.setTitle("Abby");
-                    }
-                })
-                .setNegativeButton("Thomas", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-                        SharedPreferences.Editor edit = prefs.edit();
-                        edit.putString(getString(R.string.pref_user),"Thomas");
-                        edit.apply();
-                        item.setTitle("Thomas");
+            new android.support.v7.app.AlertDialog.Builder(this)
+                    .setTitle(R.string.change_user_title)
+                    .setMessage(R.string.change_user_message)
+                    .setPositiveButton("Abby", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                            SharedPreferences.Editor edit = prefs.edit();
+                            edit.putString(getString(R.string.pref_user), "Abby");
+                            edit.apply();
+                            //update menu item
+                            item.setTitle("Abby");
+                        }
+                    })
+                    .setNegativeButton("Thomas", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+                            SharedPreferences.Editor edit = prefs.edit();
+                            edit.putString(getString(R.string.pref_user), "Thomas");
+                            edit.apply();
+                            item.setTitle("Thomas");
 
-                    }
-                })
-                .show();
+                        }
+                    })
+                    .show();
+        }
     }
 
     /**
@@ -856,8 +858,11 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.mainmenu,menu);
         MenuItem item = mainMenu.findItem(R.id.change_user);
-        if (getUser() != null) {
+        String user = getUser();
+        if (user != null && !user.equals("none")) {
             item.setTitle(getUser());
+        } else {
+            displaySetting();
         }
         return true;
     }
