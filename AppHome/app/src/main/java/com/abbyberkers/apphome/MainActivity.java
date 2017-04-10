@@ -691,7 +691,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
         } catch (ParseException e) {
-            Log.e("sendText", "parsing to nsArrivalTime failed");
+            Log.e("sendText", "parsing to nsArrivalTime failed: " + e.getMessage());
             message = "ParseException thrown";
         }
 

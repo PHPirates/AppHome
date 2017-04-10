@@ -406,12 +406,13 @@ class BaseClass {
             if (c == null) return "convertNSToCal returned null";
             if (user.equals("Thomas") && to == RDaal) {
                 //if Thomas going to Rdaal
-                    //special cycling case for Thomas
-                    //round time to nearest ten minutes
-                    int unroundedMinutes = c.get(Calendar.MINUTE);
-                    int mod = unroundedMinutes % 5;
-                    c.add(Calendar.MINUTE, 25); //add minutes for bike time
-                    c.add(Calendar.MINUTE, mod < 5 ? -mod : (10 - mod));
+                //special cycling case for Thomas
+                //round time to nearest x minutes
+                int unRoundedMinutes = c.get(Calendar.MINUTE);
+                c.add(Calendar.MINUTE, 25); //add minutes for bike time
+                int mod = 5; // modulo this much
+                int rounded = unRoundedMinutes % mod;
+                c.add(Calendar.MINUTE, rounded < (mod / 2) ? -rounded : (mod - rounded));
 
             } else if((user.equals("Abby") && to == RDaal) || (user.equals("Thomas") && to == Heeze)) {
                 String plainNumberedTime = convertCalendarToString(c);
