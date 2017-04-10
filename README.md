@@ -6,9 +6,9 @@ It is possible to switch between users to have different messages or even arriva
 
 There is also a widget which displays three departure times given a trajectory, and sends an arrival time when you click on it. It works most of the time (sometimes if it keeps 'loading...' changing the trajectory helps to reload).
 
-[Download latest release (v1.5.1)](https://github.com/PHPirates/AppHome/blob/master/AppHome/app/AppHome-release1.5.1.apk)
+[Download latest release (v1.5.1)](https://github.com/PHPirates/AppHome/blob/master/AppHome/app/AppHome-release1.5.1.apk?raw=true)
 
-[Download latest debug](https://github.com/PHPirates/AppHome/blob/master/AppHome/app/build/outputs/apk/AppHome-debug.apk) (see tags if this is ahead of the release)
+[Download latest debug](https://github.com/PHPirates/AppHome/blob/master/AppHome/app/build/outputs/apk/AppHome-debug.apk?raw=true) (see tags if this is ahead of the release)
 
 ![Image of app](ScreenshotApp.png?raw=true "App Screenshot") ![Widget Screenshot](ScreenshotWidget.png?raw=true "Widget Screenshot")
 
