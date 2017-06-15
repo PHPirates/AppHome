@@ -1,6 +1,6 @@
 **AppHome**
 
-[Download latest release (v1.5.1)](https://github.com/PHPirates/AppHome/blob/master/AppHome/app/AppHome-release1.5.1.apk?raw=true)
+[Download latest release (v1.5.2)](https://github.com/PHPirates/AppHome/blob/master/AppHome/app/AppHome-release1.5.2.apk?raw=true)
 
 [Download latest debug](https://github.com/PHPirates/AppHome/blob/master/apphome/app/build/outputs/apk/AppHome-debug.apk?raw=true) (see tags if this is ahead of the release)
 

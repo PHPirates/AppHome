@@ -6,6 +6,10 @@ import android.util.SparseArray;
 
 public class TimeToWordsConverter {
 
+    /** We need to remember the language which we use when converting in
+     * {@link #getHourExpression(int, int)} */
+    private Language language;
+
     /**
      * Language option.
      */
@@ -30,7 +34,7 @@ public class TimeToWordsConverter {
      * Creates a map with String values to be able to quickly get the minutes expression.
      */
     TimeToWordsConverter(Language language, TimeType type) {
-
+        this.language = language;
         createArrays(language, type);
     }
 
@@ -64,7 +68,17 @@ public class TimeToWordsConverter {
     }
 
     private String getHourExpression(int hour, int minutes) {
-        if(minutes < 17) {
+        // from which minute on does the hour change? compare 'twenty past' to 'tien voor half'
+        int hourSwitcher;
+
+        switch (language) {
+            case ENGLISH: hourSwitcher = 33; // this will be the first minute rounded to 35 -> '25 to hour+1'
+                break;
+            case DUTCH: hourSwitcher = 18; // same, first minute which is rounded to 'tien voor half'
+                break;
+            default: hourSwitcher = 33;
+        }
+        if(minutes < hourSwitcher) {
             return HOURS_MAP.get(hour % 12);
         } else {
             return HOURS_MAP.get((hour + 1) % 12);

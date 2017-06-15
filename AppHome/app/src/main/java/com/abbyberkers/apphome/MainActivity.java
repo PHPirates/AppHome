@@ -707,12 +707,12 @@ public class MainActivity extends AppCompatActivity {
     private void sendWhatsApp(String text) {
         Toast.makeText(getBaseContext(),text,Toast.LENGTH_SHORT).show();
 
-        Intent sendIntent = new Intent();
-        sendIntent.setAction(Intent.ACTION_SEND);
-        sendIntent.putExtra(Intent.EXTRA_TEXT, text);
-        sendIntent.setType("text/plain");
-        sendIntent.setPackage("com.whatsapp");
-        startActivity(sendIntent);
+//        Intent sendIntent = new Intent();
+//        sendIntent.setAction(Intent.ACTION_SEND);
+//        sendIntent.putExtra(Intent.EXTRA_TEXT, text);
+//        sendIntent.setType("text/plain");
+//        sendIntent.setPackage("com.whatsapp");
+//        startActivity(sendIntent);
     }
 
 
