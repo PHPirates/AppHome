@@ -12,5 +12,7 @@
     <string name="change_user_message">Please choose a user to use this app.</string>
     <string name="change_user_title">Choose a user</string>
     <string name="pref_user">user</string>
+    <string name="plural">Plural</string>
+
 
 </resources>

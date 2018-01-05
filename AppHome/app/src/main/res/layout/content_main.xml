@@ -50,6 +50,16 @@
         </TableRow>
 
         <TableRow>
+            <CheckBox
+                android:id="@+id/pluralBox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/plural"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingEnd="@dimen/activity_horizontal_margin"/>
+            <!-- What if I don't want symmetry? Going for symmetry here means that there
+             is a too big gap between the checkbox and its text. -->
+
             <Button
                 android:layout_width="0dp"
                 android:layout_weight="1"
