@@ -59,9 +59,11 @@ public class MainActivity extends AppCompatActivity {
 
     private Menu mainMenu;
 
+    // TODO: these are also declared in BaseClass.java...
     private static final int EHV = 0;
-    private static final int Heeze = 1;
-    private static final int RDaal = 2;
+    private static final int RDaal = 1;
+    private static final int Overloon = 2;
+    private static final int Heeze = 3;
 
     private ProgressBar progressBar;
     private String response; //set after getting xml from ns, used by
@@ -687,6 +689,8 @@ public class MainActivity extends AppCompatActivity {
 
                 } else if (to == RDaal) {
                     message = "Yay at " + nsArrivalTime + ".";
+                } else if (to == Overloon) {
+                    message = "Ik ben rond " + nsArrivalTime + " thuis.";
                 }
             }
 
