@@ -143,8 +143,8 @@ public class MainActivity extends AppCompatActivity {
         } else if (user.equals("Abby")) {
             from = EHV;
             npFrom.setValue(EHV);
-            to = Heeze;
-            npTo.setValue(Heeze);
+            to = Overloon;
+            npTo.setValue(Overloon);
         }
 
         NumberPicker npDep; //NP for close departure times
@@ -674,7 +674,7 @@ public class MainActivity extends AppCompatActivity {
             if (user.equals("Thomas")) {
                 if (to == RDaal) {
                     message = "Ik ben rond " + nsArrivalTime + " thuis.";
-                } else if (to == Heeze) {
+                } else if (to == Heeze || to == Overloon) {
                     message = "Yay at " + nsArrivalTime + ".";
                 }
             }
