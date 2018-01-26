@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -232,6 +233,15 @@ public class MainActivity extends AppCompatActivity {
         //find the user
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         return prefs.getString(getString(R.string.pref_user),"none");
+    }
+
+    /**
+     * @return True if the plural checkbox is checked, false otherwise.
+     */
+    public boolean getPlural() {
+        CheckBox pluralBox = (CheckBox) findViewById(R.id.pluralBox);
+        assert pluralBox != null;
+        return pluralBox.isChecked();
     }
 
     /**
@@ -654,10 +664,10 @@ public class MainActivity extends AppCompatActivity {
 
         try {
 
-            //1. get five departure times in calendar format
-            //2. convert the chosen calendar to ns-format string
-            //3. get the corresponding arrival time
-            //4. convert it to HH:mm format
+            // 1. get five departure times in calendar format
+            // 2. convert the chosen calendar to ns-format string
+            // 3. get the corresponding arrival time
+            // 4. convert it to HH:mm format
             Calendar nsDepartureCal = getNSDepartures()[depart-1]; //numberpicker values start at one instead of zero
             String nsDepartureString = convertCalendarToNS(nsDepartureCal);
             String nsString = getNSStringByDepartureTime(
@@ -665,15 +675,20 @@ public class MainActivity extends AppCompatActivity {
             String nsArrivalTime = convertNSToString(nsString);
 
             String user = getUser();
+            boolean plural = getPlural();
             String prefix = "ETA ";
             String postfix = ".";
 
             message = prefix + nsArrivalTime + postfix;
 
-            //few special cases to overrule the default message
+            // Few special cases to overrule the default message.
             if (user.equals("Thomas")) {
                 if (to == RDaal) {
-                    message = "Ik ben rond " + nsArrivalTime + " thuis.";
+                    if (plural) {
+                        message = "We zijn rond " + nsArrivalTime + " thuis.";
+                    } else {
+                        message = "Ik ben rond " + nsArrivalTime + " thuis.";
+                    }
                 } else if (to == Heeze || to == Overloon) {
                     message = "Yay at " + nsArrivalTime + ".";
                 }
@@ -681,7 +696,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (user.equals("Abby")) {
                 if (from == EHV && to == Heeze) {
-                    //take the chosen calendar object of the current departures,
+                    // take the chosen calendar object of the current departures,
                     // and add optionally travel time to that and convert to string with cAddTravel
                     message = "Trein van " + convertCalendarToString(nsDepartureCal);
                 } else if (from == Heeze && to == EHV) {
