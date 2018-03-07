@@ -163,7 +163,7 @@ class BaseClass {
                 //                    if (nextIndex == -1) {
                 ////                        Log.e("breda ", "departure time mistake ");
                 //                    } else {
-                if (!(nextIndex == -1)) {
+                if (!(nextIndex == -1) && nextIndex < BredaDepNSTimes.size()) {
                     //depTime becomes next Breda departure Time
                     return BredaDepNSTimes.get(nextIndex);
                 } else {
