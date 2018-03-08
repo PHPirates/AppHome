@@ -28,3 +28,4 @@ jdk:
 
 before_install:
   - cd AppHome
+   - chmod +x gradlew
