@@ -25,3 +25,6 @@ android:
     # - sys-img-armeabi-v7a-android-17
 jdk:
   - oraclejdk8
+
+before_install:
+  - sd AppHome
