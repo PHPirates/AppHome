@@ -27,4 +27,4 @@ jdk:
   - oraclejdk8
 
 before_install:
-  - sd AppHome
+  - cd AppHome
