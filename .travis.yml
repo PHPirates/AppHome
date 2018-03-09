@@ -29,3 +29,6 @@ jdk:
 before_install:
   - cd AppHome
   - chmod +x gradlew
+  
+notifications:
+  email: false
