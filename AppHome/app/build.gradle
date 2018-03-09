@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    signingConfigs {
-        config {
-            keyAlias 'abbythomas'
-            keyPassword '+qnND?JnE!'
-            storeFile file('C:/Users/s156757/.android/keystore.jks')
-            storePassword 'qUhpNy'
-        }
-    }
+//    signingConfigs {
+//        config {
+//            keyAlias 'abbythomas'
+//            keyPassword '+qnND?JnE!'
+//            storeFile file('C:/Users/s156757/.android/keystore.jks')
+//            storePassword 'qUhpNy'
+//        }
+//    }
     compileSdkVersion 26
     buildToolsVersion '26.0.2'
     defaultConfig {
@@ -37,7 +37,7 @@ android {
                     outputFileName = "AppHome-${variant.name}-${variant.versionName}.apk"
                 }
             }
-            signingConfig signingConfigs.config
+//            signingConfig signingConfigs.config
         }
     }
 }
@@ -45,6 +45,6 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.android.support:design:23.4.0'
+    compile 'com.android.support:appcompat-v7:26.1.0'
+    compile 'com.android.support:design:26.1.0'
 }
