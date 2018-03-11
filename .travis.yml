@@ -11,9 +11,11 @@ android:
     - tools
 
     # The BuildTools version used by your project
+    - build-tools-24.0.2
     - build-tools-26.0.2
 
     # The SDK version used to compile your project
+    - android-22
     - android-26
 
     # Additional components
@@ -24,13 +26,13 @@ android:
 
     # Specify at least one system image,
     # if you need to run emulator(s) during your tests
-    - sys-img-armeabi-v7a-android-26
+    - sys-img-armeabi-v7a-android-22
     # - sys-img-armeabi-v7a-android-17
 
 before_script:
   # Create and start emulator
   - android list targets
-  #- echo no | android create avd --force -n test -t android-26 --abi armeabi-v7a
+  - echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a
   - emulator -avd test -no-skin -no-audio -no-window &
   - adb wait-for-device
   - adb shell input keyevent 82 &
