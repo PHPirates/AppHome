@@ -25,14 +25,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-class BaseClass {
-    private static final int EHV = 0;
-    private static final int RDaal = 1;
-    private static final int Overloon = 2;
-    private static final int Heeze = 3;
-
-    //string of cities to be used in the main activity (widget is not generic)
-    static final String[] cities = {"Eindhoven", "Roosendaal", "Overloon", "Heeze"};
+public class BaseClass {
 
     String response;
 
@@ -68,20 +61,20 @@ class BaseClass {
      * @param toFrom the to or from variable
      * @return string of city
      */
-    String convertCityToString(int toFrom) {
-        if (toFrom == Overloon) {
+    String convertCityToString(City toFrom) {
+        if (toFrom == City.OVERLOON) {
             return "Vierlingsbeek";  // Go to Vierlingsbeek station, then take bike to Overloon.
         }
-        return cities[toFrom];
+        return toFrom.getString();
     }
 
     /**
-     * @param cityDepTime departure time ehv/rdaal
+     * @param cityDepTime departure time City.EINDHOVEN/rdaal
      * @param arrivalResponse xml which contains breda departures
      *                        uses response as well
      * @return departure time in breda with that voyage IN NS FORMAT
      */
-    String getBredaDepTime(String cityDepTime, String arrivalResponse, int from, int to) { //from and to are needed because of breda troubles (see below)
+    String getBredaDepTime(String cityDepTime, String arrivalResponse, City from, City to) { //from and to are needed because of breda troubles (see below)
         if (cityDepTime == null || response == null || arrivalResponse == null) {
             return "getBredaDepTime: one of parameters or response is null";
         } else {
@@ -95,7 +88,7 @@ class BaseClass {
                 String arrivalOrDepExpr = "/ReisMogelijkheden/ReisMogelijkheid" +
                         "[GeplandeVertrekTijd[text()='" + cityDepTime + "']]/GeplandeAankomstTijd";
 
-                //deptime is departure time in EHV
+                //deptime is departure time in City.EINDHOVEN
                 NodeList arrivalNodeList = (NodeList) xPath.compile(arrivalOrDepExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
 
@@ -142,11 +135,11 @@ class BaseClass {
                         }
                         if (BredaArrivalDate.before(nsDate)) {
                             //BREDA TROUBLE
-                            //i should be second (i+1) next departure time on rdaal-ehv because
+                            //i should be second (i+1) next departure time on rdaal-City.EINDHOVEN because
                             // ns selects same intercity you just left again if taking first time,
-                            // select the first (i) on ehv-rdaal
+                            // select the first (i) on City.EINDHOVEN-rdaal
 
-                            if (from == RDaal && to == EHV) {
+                            if (from == City.ROOSENDAAL && to == City.EINDHOVEN) {
                                 nextIndex = i+1;
                             } else {
                                 nextIndex = i;
@@ -188,7 +181,7 @@ class BaseClass {
      * @return arrival time IN NS FORMAT
      */
     String getNSStringByDepartureTime(String depTime, String field,
-                                      String arrivalResponse, int from, int to) {
+                                      String arrivalResponse, City from, City to) {
         if (depTime == null) {
             Log.e("BC.getNSStringBy...","depTime == null");
             return null;
@@ -204,7 +197,8 @@ class BaseClass {
                 XPath xPath = XPathFactory.newInstance().newXPath();
                 Document xmlDocument = builder.parse(new ByteArrayInputStream(response.getBytes()));
 
-                if (from == EHV && to == RDaal || from == RDaal && to == EHV) { //only viaBreda on this trajectory
+                if (from == City.EINDHOVEN && to == City.ROOSENDAAL || 
+                        from == City.ROOSENDAAL && to == City.EINDHOVEN) { //only viaBreda on this trajectory
                     depTime = getBredaDepTime(depTime, arrivalResponse, from, to);
                     xmlDocument = builder.parse(new ByteArrayInputStream(arrivalResponse.getBytes())); //don't forget to update what to search in... oops
                 }
@@ -243,24 +237,25 @@ class BaseClass {
      * @param nsTime ns time
      * @return string
      */
-    String convertNSToString(String nsTime, int from, int to, String user) throws ParseException {
+    String convertNSToString(String nsTime, City to, String user) throws ParseException {
 
         if (nsTime == null) {
             return "No time selected";
         } else {
             Calendar c = convertNSToCal(nsTime);
             if (c == null) return "convertNSToCal returned null";
-            if (user.equals("Thomas") && to == RDaal) {
+            if (user.equals("Thomas") && to == City.ROOSENDAAL) {
                 //if Thomas going to Rdaal
                 //special cycling case for Thomas
                 c = addBikeTime(c, 25);  // Add around 25 mintuse bike time for Thomas.
 
-            } else if((user.equals("Abby") && to == RDaal) || (user.equals("Thomas") && (to == Heeze || to == Overloon))) {
+            } else if((user.equals("Abby") && to == City.ROOSENDAAL) 
+                    || (user.equals("Thomas") && (to == City.HEEZE || to == City.OVERLOON))) {
                 String plainNumberedTime = convertCalendarToString(c);
                 // return time written out in English
                 return new TimeToWordsConverter(TimeToWordsConverter.Language.ENGLISH,
                         TimeToWordsConverter.TimeType.WORDS).getTimeString(plainNumberedTime);
-            } else if (user.equals("Abby") && to == Overloon) {
+            } else if (user.equals("Abby") && to == City.OVERLOON) {
 
                     // Add around 25 minutes bike time for Abby from Vierlingsbeek station to Overloon house.
                     c = addBikeTime(c, 25);
@@ -310,7 +305,7 @@ class BaseClass {
      *
      * @return Calendar[] with five current departures, default is five null objects
      */
-    Calendar[] getNSDepartures(String response, int from, int to, Context context) {
+    Calendar[] getNSDepartures(String response, City from, City to, Context context) {
         if (response == null) {
             response = "No response from NS or first time";
         }
@@ -325,8 +320,8 @@ class BaseClass {
 
             NodeList nodeList;
 
-            //if from EHV to RDaal, select intercities only
-            if (from == EHV && to == RDaal) {
+            //if from City.EINDHOVEN to RDaal, select intercities only
+            if (from == City.EINDHOVEN && to == City.ROOSENDAAL) {
                 //select all departure times where type is Intercity
 
                 // select all ActueleVertrekTijd where the first Reisdeel
@@ -336,7 +331,7 @@ class BaseClass {
                 nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
                 //selecting intercities in breda is done when finding arrival times:
-//            } else if (from == RDaal && to == EHV) {
+//            } else if (from == RDaal && to == City.EINDHOVEN) {
 //                String depTimesICExpr = "//ReisMogelijkheid[ReisDeel[last()]/" +
 //                        "VervoerType = 'Intercity']/ActueleVertrekTijd";
 //                nodeList = (NodeList) xPath.compile(depTimesICExpr).evaluate(
@@ -419,10 +414,10 @@ class BaseClass {
      * @param direction direction
      * @return next departure time calendar
      */
-    Calendar nextDeparture(int[] direction) {
+    Calendar nextDeparture(City[] direction) {
         //some initialisation
-        int from = direction[0];
-        int to = direction[1];
+        City from = direction[0];
+        City to = direction[1];
 
         //set update time according to departure times without delay
         Calendar cal = Calendar.getInstance();
@@ -433,18 +428,18 @@ class BaseClass {
         int depart = 0;
 
         //get departure time
-        if (from == EHV) {
-            if (to == Heeze) {
+        if (from == City.EINDHOVEN) {
+            if (to == City.HEEZE) {
                 depart = 9;
-            } else if (to == RDaal) {
+            } else if (to == City.ROOSENDAAL) {
                 depart = 44;
             }
-        } else if (from == Heeze) {
-            if (to == EHV || to == RDaal) {
+        } else if (from == City.HEEZE) {
+            if (to == City.EINDHOVEN || to == City.ROOSENDAAL) {
                 depart = 9;
             }
-        } else if (from == RDaal) {
-            if (to == EHV || to == Heeze) {
+        } else if (from == City.ROOSENDAAL) {
+            if (to == City.EINDHOVEN || to == City.HEEZE) {
                 depart = 27;
             }
         }

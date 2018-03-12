@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -48,23 +49,19 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import static com.abbyberkers.apphome.translations.CitiesKt.allCityStrings;
+
 public class MainActivity extends AppCompatActivity {
 
     private BaseClass baseClass;
 
-    private int from; //default from Eindhoven
-    private int to;
+    private City from; //default from Eindhoven
+    private City to;
     private int depart; //departure numberpicker value
 
     private boolean ASyncTaskIsRunning; //boolean to check if there is an asynctask running
 
     private Menu mainMenu;
-
-    // TODO: these are also declared in BaseClass.java...
-    private static final int EHV = 0;
-    private static final int RDaal = 1;
-    private static final int Overloon = 2;
-    private static final int Heeze = 3;
 
     private ProgressBar progressBar;
     private String response; //set after getting xml from ns, used by
@@ -95,8 +92,8 @@ public class MainActivity extends AppCompatActivity {
 
         assert npFrom != null;
         npFrom.setMinValue(0);
-        npFrom.setMaxValue(BaseClass.cities.length - 1);
-        npFrom.setDisplayedValues(BaseClass.cities);
+        npFrom.setMaxValue(City.values().length - 1);
+        npFrom.setDisplayedValues(allCityStrings()); // TODO
         npFrom.setWrapSelectorWheel(false);
         npFrom.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         setDividerColor(npFrom, ContextCompat.getColor(this, R.color.divider));
@@ -104,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
         npFrom.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                from = newVal;
+                from = City.values()[newVal];
                 updateNumberpicker();
             }
         });
@@ -115,8 +112,8 @@ public class MainActivity extends AppCompatActivity {
 
         assert npTo != null;
         npTo.setMinValue(0);
-        npTo.setMaxValue(BaseClass.cities.length - 1);
-        npTo.setDisplayedValues(BaseClass.cities);
+        npTo.setMaxValue(City.values().length - 1);
+        npTo.setDisplayedValues(allCityStrings()); // TODO
         npTo.setWrapSelectorWheel(false);
         npTo.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         setDividerColor(npTo, ContextCompat.getColor(this, R.color.divider));
@@ -125,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
         npTo.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                to = newVal;
+                to = City.values()[newVal];
                 updateNumberpicker();
             }
         });
@@ -137,15 +134,15 @@ public class MainActivity extends AppCompatActivity {
         //set a proper default
         String user = getUser();
         if (user.equals("Thomas")) {
-            npFrom.setValue(EHV);
-            from = EHV;
-            npTo.setValue(RDaal);
-            to = RDaal;
+            npFrom.setValue(City.EINDHOVEN.ordinal());
+            from = City.EINDHOVEN;
+            npTo.setValue(City.ROOSENDAAL.ordinal());
+            to = City.ROOSENDAAL;
         } else if (user.equals("Abby")) {
-            from = EHV;
-            npFrom.setValue(EHV);
-            to = Overloon;
-            npTo.setValue(Overloon);
+            from = City.EINDHOVEN;
+            npFrom.setValue(City.EINDHOVEN.ordinal());
+            to = City.OVERLOON;
+            npTo.setValue(City.OVERLOON.ordinal());
         }
 
         NumberPicker npDep; //NP for close departure times
@@ -260,17 +257,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Convert the instance variables to and from, set by the numberpickers,
-     * to a string to be used in {@link AsyncTask()}
-     *
-     * @param toFrom the to or from variable
-     * @return string of city
-     */
-    private String convertCityToString(int toFrom) {
-        return baseClass.convertCityToString(toFrom);
-    }
-
-    /**
      * get arrival time of voyage, given departure time
      *
      * @param depTime departure time ns-format
@@ -303,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
     private String convertNSToString(String nsTime) throws ParseException {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         String user = prefs.getString(getString(R.string.pref_user),"none");
-        return baseClass.convertNSToString(nsTime, from, to, user);
+        return baseClass.convertNSToString(nsTime, to, user);
     }
 
     /**
@@ -475,7 +461,8 @@ public class MainActivity extends AppCompatActivity {
      */
     private void processNSDataForNumberpicker() {
         //find out if going via breda (to look for breda delays or not)
-        boolean viaBreda = to == EHV && from == RDaal || to == RDaal && from == EHV;
+        boolean viaBreda = to == City.EINDHOVEN && from == City.ROOSENDAAL ||
+                to == City.ROOSENDAAL && from == City.EINDHOVEN;
 
         Map<String, String> mapDelay = getDepartureDelays(response);
         //get delays in breda as well by arrivalResponse
@@ -615,14 +602,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * @return string array of current departures, empty strings if to==from
+     * @return string array of current departures, empty allCityStrings if to==from
      */
     private String[] currentDepartures() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
         Calendar[] calendars = getNSDepartures();
         String[] deps = new String[calendars.length];
         for (int i = 0; i < calendars.length; i++) {
-            if (calendars[i] != null) { //if from == to, add empty strings
+            if (calendars[i] != null) { //if from == to, add empty allCityStrings
                 deps[i] = simpleDateFormat.format(calendars[i].getTime());
             } else {
                 deps[i] = " ";
@@ -683,28 +670,28 @@ public class MainActivity extends AppCompatActivity {
 
             // Few special cases to overrule the default message.
             if (user.equals("Thomas")) {
-                if (to == RDaal) {
+                if (to == City.ROOSENDAAL) {
                     if (plural) {
                         message = "We zijn rond " + nsArrivalTime + " thuis.";
                     } else {
                         message = "Ik ben rond " + nsArrivalTime + " thuis.";
                     }
-                } else if (to == Heeze || to == Overloon) {
+                } else if (to == City.HEEZE || to == City.OVERLOON) {
                     message = "Yay at " + nsArrivalTime + ".";
                 }
             }
 
             if (user.equals("Abby")) {
-                if (from == EHV && to == Heeze) {
+                if (from == City.EINDHOVEN && to == City.HEEZE) {
                     // take the chosen calendar object of the current departures,
                     // and add optionally travel time to that and convert to string with cAddTravel
                     message = "Trein van " + convertCalendarToString(nsDepartureCal);
-                } else if (from == Heeze && to == EHV) {
+                } else if (from == City.HEEZE && to == City.EINDHOVEN) {
                         message = "Eindhoven ETA " + nsArrivalTime;
 
-                } else if (to == RDaal) {
+                } else if (to == City.ROOSENDAAL) {
                     message = "Yay at " + nsArrivalTime + ".";
-                } else if (to == Overloon) {
+                } else if (to == City.OVERLOON) {
                     message = "Ik ben rond " + nsArrivalTime + " thuis.";
                 }
             }
@@ -758,16 +745,17 @@ public class MainActivity extends AppCompatActivity {
                 if (to == from) {
                     return "no url possible";
                 } else {
-                    String fromString = convertCityToString(from);
-                    String toString = convertCityToString(to);
+                    String fromString = from.getString();
+                    String toString = to.getString();
 
                     URL url;
 
-                    boolean viaBreda = (from == EHV && to == RDaal) || (from == RDaal && to == EHV);
+                    boolean viaBreda = (from == City.EINDHOVEN && to == City.ROOSENDAAL) ||
+                            (from == City.ROOSENDAAL && to == City.EINDHOVEN);
 
                     if (viaBreda) {
                         HttpURLConnection urlConnection;
-                        if (from == EHV) { //go to Breda to get also the intercity trips
+                        if (from == City.EINDHOVEN) { //go to Breda to get also the intercity trips
                             url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
                                     + fromString + "&toStation=Breda");
                             // also get trips from Breda to RDaal for arrival times and breda delays

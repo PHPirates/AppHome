@@ -26,34 +26,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <receiver android:name=".WidgetProvider">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="TIME_ONE" />
-                <action android:name="TIME_TWO" />
-                <action android:name="TIME_THREE" />
-                <action android:name="TURN" />
-            </intent-filter>
-
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@layout/widget_info" />
-        </receiver>
-
-        <receiver android:name=".Receiver" android:enabled="true">
-            <!--<intent-filter>-->
-                <!--<action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>-->
-            <!--</intent-filter>-->
-        </receiver>
-
-        <activity android:name=".WidgetSettings"/>
-
-        <receiver android:name=".BootReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
     </application>
 
 </manifest>
