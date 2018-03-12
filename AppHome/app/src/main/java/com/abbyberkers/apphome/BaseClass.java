@@ -55,20 +55,6 @@ public class BaseClass {
     }
 
     /**
-     * Convert the instance variables to and from, set by the numberpickers,
-     * to a string to be used in {@link AsyncTask ()}
-     *
-     * @param toFrom the to or from variable
-     * @return string of city
-     */
-    String convertCityToString(City toFrom) {
-        if (toFrom == City.OVERLOON) {
-            return "Vierlingsbeek";  // Go to Vierlingsbeek station, then take bike to Overloon.
-        }
-        return toFrom.getString();
-    }
-
-    /**
      * @param cityDepTime departure time City.EINDHOVEN/rdaal
      * @param arrivalResponse xml which contains breda departures
      *                        uses response as well

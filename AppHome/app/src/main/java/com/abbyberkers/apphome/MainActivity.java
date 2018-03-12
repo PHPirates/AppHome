@@ -800,6 +800,7 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                     } else { //if not via breda
+                        if (getUser().equals("Abby") && to == City.OVERLOON) toString = "Vierlingsbeek";
                         url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
                                 + fromString + "&toStation=" + toString);
 //                        url = new URL("http://hollandpirates.bitbucket.org/ehv-hz.xml"); //test url
