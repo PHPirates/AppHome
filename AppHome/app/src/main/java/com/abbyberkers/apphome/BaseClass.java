@@ -242,10 +242,8 @@ public class BaseClass {
                 return new TimeToWordsConverter(TimeToWordsConverter.Language.ENGLISH,
                         TimeToWordsConverter.TimeType.WORDS).getTimeString(plainNumberedTime);
             } else if (user.equals("Abby") && to == City.OVERLOON) {
-
                     // Add around 25 minutes bike time for Abby from Vierlingsbeek station to Overloon house.
                     c = addBikeTime(c, 25);
-
             }
             String plainNumberedTime = convertCalendarToString(c); // time in HH:mm format
             // return the time written out
