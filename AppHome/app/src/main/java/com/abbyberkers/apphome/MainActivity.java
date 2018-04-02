@@ -20,9 +20,11 @@ import android.widget.CheckBox;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -34,11 +36,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
-import java.util.Locale;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -49,6 +48,9 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import static com.abbyberkers.apphome.converters.CalendarKt.calendarToNS;
+import static com.abbyberkers.apphome.converters.CalendarKt.calendarToString;
+import static com.abbyberkers.apphome.converters.CalendarKt.nsToCalendar;
 import static com.abbyberkers.apphome.translations.CitiesKt.allCityStrings;
 
 public class MainActivity extends AppCompatActivity {
@@ -65,10 +67,6 @@ public class MainActivity extends AppCompatActivity {
 
     private ProgressBar progressBar;
     private String response; //set after getting xml from ns, used by
-    /**
-     * response is used by getNSDepartures and set by the AsyncTask
-     */
-    private String arrivalResponse; //trips from Breda to RDaal for arrival times on EHV-RDaal
 
     /**
      * OnCreate
@@ -93,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         assert npFrom != null;
         npFrom.setMinValue(0);
         npFrom.setMaxValue(City.values().length - 1);
-        npFrom.setDisplayedValues(allCityStrings()); // TODO
+        npFrom.setDisplayedValues(allCityStrings()); // TODO (Kotlin)
         npFrom.setWrapSelectorWheel(false);
         npFrom.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         setDividerColor(npFrom, ContextCompat.getColor(this, R.color.divider));
@@ -252,10 +250,6 @@ public class MainActivity extends AppCompatActivity {
         baseClass.response = response;
     }
 
-    private void setArrivalResponse(String arrivalResponse) {
-        this.arrivalResponse = arrivalResponse;
-    }
-
     /**
      * get arrival time of voyage, given departure time
      *
@@ -265,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private String getNSStringByDepartureTime(String depTime, String field) {
         baseClass.response = this.response;
-        String res = baseClass.getNSStringByDepartureTime(depTime, field, arrivalResponse, from, to);
+        String res = baseClass.getNSStringByDepartureTime(depTime, field);
         this.response = baseClass.response;
         return res;
     }
@@ -277,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
      * @return Calendar[] with five current departures, default is five null objects
      */
     private Calendar[] getNSDepartures() {
-        return baseClass.getNSDepartures(this.response, this.from, this.to, this);
+        return baseClass.getNSDepartures(this.response);
     }
 
     /**
@@ -293,71 +287,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * @param time string in HH:mm format
-     * @return time in NS format
-     */
-    private String convertStringToNS(String time) throws ParseException {
-        if (  time == null || time.contains(" ") ) { //assume correct HH:mm times
-            Log.e("convertStringToNS","time not formatted correctly");
-            return null;
-        } else {
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", java.util.Locale.getDefault());
-            Date date = sdf.parse(time);
-            if (date == null) {
-                Log.e("convertStringToNS","date == null");
-                return null;
-            }
-            Calendar calendar = new GregorianCalendar();
-            calendar.setTime(date); //changes date to 1 jan 1970
-            int hour = calendar.get(Calendar.HOUR_OF_DAY);
-            int min = calendar.get(Calendar.MINUTE);
-            Calendar c = new GregorianCalendar(); //now with correct date
-            c.set(Calendar.HOUR_OF_DAY,hour);
-            c.set(Calendar.MINUTE,min);
-            c.set(Calendar.SECOND,0); //you'd wish trains are this precise
-            return convertCalendarToNS(c);
-        }
-    }
-
-    /**
-     * convert ns time string to calendar object
-     *
-     * @param nsTime time in ns format
-     * @return calendar object
-     */
-    private Calendar convertNSToCal(String nsTime) throws ParseException {
-        return baseClass.convertNSToCal(nsTime);
-    }
-
-// --Commented out by Inspection START (15-6-2016 16:41):
-//    /**
-//     * convert a time string in ns format to a date object
-//     *
-//     * @param nsTime time in ns format
-//     * @return date object
-//     */
-//    public Date convertNSToDate(String nsTime) {
-//        return baseClass.convertNSToDate(nsTime);
-//    }
-// --Commented out by Inspection STOP (15-6-2016 16:41)
-
-    /**
-     * Convert calendar object to string in ns-format
-     *
-     * @param c calendar
-     * @return string
-     */
-    private String convertCalendarToNS(Calendar c) {
-        if (c == null) {
-            Log.e("convertCalendarToNS","null passed");
-            return null;
-        } else {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.getDefault());
-            return sdf.format(c.getTime());
-        }
-    }
-
-    /**
      * just convert ns-format to HH:mm
      *
      * @param nsTime ns time
@@ -368,19 +297,9 @@ public class MainActivity extends AppCompatActivity {
         if (nsTime == null) {
             return "No time selected";
         } else {
-            Calendar c = convertNSToCal(nsTime);
-            return convertCalendarToString(c);
+            Calendar c = nsToCalendar(nsTime);
+            return calendarToString(c);
         }
-    }
-
-    /**
-     * convert calendar object to string object in HH:mm format
-     *
-     * @param c calendar object
-     * @return string object
-     */
-    private String convertCalendarToString(Calendar c) {
-        return baseClass.convertCalendarToString(c);
     }
 
     /**
@@ -410,13 +329,9 @@ public class MainActivity extends AppCompatActivity {
                 //and vervoertype of first reisdeel is intercity
                 String depExpr =
                         "//ReisMogelijkheid[VertrekVertraging]/GeplandeVertrekTijd";
-                //would be for breda:
-//                "//ReisMogelijkheid[VertrekVertraging and ReisDeel[1]/VervoerType = 'Intercity']/GeplandeVertrekTijd";
                 //select the corresponding vertrekvertragingen
                 String delayExpr =
                         "//ReisMogelijkheid[VertrekVertraging]/VertrekVertraging";
-                //would be for breda:
-//                    "//ReisMogelijkheid[VertrekVertraging and ReisDeel[1]/VervoerType = 'Intercity']/VertrekVertraging";
                     depNodeList = (NodeList) xPath.compile(depExpr).evaluate(
                         xmlDocument, XPathConstants.NODESET);
                 delayNodeList = (NodeList) xPath.compile(delayExpr).evaluate(
@@ -450,7 +365,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * updates numberpicker with fresh data from NS
+     * updates numberpicker with fresh data from NS.
      */
     private void updateNumberpicker() {
         new RetrieveFeedTask().execute();
@@ -460,13 +375,8 @@ public class MainActivity extends AppCompatActivity {
      * Update the time picker GIVEN new data from NS
      */
     private void processNSDataForNumberpicker() {
-        //find out if going via breda (to look for breda delays or not)
-        boolean viaBreda = to == City.EINDHOVEN && from == City.ROOSENDAAL ||
-                to == City.ROOSENDAAL && from == City.EINDHOVEN;
 
         Map<String, String> mapDelay = getDepartureDelays(response);
-        //get delays in breda as well by arrivalResponse
-        Map<String, String> mapBredaDelay = getDepartureDelays(arrivalResponse);
 
         String[] departTimes = currentDepartures();
 
@@ -479,13 +389,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         boolean delayedDepTime; //to add align spaces
-        boolean delayedBredaDepTime;
 
         //for every time, if there is a match with delayed departures, add delay
 
             for (int i = 0; i < departTimes.length; i++) {
                 delayedDepTime = false;
-                delayedBredaDepTime = false;
                 if (mapDelay != null) {
                     for (Map.Entry<String, String> entry : mapDelay.entrySet()) {
                         if (entry.getKey().equals(departTimes[i])) {
@@ -497,53 +405,10 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }
-                //now for breda
-                //for every departure time, check also if getBredaDepTime(departTime, arrivalResponse)
-                //matches with any departure time in the breda hashmap
-                //if so, add bd +x
-                if (viaBreda && mapBredaDelay != null) {
-                    try {
-                        //convert to ns for getBredaDepTime, removing the +x for that
-                        //only if it does contain a +x
-                        String nsdep = departTimes[i];
-                        if (departTimes[i].contains("+")) {
-                            nsdep = departTimes[i].split(" ")[0];
-                        }
-                        nsdep = convertStringToNS(nsdep);
-
-                        String nsBredaDepTime = baseClass.getBredaDepTime(nsdep, arrivalResponse, from, to);
-                        if (nsBredaDepTime == null) {
-                            Log.e("processNSDataForNp", "nsBredaDepTime == null");
-                            break;
-                        }
-                        String bredaDepTime = convertNSToString_Bare(
-                                nsBredaDepTime);
-                        if (bredaDepTime == null) {
-                            Log.e("processNSDataForNp", "bredaDepTime == null");
-                            break;
-                        }
-
-                        for (Map.Entry<String, String> entry : mapBredaDelay.entrySet()) {
-                            if (entry.getKey().equals(bredaDepTime)) {
-                                delayedBredaDepTime = true;
-                                departTimes[i] += " bd " + entry.getValue();
-                                break;
-                            }
-
-                        }
-                    } catch (ParseException e) {
-                        Log.e("processNSDataForNp","converting nsdep or nsBredaDepTime failed");
-                    }
-                }
                 if (!delayedDepTime) { //align a tiny bit better
                     departTimes[i] += "     ";
                 }
-                if (!delayedBredaDepTime) {
-                    departTimes[i] += "            ";
-                }
             }
-
-
         }
 
         NumberPicker npDep; //NP for close departure times
@@ -631,7 +496,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Delay not possible", Toast.LENGTH_LONG).show();
         } else {
             //convert calendar to ns format and select the chosen departure time
-            String nsDep = convertCalendarToNS(departures[depart-1]);
+            String nsDep = calendarToNS(departures[depart-1]);
             String delay = getNSStringByDepartureTime(nsDep, "AankomstVertraging");
             sendWhatsApp(delay);
         }
@@ -656,7 +521,7 @@ public class MainActivity extends AppCompatActivity {
             // 3. get the corresponding arrival time
             // 4. convert it to HH:mm format
             Calendar nsDepartureCal = getNSDepartures()[depart-1]; //numberpicker values start at one instead of zero
-            String nsDepartureString = convertCalendarToNS(nsDepartureCal);
+            String nsDepartureString = calendarToNS(nsDepartureCal);
             String nsString = getNSStringByDepartureTime(
                     nsDepartureString, "ActueleAankomstTijd");
             String nsArrivalTime = convertNSToString(nsString);
@@ -685,7 +550,7 @@ public class MainActivity extends AppCompatActivity {
                 if (from == City.EINDHOVEN && to == City.HEEZE) {
                     // take the chosen calendar object of the current departures,
                     // and add optionally travel time to that and convert to string with cAddTravel
-                    message = "Trein van " + convertCalendarToString(nsDepartureCal);
+                    message = "Trein van " + calendarToString(nsDepartureCal);
                 } else if (from == City.HEEZE && to == City.EINDHOVEN) {
                         message = "Eindhoven ETA " + nsArrivalTime;
 
@@ -749,63 +614,11 @@ public class MainActivity extends AppCompatActivity {
                     String toString = to.getString();
 
                     URL url;
-
-                    boolean viaBreda = (from == City.EINDHOVEN && to == City.ROOSENDAAL) ||
-                            (from == City.ROOSENDAAL && to == City.EINDHOVEN);
-
-                    if (viaBreda) {
-                        HttpURLConnection urlConnection;
-                        if (from == City.EINDHOVEN) { //go to Breda to get also the intercity trips
-                            url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
-                                    + fromString + "&toStation=Breda");
-                            // also get trips from Breda to RDaal for arrival times and breda delays
-                        URL arrivalURL = new URL("http://webservices.ns.nl/ns-api-treinplanner" +
-                                "?fromStation=Breda&toStation=" + toString);
-//                            URL arrivalURL = new URL("http://hollandpirates.bitbucket.org/bd-rdaal.xml"); //debug url
-                            String encoding = "dC5tLnNjaG91dGVuQHN0dWRlbnQudHVlLm5sOnNPLTY1QVp4dUVySm1tQzI4ZUlSQjg1YW9zN29HVkowQzZ0T1pJOVllSERQTFhlRXYxbmZCZw==";
-                            urlConnection = (HttpURLConnection) arrivalURL.openConnection();
-                        urlConnection.setRequestProperty("Authorization", "Basic " + encoding);
-
-                        } else { // going from Rdaal
-                            url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
-                                    + fromString + "&toStation=Breda");
-                            // also get trips from Breda to Eindhoven for arrival times and breda delays
-                        URL arrivalURL = new URL("http://webservices.ns.nl/ns-api-treinplanner" +
-                                "?fromStation=Breda&toStation=" + toString);
-//                            URL arrivalURL = new URL("http://hollandpirates.bitbucket.org/bd-ehv.xml");
-                            String encoding = "dC5tLnNjaG91dGVuQHN0dWRlbnQudHVlLm5sOnNPLTY1QVp4dUVySm1tQzI4ZUlSQjg1YW9zN29HVkowQzZ0T1pJOVllSERQTFhlRXYxbmZCZw==";
-                            urlConnection = (HttpURLConnection) arrivalURL.openConnection();
-                        urlConnection.setRequestProperty("Authorization", "Basic " + encoding);
-
-                        }
-
-                        try {
-                            resCode = urlConnection.getResponseCode();
-                            if (resCode == HttpURLConnection.HTTP_OK) {
-                                in = urlConnection.getInputStream();
-                            } else {
-                                in = urlConnection.getErrorStream();
-                            }
-                            BufferedReader bufferedReader = new BufferedReader(
-                                    new InputStreamReader(in));
-                            StringBuilder stringBuilder = new StringBuilder();
-                            String line;
-                            while ((line = bufferedReader.readLine()) != null) {
-                                stringBuilder.append(line).append("\n");
-                            }
-                            bufferedReader.close();
-                            setArrivalResponse(stringBuilder.toString());
-                        } finally {
-                            urlConnection.disconnect();
-                        }
-
-                    } else { //if not via breda
                         if (to == City.OVERLOON) toString = "Vierlingsbeek";
                         if (from == City.OVERLOON) fromString = "Vierlingsbeek";
                         url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
                                 + fromString + "&toStation=" + toString);
 //                        url = new URL("http://hollandpirates.bitbucket.org/ehv-hz.xml"); //test url
-                    }
 
 //                String userCredentials = "t.m.schouten@student.tue.nl:sO-65AZxuErJmmC28eIRB85aos7oGVJ0C6tOZI9YeHDPLXeEv1nfBg";
 //                String encoding = new String(android.util.Base64.encode(userCredentials.getBytes(), Base64.DEFAULT));
