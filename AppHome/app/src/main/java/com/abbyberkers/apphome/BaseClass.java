@@ -222,6 +222,4 @@ public class BaseClass {
         }
         return new Calendar[timesNumber]; //return default, null objects
     }
-
-
 }

@@ -1,9 +1,12 @@
 package com.abbyberkers.apphome
 
-enum class City(val string: String) {
+/**
+ * The possible cities
+ */
+enum class City(val string: String, val station: String = string) {
     EINDHOVEN("Eindhoven"),
     ROOSENDAAL("Roosendaal"),
-    OVERLOON("Overloon"),
+    OVERLOON("Overloon", "Vierlingsbeek"),
     HEEZE("Heeze");
 
     companion object {
@@ -16,6 +19,4 @@ enum class City(val string: String) {
             return City.values().map { it.string }.toTypedArray()
         }
     }
-
-
 }

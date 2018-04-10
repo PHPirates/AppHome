@@ -610,12 +610,10 @@ public class MainActivity extends AppCompatActivity {
                 if (to == from) {
                     return "no url possible";
                 } else {
-                    String fromString = from.getString();
-                    String toString = to.getString();
+                    String fromString = from.getStation();
+                    String toString = to.getStation();
 
                     URL url;
-                        if (to == City.OVERLOON) toString = "Vierlingsbeek";
-                        if (from == City.OVERLOON) fromString = "Vierlingsbeek";
                         url = new URL("http://webservices.ns.nl/ns-api-treinplanner?fromStation="
                                 + fromString + "&toStation=" + toString);
 //                        url = new URL("http://hollandpirates.bitbucket.org/ehv-hz.xml"); //test url

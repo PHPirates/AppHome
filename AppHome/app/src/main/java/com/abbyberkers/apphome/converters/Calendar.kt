@@ -18,7 +18,7 @@ fun calendarToString(calendar: Calendar, format: String = "HH:mm"): String {
 /**
  * Convert a calendar object to a string in NS format. Uses [calendarToString].
  *
- * @param calendarThe The calendar object to be converted.
+ * @param calendar The The calendar object to be converted.
  */
 fun calendarToNS(calendar: Calendar): String = calendarToString(calendar, "yyyy-MM-dd'T'HH:mm:ssZ")
 
