@@ -44,5 +44,8 @@ before_install:
   
 notifications:
   email: false
+  slack:
+    rooms:
+      - deltadak:SDesvinRRI6WqYut1gxC1Qbs#apphome
   
 script: ./gradlew connectedAndroidTest

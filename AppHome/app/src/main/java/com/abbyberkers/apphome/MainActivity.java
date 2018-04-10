@@ -96,12 +96,9 @@ public class MainActivity extends AppCompatActivity {
         npFrom.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         setDividerColor(npFrom, ContextCompat.getColor(this, R.color.divider));
 
-        npFrom.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
-            @Override
-            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
-                from = City.values()[newVal];
-                updateNumberpicker();
-            }
+        npFrom.setOnValueChangedListener((picker, oldVal, newVal) -> {
+            from = City.values()[newVal];
+            updateNumberpicker();
         });
 
         NumberPicker npTo;
@@ -665,6 +662,7 @@ public class MainActivity extends AppCompatActivity {
                 if (response.equals("no internet")) {
                     noInternetConnection();
                 } else {
+                    Log.e("Response", response);
                     setResponse(response);
                     processNSDataForNumberpicker(); //update nrpicker
                 }
