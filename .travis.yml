@@ -41,7 +41,7 @@ before_script:
 before_install:
   - cd AppHome
   - chmod +x gradlew
-  - yes | sdkmanager --licenses
+  - echo yes | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;27.0.3"
   
 notifications:
   email: false

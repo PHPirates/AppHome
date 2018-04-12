@@ -47,6 +47,8 @@ public class BaseClass {
      * get arrival time of voyage, given departure time
      * SETS response
      *
+     * XML parsing find arrival time, given departure.
+     *
      * @param depTime departure time ns-format
      * @param field   do you want delays or arrival times? Should be ns node string
      * @return arrival time IN NS FORMAT
@@ -139,13 +141,11 @@ public class BaseClass {
     }
 
 
-    // --------------------------------------------------------------------------------
-    // Widget stuff
-    // --------------------------------------------------------------------------------
-
     /**
      * Communicates with ASyncTask using the instance variables to, from and response
      * also in WidgetProvider
+     *
+     * XML parsing find five current departure times in response.
      *
      * @return Calendar[] with five current departures, default is five null objects
      */

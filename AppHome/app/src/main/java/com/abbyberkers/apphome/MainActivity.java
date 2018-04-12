@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-        updateNumberpicker(); //get xml from ns
+        updateNumberpicker(); // Get and parse xml from ns.
         checkUserConfigured();
     }
 
@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private String getNSStringByDepartureTime(String depTime, String field) {
         baseClass.response = this.response;
-        String res = baseClass.getNSStringByDepartureTime(depTime, field);
+        String res = baseClass.getNSStringByDepartureTime(depTime, field); // Parse XML.
         this.response = baseClass.response;
         return res;
     }
@@ -301,6 +301,9 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * find the delayed departure times in response
+     *
+     * XML Parsing find delays in response.
+     *
      * @return hashmap, key=departure time HH:mm, value is delay +x
      */
     private Map<String, String> getDepartureDelays(String response) {
@@ -369,7 +372,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Update the time picker GIVEN new data from NS
+     * Update the time picker GIVEN new data (departure times) from NS.
      */
     private void processNSDataForNumberpicker() {
 
@@ -427,17 +430,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-    }
-
-    /**
-     * Called from {@link AsyncTask} when there is no internet connection
-     */
-    private void noInternetConnection() {
-        //remove select dividers
-        NumberPicker npDep; //NP for close departure times
-        npDep = (NumberPicker) findViewById(R.id.numberPickerDepartures);
-        setDividerColor(npDep, 0);
-        Toast.makeText(this, "No Internet connection available", Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -528,6 +520,7 @@ public class MainActivity extends AppCompatActivity {
             String prefix = "ETA ";
             String postfix = ".";
 
+            // Set a default message.
             message = prefix + nsArrivalTime + postfix;
 
             // Few special cases to overrule the default message.
@@ -554,7 +547,11 @@ public class MainActivity extends AppCompatActivity {
                 } else if (to == City.ROOSENDAAL) {
                     message = "Yay at " + nsArrivalTime + ".";
                 } else if (to == City.OVERLOON) {
-                    message = "Ik ben rond " + nsArrivalTime + " thuis.";
+                    if (plural) {
+                        message = "We zijn rond " + nsArrivalTime + " thuis.";
+                    } else {
+                        message = "Ik ben rond " + nsArrivalTime + " thuis.";
+                    }
                 }
             }
 
@@ -583,9 +580,21 @@ public class MainActivity extends AppCompatActivity {
         startActivity(sendIntent);
     }
 
+    /**
+     * Called from {@link AsyncTask} when there is no internet connection
+     */
+    private void noInternetConnection() {
+        //remove select dividers
+        NumberPicker npDep; //NP for close departure times
+        npDep = (NumberPicker) findViewById(R.id.numberPickerDepartures);
+        setDividerColor(npDep, 0);
+        Toast.makeText(this, "No Internet connection available", Toast.LENGTH_LONG).show();
+    }
 
     /**
      * Requests data from NS and updates numberpicker (processNSDataForNumberpicker())
+     *
+     * API Call.
      */
     private class RetrieveFeedTask extends AsyncTask<Void, Void, String> {
 
@@ -663,6 +672,7 @@ public class MainActivity extends AppCompatActivity {
                     noInternetConnection();
                 } else {
                     Log.e("Response", response);
+                    // Set the response.
                     setResponse(response);
                     processNSDataForNumberpicker(); //update nrpicker
                 }
