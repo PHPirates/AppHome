@@ -42,3 +42,9 @@ fun nsToCalendar(nsString: String): Calendar {
     calendar.time = date
     return calendar
 }
+
+/**
+ * Convert a string in NS format to a string in HH:mm format.
+ */
+fun nsToString(nsString: String): String =
+        calendarToString(nsToCalendar(nsString))
