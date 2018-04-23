@@ -1,9 +1,7 @@
 package com.abbyberkers.apphome;
 
 import java.util.Calendar;
-
-import static com.abbyberkers.apphome.converters.CalendarKt.calendarToString;
-import static com.abbyberkers.apphome.converters.CalendarKt.nsToCalendar;
+import static com.abbyberkers.apphome.converters.CalendarKt.toCalendar;
 
 public class BaseClass {
 
@@ -18,7 +16,7 @@ public class BaseClass {
         if (nsTime == null) {
             return "No time selected";
         } else {
-            Calendar c = nsToCalendar(nsTime);
+            Calendar c = toCalendar(nsTime);
             if (user.equals("Thomas") && to == City.ROOSENDAAL) {
                 //if Thomas going to Rdaal
                 //special cycling case for Thomas
@@ -26,7 +24,7 @@ public class BaseClass {
 
             } else if((user.equals("Abby") && to == City.ROOSENDAAL)
                     || (user.equals("Thomas") && (to == City.HEEZE || to == City.OVERLOON))) {
-                String plainNumberedTime = calendarToString(c);
+                String plainNumberedTime = c.toString();
                 // return time written out in English
                 return new TimeToWordsConverter(TimeToWordsConverter.Language.ENGLISH,
                         TimeToWordsConverter.TimeType.WORDS).getTimeString(plainNumberedTime);
@@ -34,7 +32,7 @@ public class BaseClass {
                     // Add around 25 minutes bike time for Abby from Vierlingsbeek station to Overloon house.
                     c = addBikeTime(c, 25);
             }
-            String plainNumberedTime = calendarToString(c); // time in HH:mm format
+            String plainNumberedTime = c.toString(); // time in HH:mm format
             // return the time written out
             return new TimeToWordsConverter(TimeToWordsConverter.Language.DUTCH,
                     TimeToWordsConverter.TimeType.WORDS).getTimeString(plainNumberedTime);

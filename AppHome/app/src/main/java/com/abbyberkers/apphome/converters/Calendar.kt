@@ -11,33 +11,33 @@ import java.util.*
  * @param format The format for the time. Default format is "HH:mm".
  */
 @JvmOverloads
-fun calendarToString(calendar: Calendar, format: String = "HH:mm"): String =
-        SimpleDateFormat(format, java.util.Locale.getDefault()).format(calendar.time)
+fun Calendar.toFormattedString(format: String = "HH:mm"): String =
+        SimpleDateFormat(format, java.util.Locale.getDefault()).format(this.time)
 
 /**
  * Convert a calendar object to a string in NS format. Uses [calendarToString].
  *
  * @param calendar The The calendar object to be converted.
  */
-fun calendarToNS(calendar: Calendar): String =
-        calendarToString(calendar, "yyyy-MM-dd'T'HH:mm:ssZ")
+fun Calendar.toNS(): String =
+        this.toFormattedString("yyyy-MM-dd'T'HH:mm:ssZ")
 
 /**
  * Convert a string in NS format to a Date object.
  *
  * @param nsString The string to be converted.
  */
-fun nsToDate(nsString: String): Date =
+fun String.toNsDate(): Date =
         SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", java.util.Locale.getDefault())
-                .parse(nsString)
+                .parse(this)
 
 /**
  * Convert a string in NS format to a Calendar object. Uses [nsToDate].
  *
  * @param nsString String to be converted.
  */
-fun nsToCalendar(nsString: String): Calendar {
-    val date = nsToDate(nsString)
+fun String.toCalendar(): Calendar {
+    val date = this.toNsDate()
     val calendar = GregorianCalendar()
     calendar.time = date
     return calendar
@@ -46,5 +46,5 @@ fun nsToCalendar(nsString: String): Calendar {
 /**
  * Convert a string in NS format to a string in HH:mm format.
  */
-fun nsToString(nsString: String): String =
-        calendarToString(nsToCalendar(nsString))
+fun String.fromNs(): String =
+        this.toCalendar().toFormattedString()

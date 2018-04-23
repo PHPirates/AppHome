@@ -46,6 +46,7 @@ before_install:
 notifications:
   email: false
   slack:
+    on_success: change
     rooms:
       - deltadak:SDesvinRRI6WqYut1gxC1Qbs#apphome
   

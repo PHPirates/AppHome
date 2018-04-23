@@ -26,7 +26,7 @@ import com.abbyberkers.apphome.util.ToastKt;
 import java.text.ParseException;
 import java.util.List;
 
-import static com.abbyberkers.apphome.converters.CalendarKt.nsToString;
+import static com.abbyberkers.apphome.converters.CalendarKt.fromNs;
 import static com.abbyberkers.apphome.translations.CitiesKt.allCityStrings;
 
 public class MainActivity extends AppCompatActivity {
@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity {
                 if (from == City.EINDHOVEN && to == City.HEEZE) {
                     // take the chosen calendar object of the current departures,
                     // and add optionally travel time to that and convert to string with cAddTravel
-                    message = "Trein van " + nsToString(journeys.get(depart-1).departureTime);
+                    message = "Trein van " + fromNs(journeys.get(depart-1).departureTime);
                 } else if (from == City.HEEZE && to == City.EINDHOVEN) {
                         message = "Eindhoven ETA " + nsArrivalTime;
 

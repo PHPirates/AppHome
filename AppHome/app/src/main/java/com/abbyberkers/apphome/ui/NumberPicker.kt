@@ -2,7 +2,7 @@ package com.abbyberkers.apphome.ui
 
 import android.view.View
 import android.widget.NumberPicker
-import com.abbyberkers.apphome.converters.journeysToStrings
+import com.abbyberkers.apphome.converters.toStrings
 import com.abbyberkers.apphome.ns.xml.ReisMogelijkheid
 
 /**
@@ -19,7 +19,7 @@ fun NumberPicker.setDepartures(journeys: List<ReisMogelijkheid>?): Int {
         visibility = View.VISIBLE
         minValue = 1
         maxValue = journeys.size
-        displayedValues = journeysToStrings(journeys)
+        displayedValues = journeys.toStrings()
         wrapSelectorWheel = false
         value = journeys.size / 2 + 1
         value

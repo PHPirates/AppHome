@@ -13,7 +13,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 /**
- * Calls the NS API and on success uppdate the numberpicker with new
+ * Calls the NS API and on success update the numberpicker with new
  * departure times and update the [journeys].
  */
 fun MainActivity.updateNumberPicker(from: City, to: City) {
