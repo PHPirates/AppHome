@@ -4,7 +4,6 @@ import android.view.View
 import android.widget.NumberPicker
 import com.abbyberkers.apphome.City
 import com.abbyberkers.apphome.MainActivity
-import com.abbyberkers.apphome.R
 import com.abbyberkers.apphome.ns.xml.ReisMogelijkheden
 import com.abbyberkers.apphome.ui.setDepartures
 import com.abbyberkers.apphome.util.toast
@@ -14,18 +13,19 @@ import retrofit2.Response
 
 /**
  * Calls the NS API and on success update the numberpicker with new
- * departure times and update the journeys.
+ * departure times and updates the journeys.
  */
-fun MainActivity.updateNumberPicker(from: City, to: City) {
-
-    // Get a reference to the departure number picker.
-    val departurePicker = findViewById<NumberPicker>(R.id.numberPickerDepartures)
+fun NumberPicker.updateNumberPicker(from: City,
+                                    to: City,
+                                    activity: MainActivity) {
 
     // If the from and to station that are selected are the same,
     // set nothing on the numberpicker.
     if(from == to) {
-        departurePicker.setDepartures(null)
+        this.setDepartures(null)
     } else {
+
+        val progressBar = activity.progressBar
 
         // Show the progress bar.
         progressBar.visibility = View.VISIBLE
@@ -40,20 +40,16 @@ fun MainActivity.updateNumberPicker(from: City, to: City) {
         call.enqueue(object : Callback<ReisMogelijkheden> {
             override fun onResponse(call: Call<ReisMogelijkheden>, response: Response<ReisMogelijkheden>) {
                 // Get the journeys from the response.
-                journeys = response.body()?.journeys
+                activity.journeys = response.body()?.journeys
                 // Hide the progressbar.
                 progressBar.visibility = View.GONE
-
-                if (journeys != null) {
-                    // Set the new times on the number picker.
-                    depart = departurePicker.setDepartures(journeys!!)
-                } else {
-                    toast("Didn't get journeys from NS.")
-                }
+                // Set the new times on the number picker.
+//                depart.setter.call(this@updateNumberPicker.setDepartures(journeys.getter.call()))
+                activity.depart = this@updateNumberPicker.setDepartures(journeys = activity.journeys)
             }
 
             override fun onFailure(call: Call<ReisMogelijkheden>?, t: Throwable?) {
-                toast("Could not find NS.")
+                context.toast("Could not find NS.")
                 progressBar.visibility = View.GONE
             }
 

@@ -26,6 +26,8 @@ import com.abbyberkers.apphome.util.ToastKt;
 import java.text.ParseException;
 import java.util.List;
 
+import kotlin.reflect.KMutableProperty;
+
 import static com.abbyberkers.apphome.converters.CalendarKt.fromNs;
 import static com.abbyberkers.apphome.translations.CitiesKt.allCityStrings;
 
@@ -213,7 +215,8 @@ public class MainActivity extends AppCompatActivity {
      */
     private void getNewJourneys() {
         // Get the new data.
-        UseAPIKt.updateNumberPicker(this, from, to);
+        NumberPicker departureNP = findViewById(R.id.numberPickerDepartures);
+        UseAPIKt.updateNumberPicker(departureNP, from, to, this);
     }
 
     /**
