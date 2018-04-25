@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Menu mainMenu;
 
-    // TODO: these are also declared in BaseClass.java...
+    // TODO: these are also declared in BaseClass.java... https://github.com/PHPirates/AppHome/issues/10 id:0
     private static final int EHV = 0;
     private static final int RDaal = 1;
     private static final int Overloon = 2;
