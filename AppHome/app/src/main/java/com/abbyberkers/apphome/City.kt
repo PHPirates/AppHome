@@ -1,7 +1,7 @@
 package com.abbyberkers.apphome
 
 /**
- * The possible cities
+ * The possible cities.
  */
 enum class City(val string: String, val station: String = string) {
     EINDHOVEN("Eindhoven"),
