@@ -6,7 +6,7 @@
   "keepEmptyPriority": true,
   "code": {
     "include_lists": [
-      "TODO",
+      "ISSUE",
       "DOING",
       "DONE",
       "PLANNING",
