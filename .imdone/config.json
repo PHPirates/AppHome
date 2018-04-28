@@ -6,7 +6,7 @@
   "keepEmptyPriority": true,
   "code": {
     "include_lists": [
-      "ISSUE",
+      "TODO",
       "DOING",
       "DONE",
       "PLANNING",
@@ -18,7 +18,8 @@
       "IDEA",
       "NOTE",
       "REVIEW",
-      "MARK"
+      "MARK",
+      "ISSUE"
     ]
   },
   "lists": [

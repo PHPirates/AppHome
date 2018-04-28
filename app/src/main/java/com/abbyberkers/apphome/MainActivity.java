@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         assert npFrom != null;
         npFrom.setMinValue(0);
         npFrom.setMaxValue(City.values().length - 1);
-        npFrom.setDisplayedValues(allCityStrings()); // TODO (Kotlin)
+        npFrom.setDisplayedValues(allCityStrings()); // TODO (Kotlin) https://github.com/PHPirates/AppHome/issues/12 id:1
         npFrom.setWrapSelectorWheel(false);
         npFrom.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         setDividerColor(npFrom, ContextCompat.getColor(this, R.color.divider));
@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         assert npTo != null;
         npTo.setMinValue(0);
         npTo.setMaxValue(City.values().length - 1);
-        npTo.setDisplayedValues(allCityStrings()); // TODO
+        npTo.setDisplayedValues(allCityStrings()); // TODO https://github.com/PHPirates/AppHome/issues/13 id:2
         npTo.setWrapSelectorWheel(false);
         npTo.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
         setDividerColor(npTo, ContextCompat.getColor(this, R.color.divider));
@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * TODO
+     * TODO https://github.com/PHPirates/AppHome/issues/14 id:3
      * whatsapp a delayed arrival time
      *
      * @param view button sendDelay
