@@ -12,7 +12,6 @@ import com.abbyberkers.apphome.ns.xml.ReisMogelijkheid
  * TODO: String resources not available because we're not in an activity.
  */
 fun List<ReisMogelijkheid>.toStrings(): Array<String> =
-        this.map {
-            if (it.status == "NIET-MOGELIJK") "Trip impossible."
-                else "${it.departureTime.fromNs()} ${it.delay() ?: "    "}"
-        }.toTypedArray()
+        this.filter{it.status != "NIET-MOGELIJK"}
+                .map { "${it.departureTime.fromNs()} ${it.delay() ?: "    "}" }
+                .toTypedArray()

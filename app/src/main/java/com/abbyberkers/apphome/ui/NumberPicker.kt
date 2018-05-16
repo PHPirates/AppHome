@@ -1,5 +1,6 @@
 package com.abbyberkers.apphome.ui
 
+import android.util.Log
 import android.view.View
 import android.widget.NumberPicker
 import com.abbyberkers.apphome.converters.toStrings
@@ -16,12 +17,15 @@ import com.abbyberkers.apphome.ns.xml.ReisMogelijkheid
  */
 fun NumberPicker.setDepartures(journeys: List<ReisMogelijkheid>?): Int {
     return if (journeys != null) {
+        // Get the strings of all possible trips.
+        val journeyStrings = journeys.toStrings()
+
         visibility = View.VISIBLE
         minValue = 1
-        maxValue = journeys.size
-        displayedValues = journeys.toStrings()
+        maxValue = journeyStrings.size - 1
+        displayedValues = journeyStrings
         wrapSelectorWheel = false
-        value = journeys.size / 2 + 1
+        value = journeyStrings.size / 2 + 1  // Default position of the numberpicker.
         value
     } else {
         // If journeys is null: hide the numberpicker.
