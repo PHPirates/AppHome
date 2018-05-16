@@ -16,7 +16,7 @@ fun Calendar.toFormattedString(format: String = "HH:mm"): String =
 /**
  * Convert a calendar object to a string in NS format. Uses [Calendar.toFormattedString].
  */
-fun Calendar.toNS(): String =
+fun Calendar.toNsString(): String =
         this.toFormattedString("yyyy-MM-dd'T'HH:mm:ssZ")
 
 /**
