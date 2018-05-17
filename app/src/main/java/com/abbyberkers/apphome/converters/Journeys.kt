@@ -9,9 +9,7 @@ import com.abbyberkers.apphome.ns.xml.ReisMogelijkheid
  * is HH:mm (with a few spaces to align with the delayed strings in the
  * number picker).
  *
- * TODO: String resources not available because we're not in an activity.
  */
 fun List<ReisMogelijkheid>.toStrings(): Array<String> =
-        this.filter{it.status != "NIET-MOGELIJK"}
-                .map { "${it.departureTime.fromNs()} ${it.delay() ?: "    "}" }
+        this.map { "${it.departureTime.fromNs()} ${it.delay() ?: "    "}" }
                 .toTypedArray()

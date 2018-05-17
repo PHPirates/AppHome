@@ -40,7 +40,7 @@ fun NumberPicker.updateNumberPicker(from: City,
         call.enqueue(object : Callback<ReisMogelijkheden> {
             override fun onResponse(call: Call<ReisMogelijkheden>, response: Response<ReisMogelijkheden>) {
                 // Get the journeys from the response.
-                activity.journeys = response.body()?.journeys
+                activity.journeys = response.body()?.journeys?.filter { it.status != "NIET-MOGELIJK"}
                 // Hide the progressbar.
                 progressBar.visibility = View.GONE
                 // Set the new times on the number picker.
