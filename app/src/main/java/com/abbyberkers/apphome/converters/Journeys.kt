@@ -1,5 +1,6 @@
 package com.abbyberkers.apphome.converters
 
+import android.content.res.Resources
 import com.abbyberkers.apphome.ns.xml.ReisMogelijkheid
 
 /**
@@ -7,8 +8,8 @@ import com.abbyberkers.apphome.ns.xml.ReisMogelijkheid
  * where x are the minutes of delay. When there is no delay, the format
  * is HH:mm (with a few spaces to align with the delayed strings in the
  * number picker).
+ *
  */
 fun List<ReisMogelijkheid>.toStrings(): Array<String> =
-        this.map { "${it.departureTime.fromNs()} ${it.departureDelay ?: "    "}" }
-                .map { it.replace(" min", "") }
+        this.map { "${it.departureTime.fromNs()} ${it.delay() ?: "    "}" }
                 .toTypedArray()

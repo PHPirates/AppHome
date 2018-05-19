@@ -250,9 +250,10 @@ public class MainActivity extends AppCompatActivity {
      */
     @SuppressWarnings("unused") // Actually injected by sendDelayButton
     public void sendDelay(View view) {
-        String delay = journeys.get(depart-1).departureDelay;
+//        String delay = journeys.get(depart-1).departureDelay;
+        String delay = journeys.get(depart-1).delay();
         if(delay != null) {
-            delay = delay.replace(" min", "");
+//            delay = delay.replace(" min", "");
             sendWhatsApp(delay);
         } else {
             ToastKt.toast(this, "No delay :)");
