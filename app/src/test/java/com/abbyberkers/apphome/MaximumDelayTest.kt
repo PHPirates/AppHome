@@ -8,7 +8,7 @@ import org.jetbrains.spek.api.dsl.on
 import org.junit.Assert.assertEquals
 
 object MaximumDelayTest: Spek({
-    given("Some delays which are not null") {
+    given("some delays which are not null") {
         val delay = "+5 min"
         val otherDelay = "+3 min"
 
@@ -21,7 +21,7 @@ object MaximumDelayTest: Spek({
         }
     }
 
-    given("Some delays which can be null") {
+    given("some delays which can be null") {
         val delay = "+5 min"
         val otherDelay = null
 
@@ -34,7 +34,7 @@ object MaximumDelayTest: Spek({
         }
     }
 
-    given("Delays that are null") {
+    given("delays that are null") {
         val delay = null
         val otherDelay = null
 

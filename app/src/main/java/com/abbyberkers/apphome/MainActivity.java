@@ -35,8 +35,9 @@ public class MainActivity extends AppCompatActivity {
 
     private BaseClass baseClass;
 
-    private City from; // default from Eindhoven
-    private City to;
+
+    private City from = City.EINDHOVEN; // Default from Eindhoven.
+    private City to = City.EINDHOVEN; // Default to Eindhoven, not null.
     public int depart; // departure numberpicker value
 
     public List<ReisMogelijkheid> journeys;
