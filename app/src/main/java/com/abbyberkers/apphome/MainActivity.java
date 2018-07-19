@@ -31,6 +31,7 @@ import kotlin.reflect.KMutableProperty;
 import static com.abbyberkers.apphome.converters.CalendarKt.fromNs;
 import static com.abbyberkers.apphome.translations.CitiesKt.allCityStrings;
 
+@Deprecated
 public class MainActivity extends AppCompatActivity {
 
     private BaseClass baseClass;
