@@ -21,12 +21,9 @@ import android.widget.Toast;
 
 import com.abbyberkers.apphome.ns.UseAPIKt;
 import com.abbyberkers.apphome.ns.xml.ReisMogelijkheid;
-import com.abbyberkers.apphome.util.ToastKt;
 
 import java.text.ParseException;
 import java.util.List;
-
-import kotlin.reflect.KMutableProperty;
 
 import static com.abbyberkers.apphome.converters.CalendarKt.fromNs;
 import static com.abbyberkers.apphome.translations.CitiesKt.allCityStrings;
@@ -258,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
 //            delay = delay.replace(" min", "");
             sendWhatsApp(delay);
         } else {
-            ToastKt.toast(this, "No delay :)");
+            Toast.makeText(this, "no delay", Toast.LENGTH_SHORT).show();
         }
     }
 

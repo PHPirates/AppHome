@@ -6,7 +6,7 @@ import com.abbyberkers.apphome.City
 import com.abbyberkers.apphome.MainActivity
 import com.abbyberkers.apphome.ns.xml.ReisMogelijkheden
 import com.abbyberkers.apphome.ui.setDepartures
-import com.abbyberkers.apphome.util.toast
+import org.jetbrains.anko.toast
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

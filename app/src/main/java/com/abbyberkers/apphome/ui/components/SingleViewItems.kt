@@ -17,14 +17,13 @@ import org.jetbrains.anko.sdk25.coroutines.onItemSelectedListener
  * @param onItemSelected The function to evaluate when an item is being selected.
  *        Takes the position of the item in [items] as an argument.
  */
-fun ViewManager.spinnerWithListener(items: Array<*>, onItemSelected: (position: Int) -> Unit) : LinearLayout {
-    return linearLayout {
-        spinner {
+fun ViewManager.spinnerWithListener(items: Array<*>, onItemSelected: (position: Int) -> Unit) : Spinner {
+    return spinner {
             adapter = ArrayAdapter(this.context, R.layout.simple_spinner_dropdown_item, items)
             onItemSelectedListener {
                 onItemSelected { adapterView, view, i, l -> onItemSelected(i) }
                 onNothingSelected { parent: AdapterView<*>? -> getContext().toast("Please select an item.") }
             }
-        }.lparams(width = matchParent)
     }
+
 }
