@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'de.mannodermaus.android-junit5'
+apply plugin: 'jacoco-android'
 
 android {
     compileSdkVersion 26
@@ -22,6 +23,9 @@ android {
                     outputFileName = "AppHome-${variant.name}-${variant.versionName}.apk"
                 }
             }
+        }
+        debug {
+            testCoverageEnabled true
         }
     }
     compileOptions {
