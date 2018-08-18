@@ -24,9 +24,6 @@ android {
                 }
             }
         }
-        debug {
-            testCoverageEnabled true
-        }
     }
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_8
