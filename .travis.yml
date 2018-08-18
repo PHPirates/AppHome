@@ -17,10 +17,12 @@ android:
   - sys-img-armeabi-v7a-android-22
 before_script:
 - android list targets
+- ./gradlew build jacocoTestReport assembleAndroidTest
 - echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a
 - emulator -avd test -no-skin -no-audio -no-window &
 - android-wait-for-emulator
 - adb shell input keyevent 82 &
+- ./gradlew connectedCheck
 before_install:
 - chmod +x gradlew
 - echo yes | $ANDROID_HOME/tools/bin/sdkmanager "build-tools;27.0.3"
@@ -31,3 +33,5 @@ notifications:
     rooms:
       secure: gmHpp5rX77RrKmnW2G7Efpnq8ETX35YZC4pzBzOa+otyx4SCrj4ENSVmqhSxTgjQEZ4MF6ea/zPXVHTpwroZoGvI0xZ1o6sAAqGNLunq7cqWx+Dht2scL8Qlo6j3seqSdJQejuo+52yNY6093ILCO9EI1vLTWXLM2LH9rWc5nvnhXLUA48LTVOhPUYF8F27bNT0osqAZTngWLzzcj3/SbXIlL2RHf6UzBum12uwsa9g0x8oKD2Cx4L/wXCph6CjMYaRDrKkK7As5UDPik+o5e4aKy9P+bGZYoQ0Jkfy7WlVO4+PaCQX6SWmfBYWLGuTu1mkrREaqN6J+bXbndHDOREV+uo82BebZti8Ac+g0UYw6qcDpvjlRxfNiDBRu6tGit006ioo/7zjP6jv8CuCLBBVSbg4IT8vR3cYZxeJFH/9jtBzCp0Bt+IuHX1XMnmkFU8oY/fO5DacYa0E4pSn2RxFRpYnd/cTZgyf+Re4XxKTkvyc6YkL/GWNEOmZG2Bvfs6di52IOO2fFSUXDiIW2Q3okJ8eOk3zrglQunLLe1e3Y2dR0GP9aKoyyPYSpzZPnZU/ePzd6ZHG34B/+IlIxO4/+Q8NDbyO2yBNHo1hJ084NZQ3TBekMWy3+Qs5kf7Wac6O4w8HIadk8bqvrPe4eCno/opG5RfiruAIvBKZh1Qs=
 script: "./gradlew connectedAndroidTest"
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
