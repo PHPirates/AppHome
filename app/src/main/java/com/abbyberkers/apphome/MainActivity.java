@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
             getNewJourneys();
         });
 
-        //first check whether user is already set, then set defaults, then request times
+        //first check whether userPreferences is already set, then set defaults, then request times
 
         checkUserConfigured();
 
@@ -150,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Display 'choose user' dialog
+     * Display 'choose userPreferences' dialog
      */
     public void displaySetting() {
         if (mainMenu != null) {
@@ -180,10 +180,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * @return string user from shared prefs
+     * @return string userPreferences from shared prefs
      */
     public String getUser() {
-        //find the user
+        //find the userPreferences
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         return prefs.getString(getString(R.string.pref_user),"none");
     }

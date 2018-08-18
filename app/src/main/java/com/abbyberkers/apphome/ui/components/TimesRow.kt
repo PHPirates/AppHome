@@ -27,7 +27,6 @@ class TimesRow(context: Context) : TableRow(context) {
             progress.lparams(height = wrapContent, width = 0, initWeight = 1f)
         }
         showTimes()
-
     }
 
     /**

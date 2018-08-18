@@ -1,14 +1,14 @@
 package com.abbyberkers.apphome;
 
 import java.util.Calendar;
-import static com.abbyberkers.apphome.converters.CalendarKt.toCalendar;
+import static com.abbyberkers.apphome.converters.CalendarKt.nsToCalendar;
 import static com.abbyberkers.apphome.converters.CalendarKt.toFormattedString;
 
 public class BaseClass {
 
     /**
      * convert ns-format to HH:mm
-     * asks for user to add bike time for Thomas/Abby
+     * asks for userPreferences to add bike time for Thomas/Abby
      * @param nsTime ns time
      * @return string
      */
@@ -17,7 +17,7 @@ public class BaseClass {
         if (nsTime == null) {
             return "No time selected";
         } else {
-            Calendar c = toCalendar(nsTime);
+            Calendar c = nsToCalendar(nsTime);
             if (user.equals("Thomas") && to == City.ROOSENDAAL) {
                 //if Thomas going to Rdaal
                 //special cycling case for Thomas

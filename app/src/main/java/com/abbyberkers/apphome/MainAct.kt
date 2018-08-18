@@ -15,13 +15,7 @@ class MainAct : AppCompatActivity() {
 
         /*
         TODO:
-        - check if user configured
+        - check if userPreferences configured and set direction accordingly
          */
-    }
-
-    fun hi() {
-        val uri = Uri.parse("https://wa.me/?text=hi")
-        val intent = Intent(Intent.ACTION_VIEW, uri)
-        startActivity(intent)
     }
 }
