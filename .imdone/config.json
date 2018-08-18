@@ -19,10 +19,15 @@
       "NOTE",
       "REVIEW",
       "MARK",
-      "ISSUE"
+      "ISSUE",
+      "HELP"
     ]
   },
   "lists": [
+    {
+      "name": "HELP",
+      "hidden": false
+    },
     {
       "name": "TODO",
       "hidden": false
@@ -40,5 +45,6 @@
     "id": "5ae048b775e50c7dfbd31049",
     "name": "PHPirates/AppHome",
     "useImdoneioForPriority": true
-  }
+  },
+  "noHelp": true
 }
