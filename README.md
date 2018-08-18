@@ -1,4 +1,7 @@
-[![Build Status](https://travis-ci.org/PHPirates/AppHome.svg?branch=master)](https://travis-ci.org/PHPirates/AppHome) **AppHome** 
+[![Build Status](https://travis-ci.org/PHPirates/AppHome.svg?branch=master)](https://travis-ci.org/PHPirates/AppHome) 
+[![codecov](https://codecov.io/gh/phpirates/apphome/branch/master/graph/badge.svg)](https://codecov.io/gh/phpirates/apphome)
+
+# AppHome
 
 [Download latest release (v1.5.3)](https://github.com/PHPirates/AppHome/blob/master/AppHome/app/release/AppHome-release1.5.3.apk?raw=true)
 
