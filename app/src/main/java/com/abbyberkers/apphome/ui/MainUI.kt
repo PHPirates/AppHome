@@ -16,12 +16,13 @@ import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
 
 class MainUI : AnkoComponent<MainAct> {
+
+    lateinit var fromSpinner: Spinner
+    lateinit var toSpinner: Spinner
+    lateinit var timesSpinner: TimesRow
+
     override fun createView(ui: AnkoContext<MainAct>): View = with(ui) {
         tableLayout {
-
-            lateinit var fromSpinner: Spinner
-            lateinit var toSpinner: Spinner
-            lateinit var timesSpinner: TimesRow
 
             padding = 16
 

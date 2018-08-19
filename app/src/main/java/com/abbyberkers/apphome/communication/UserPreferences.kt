@@ -3,6 +3,7 @@ package com.abbyberkers.apphome.communication
 import com.abbyberkers.apphome.City
 import com.abbyberkers.apphome.communication.textformatters.Language
 import com.abbyberkers.apphome.communication.textformatters.TimesFormat
+import java.util.*
 
 enum class UserPreferences(
         /** Default trip in the morning. */
@@ -38,5 +39,17 @@ enum class UserPreferences(
                     City.OVERLOON to {time -> "Ik ben rond $time thuis."},
                     City.HEEZE to {time -> "Ik ben rond $time thuis."},
                     City.ROOSENDAAL to {time -> "Yay at $time!"})
-    )
+    );
+
+    /**
+     * Get the prefered direction of the user at the current time.
+     */
+    fun getDirection(): Direction {
+        // Create a Calendar object.
+        val cal = GregorianCalendar()
+        // Set the current time on the calendar.
+        cal.time = Calendar.getInstance().time
+        // If the time is before noon return the morning direction, else return the afternoon direction.
+        return if(cal.get(Calendar.HOUR_OF_DAY) < 12) morning else afternoon
+    }
 }
