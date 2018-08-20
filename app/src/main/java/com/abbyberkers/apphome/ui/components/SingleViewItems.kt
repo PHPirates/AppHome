@@ -25,5 +25,4 @@ fun ViewManager.spinnerWithListener(items: Array<*>, onItemSelected: (position: 
                 onNothingSelected { parent: AdapterView<*>? -> getContext().toast("Please select an item.") }
             }
     }
-
 }

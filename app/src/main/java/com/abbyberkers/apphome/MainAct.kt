@@ -9,27 +9,25 @@ import org.jetbrains.anko.setContentView
 
 class MainAct : AppCompatActivity() {
 
+    val mainUI by lazy { MainUI() }
+    val sharedPref by lazy { getPreferences(Context.MODE_PRIVATE) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val mainUI = MainUI()
         mainUI.setContentView(this)
 
-        val sharedPreferences = getPreferences(Context.MODE_PRIVATE)
-        val user = sharedPreferences.let {
+        sharedPref.let {
+            // Check if the user is configured by checking if the key exists in the
+            // shared preferences.
             if(it.contains("user")) {
-                it.getUserPreference()
+                // Update the direction on the from and to spinners based on the currently configured
+                // user.
+                mainUI.updateDirection(sharedPref.getUserPreference())
             } else {
-                // Display fragment to pick user. In this fragment the new user will be stored in
-                // the preferences.
-                it.getUserPreference()
+                // Display dialog to pick user. By clicking a button in this dialog the new user will
+                // be stored in the preferences.
+                mainUI.userDialog.show()
             }
         }
-
-        // Get the prefered direction from the user.
-        val direction = user.getDirection()
-        // Set this direction on the from and to spinners.
-        mainUI.fromSpinner.setSelection(City.values().indexOf(direction.from))
-        mainUI.toSpinner.setSelection(City.values().indexOf(direction.to))
     }
-
 }
