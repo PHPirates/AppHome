@@ -76,7 +76,7 @@ class MainUI : AnkoComponent<MainAct> {
 
             timesSpinner = timesRow()
 
-            userDialog = alert("Choose a user.", "Please choose a user to use this app.") {
+            userDialog = alert("Please choose a user to use this app.", "Choose a user.") {
 
                 fun clickDialogButton(user: UserPreferences) {
                     // Change the name on the menu.
