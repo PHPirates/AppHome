@@ -1,15 +1,16 @@
 package com.abbyberkers.apphome.ui
 
 import android.app.AlertDialog
-import android.preference.PreferenceManager
+import android.view.MenuItem
 import android.view.View
 import android.widget.Spinner
 import com.abbyberkers.apphome.City
 import com.abbyberkers.apphome.MainAct
 import com.abbyberkers.apphome.R
+import com.abbyberkers.apphome.communication.MessageType
 import com.abbyberkers.apphome.communication.UserPreferences
 import com.abbyberkers.apphome.communication.WhatsappCommunication
-import com.abbyberkers.apphome.storage.saveUserPreference
+import com.abbyberkers.apphome.storage.SharedPreferenceHelper
 import com.abbyberkers.apphome.ui.components.TimesRow
 import com.abbyberkers.apphome.ui.components.spinnerWithListener
 import com.abbyberkers.apphome.ui.components.textRow
@@ -23,11 +24,14 @@ class MainUI : AnkoComponent<MainAct> {
     lateinit var toSpinner: Spinner
     lateinit var timesSpinner: TimesRow
     lateinit var userDialog: AlertBuilder<AlertDialog>
+    lateinit var chooseUserItem: MenuItem
 
     override fun createView(ui: AnkoContext<MainAct>): View = with(ui) {
         tableLayout {
 
             padding = 16
+
+            val prefs = SharedPreferenceHelper(context)
 
             textRow("From", "To", alignment = View.TEXT_ALIGNMENT_VIEW_START)
 
@@ -35,13 +39,13 @@ class MainUI : AnkoComponent<MainAct> {
                 fromSpinner = spinnerWithListener(City.strings()) {
                     // Update the times spinner with the new value of the from spinner and the
                     // current value of the to spinner.
-                    timesSpinner.update(City.values()[it], City.values()[toSpinner.selectedItemPosition])
+                    timesSpinner.update(City.values()[it], City.getSelectedCity(toSpinner))
                 }.lparams(height = wrapContent, width = 0, initWeight = 1f)
 
                 toSpinner = spinnerWithListener(City.strings()) {
                     // Update the times spinner with the current value of the from spinner and the
                     // new value of the to spinner.
-                    timesSpinner.update(City.values()[fromSpinner.selectedItemPosition], City.values()[it])
+                    timesSpinner.update(City.getSelectedCity(fromSpinner), City.values()[it])
                 }.lparams(height = wrapContent, width = 0, initWeight = 1f)
             }
 
@@ -52,8 +56,8 @@ class MainUI : AnkoComponent<MainAct> {
                         val whatsapp = WhatsappCommunication(getContext())
                         // Send the WhatsApp message.
                         whatsapp.sendMessage(trip = timesSpinner.selectedTrip(),
-                                destination = City.values()[toSpinner.selectedItemPosition],
-                                userPreferences = UserPreferences.ABBY)
+                                destination = City.getSelectedCity(toSpinner),
+                                userPreferences = prefs.getUserPreference())
                     }
                 }.lparams(height = wrapContent, width = 0, initWeight = 1f)
 
@@ -62,7 +66,10 @@ class MainUI : AnkoComponent<MainAct> {
                     onClick {
                         val whatsapp = WhatsappCommunication(getContext())
                         // Send the delay.
-                        whatsapp.send(timesSpinner.selectedTrip().delay())
+                        whatsapp.sendMessage(trip = timesSpinner.selectedTrip(),
+                                destination = City.getSelectedCity(toSpinner),
+                                userPreferences = prefs.getUserPreference(),
+                                messageType = MessageType.DELAY)
                     }
                 }.lparams(height = wrapContent, width = 0, initWeight = 1f)
             }
@@ -72,8 +79,8 @@ class MainUI : AnkoComponent<MainAct> {
             userDialog = alert("Choose a user.", "Please choose a user to use this app.") {
 
                 fun clickDialogButton(user: UserPreferences) {
-                    // Get the shared preferences.
-                    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+                    // Change the name on the menu.
+                    chooseUserItem.title = user.name
                     // Save the user to the shared preferences.
                     prefs.saveUserPreference(user = user)
                     updateDirection(user)

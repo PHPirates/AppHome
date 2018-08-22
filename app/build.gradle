@@ -9,7 +9,7 @@ android {
     buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "com.abbyberkers.apphome"
-        minSdkVersion 17
+        minSdkVersion 21
         targetSdkVersion 26
         versionCode 10
         versionName "1.6.0"

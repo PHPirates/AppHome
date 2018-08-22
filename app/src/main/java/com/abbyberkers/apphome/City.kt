@@ -1,5 +1,7 @@
 package com.abbyberkers.apphome
 
+import android.widget.Spinner
+
 /**
  * The possible cities.
  */
@@ -17,6 +19,10 @@ enum class City(val string: String, val station: String = string) {
          */
         fun strings(): Array<String> {
             return City.values().map { it.string }.toTypedArray()
+        }
+
+        fun getSelectedCity(spinner: Spinner): City {
+            return City.values()[spinner.selectedItemPosition]
         }
     }
 }
