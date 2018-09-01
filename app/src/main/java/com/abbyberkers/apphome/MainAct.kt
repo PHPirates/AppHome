@@ -1,8 +1,10 @@
 package com.abbyberkers.apphome
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import com.abbyberkers.apphome.storage.SharedPreferenceHelper
 import com.abbyberkers.apphome.storage.getUserPreference
 import com.abbyberkers.apphome.ui.MainUI
 import org.jetbrains.anko.setContentView
@@ -10,11 +12,12 @@ import org.jetbrains.anko.setContentView
 class MainAct : AppCompatActivity() {
 
     val mainUI by lazy { MainUI() }
-    val sharedPref by lazy { getPreferences(Context.MODE_PRIVATE) }
+    val sharedPref by lazy { SharedPreferenceHelper(applicationContext) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mainUI.setContentView(this)
+        mainUI.sharedPref = sharedPref
 
         sharedPref.let {
             // Check if the user is configured by checking if the key exists in the
@@ -29,5 +32,10 @@ class MainAct : AppCompatActivity() {
                 mainUI.userDialog.show()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mainUI.updateDirection(sharedPref.getUserPreference())
     }
 }

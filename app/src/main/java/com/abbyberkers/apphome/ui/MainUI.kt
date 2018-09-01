@@ -9,6 +9,7 @@ import com.abbyberkers.apphome.MainAct
 import com.abbyberkers.apphome.R
 import com.abbyberkers.apphome.communication.UserPreferences
 import com.abbyberkers.apphome.communication.WhatsappCommunication
+import com.abbyberkers.apphome.storage.SharedPreferenceHelper
 import com.abbyberkers.apphome.storage.saveUserPreference
 import com.abbyberkers.apphome.ui.components.TimesRow
 import com.abbyberkers.apphome.ui.components.spinnerWithListener
@@ -23,6 +24,8 @@ class MainUI : AnkoComponent<MainAct> {
     lateinit var toSpinner: Spinner
     lateinit var timesSpinner: TimesRow
     lateinit var userDialog: AlertBuilder<AlertDialog>
+
+    lateinit var sharedPref: SharedPreferenceHelper
 
     override fun createView(ui: AnkoContext<MainAct>): View = with(ui) {
         tableLayout {
@@ -69,13 +72,11 @@ class MainUI : AnkoComponent<MainAct> {
 
             timesSpinner = timesRow()
 
-            userDialog = alert("Choose a user.", "Please choose a user to use this app.") {
+            userDialog = alert("Please choose a user to use this app.", "Choose a user.") {
 
                 fun clickDialogButton(user: UserPreferences) {
-                    // Get the shared preferences.
-                    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                     // Save the user to the shared preferences.
-                    prefs.saveUserPreference(user = user)
+                    sharedPref.saveUserPreference(user = user)
                     updateDirection(user)
                 }
                 // Make sure that the user chooses a user, by disabling the possibility that they
