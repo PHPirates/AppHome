@@ -20,9 +20,8 @@ class MainAct : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         mainUI.setContentView(this)
-        // Refresh the direction of the user.
-        setDefaultDirection()
-
+        // Refreshing the direction on the user is done by onResume(), which is always executed
+        // when opening the app.
     }
 
     /**
@@ -33,7 +32,6 @@ class MainAct : AppCompatActivity() {
         super.onResume()
         // Refresh the direction of the user.
         setDefaultDirection()
-//        invalidateOptionsMenu()
     }
 
     /**
