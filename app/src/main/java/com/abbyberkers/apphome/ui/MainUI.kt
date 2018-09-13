@@ -3,13 +3,17 @@ package com.abbyberkers.apphome.ui
 import android.app.AlertDialog
 import android.view.MenuItem
 import android.view.View
+import android.widget.AdapterView
 import android.widget.Spinner
+import android.widget.TextView
 import com.abbyberkers.apphome.City
 import com.abbyberkers.apphome.MainAct
 import com.abbyberkers.apphome.R
 import com.abbyberkers.apphome.communication.MessageType
 import com.abbyberkers.apphome.communication.UserPreferences
 import com.abbyberkers.apphome.communication.WhatsappCommunication
+import com.abbyberkers.apphome.communication.textformatters.TextFormatter
+import com.abbyberkers.apphome.converters.nsToCalendar
 import com.abbyberkers.apphome.storage.SharedPreferenceHelper
 import com.abbyberkers.apphome.ui.components.TimesRow
 import com.abbyberkers.apphome.ui.components.spinnerWithListener
@@ -25,6 +29,7 @@ class MainUI : AnkoComponent<MainAct> {
     lateinit var timesSpinner: TimesRow
     lateinit var userDialog: AlertBuilder<AlertDialog>
     lateinit var chooseUserItem: MenuItem
+    lateinit var previewText: TextView
 
     override fun createView(ui: AnkoContext<MainAct>): View = with(ui) {
         tableLayout {
@@ -75,6 +80,14 @@ class MainUI : AnkoComponent<MainAct> {
             }
 
             timesSpinner = timesRow()
+            timesSpinner.timePicker.setOnValueChangedListener { _, _, newValue ->
+                previewText.text = TextFormatter(prefs.getUserPreference()).applyTemplate(
+                        destination = City.getSelectedCity(toSpinner),
+                        time = timesSpinner.trips[newValue].arrivalTime.nsToCalendar()
+                )
+            }
+
+            previewText = textView { textAlignment = View.TEXT_ALIGNMENT_CENTER}
 
             userDialog = alert("Please choose a user to use this app.", "Choose a user.") {
 

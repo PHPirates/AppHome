@@ -25,7 +25,10 @@ class WhatsappCommunication(val context: Context) {
      *      message. It is selected in the menu in the toolbar.
      * @param messageType The type of the message. Can be ETA (the default) or a delay.
      */
-    fun sendMessage(trip: ReisMogelijkheid, destination: City, userPreferences: UserPreferences, messageType: MessageType = MessageType.ETA) {
+    fun sendMessage(trip: ReisMogelijkheid,
+                    destination: City,
+                    userPreferences: UserPreferences,
+                    messageType: MessageType = MessageType.ETA) {
         // If the delay is null and the message type is DELAY give the user a toast that there is no delay.
         if (trip.delay() == null && messageType == MessageType.DELAY) context.toast("There is no delay.")
         else {

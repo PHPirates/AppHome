@@ -1,10 +1,12 @@
 package com.abbyberkers.apphome.ui.components
 
 import android.content.Context
+import android.support.v4.content.res.ResourcesCompat
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewManager
 import android.widget.ArrayAdapter
+import android.widget.NumberPicker
 import android.widget.Spinner
 import com.abbyberkers.apphome.R
 import com.abbyberkers.apphome.converters.toStrings
@@ -13,14 +15,17 @@ import org.jetbrains.anko.custom.ankoView
 import org.jetbrains.anko.matchParent
 import org.jetbrains.anko.wrapContent
 
-class TimesSpinner : Spinner {
+class TimesSpinner : NumberPicker {
 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     init {
-        adapter = ArrayAdapter<String>(context, R.layout.support_simple_spinner_dropdown_item, arrayOf(" "))
+        displayedValues = arrayOf("", "")
+        wrapSelectorWheel = false
+        minValue = 0
+        maxValue = 1
         layoutParams = LayoutParams(wrapContent, matchParent)
     }
 
@@ -31,8 +36,11 @@ class TimesSpinner : Spinner {
      */
     fun setTimes(journeys: List<ReisMogelijkheid>?) {
         if (journeys != null) {
-            adapter = ArrayAdapter<String>(context, R.layout.support_simple_spinner_dropdown_item,
-                    journeys.toStrings())
+            wrapSelectorWheel = false // Not including this will set it to true.
+            displayedValues = journeys.toStrings()
+            minValue = 0
+            maxValue = journeys.size - 1
+            value = (journeys.size - 1) / 2
         } else {
             visibility = View.GONE
         }

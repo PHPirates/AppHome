@@ -5,6 +5,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewManager
 import android.widget.TableRow
+import android.widget.TextView
 import com.abbyberkers.apphome.City
 import com.abbyberkers.apphome.ns.NsApiService
 import com.abbyberkers.apphome.ns.xml.ReisMogelijkheden
@@ -16,17 +17,21 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class TimesRow(context: Context) : TableRow(context) {
-    private val timesSpinner = timesSpinner { gravity = Gravity.CENTER }
+    val timePicker = timesSpinner { gravity = Gravity.CENTER }
     private val progress = progressBar()
 
-    private lateinit var trips: List<ReisMogelijkheid>
+    lateinit var trips: List<ReisMogelijkheid>
 
     init {
         tableRow {
-            timesSpinner.lparams(height = wrapContent, width = wrapContent)
+            timePicker.lparams(height = wrapContent, width = 0, initWeight = 1f)
             progress.lparams(height = wrapContent, width = 0, initWeight = 1f)
         }
         showTimes()
+    }
+
+    fun areTripsInitialized(): Boolean {
+        return ::trips.isInitialized
     }
 
     /**
@@ -38,7 +43,7 @@ class TimesRow(context: Context) : TableRow(context) {
         hideTimes()
 
         if (from == to) {
-            timesSpinner.setTimes(null)
+            timePicker.setTimes(null)
             progress.visibility = View.GONE
         } else {
             // Prepare a call to the API.
@@ -53,7 +58,7 @@ class TimesRow(context: Context) : TableRow(context) {
                     // Get the trips from the response.
                     trips = response.body()?.journeys?.filter { it.status != "NIET-MOGELIJK"} as List<ReisMogelijkheid>
                     // Set the new times on the number picker.
-                    timesSpinner.setTimes(trips)
+                    timePicker.setTimes(trips)
                     showTimes()
                 }
 
@@ -68,13 +73,13 @@ class TimesRow(context: Context) : TableRow(context) {
     /**
      * Get the trip [ReisMogelijkheid] that is currently selected.
      */
-    fun selectedTrip() : ReisMogelijkheid = trips[timesSpinner.selectedItemPosition]
+    fun selectedTrip() : ReisMogelijkheid = trips[timePicker.value]
 
     /**
      * Hide the TimeSpinner and show the ProgressBar.
      */
     fun hideTimes() {
-        timesSpinner.visibility = View.GONE
+        timePicker.visibility = View.GONE
         progress.visibility = View.VISIBLE
     }
 
@@ -82,7 +87,7 @@ class TimesRow(context: Context) : TableRow(context) {
      * Show the TimeSpinner and hide the ProgressBar.
      */
     fun showTimes() {
-        timesSpinner.visibility = View.VISIBLE
+        timePicker.visibility = View.VISIBLE
         progress.visibility = View.GONE
     }
 }
