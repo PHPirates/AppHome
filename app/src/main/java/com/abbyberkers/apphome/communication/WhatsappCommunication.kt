@@ -28,13 +28,14 @@ class WhatsappCommunication(val context: Context) {
     fun sendMessage(trip: ReisMogelijkheid,
                     destination: City,
                     userPreferences: UserPreferences,
-                    messageType: MessageType = MessageType.ETA) {
+                    messageType: MessageType = MessageType.ETA,
+                    plural: Boolean) {
         // If the delay is null and the message type is DELAY give the user a toast that there is no delay.
         if (trip.delay() == null && messageType == MessageType.DELAY) context.toast("There is no delay.")
         else {
             // Get the text depending on the message type.
             val text = when (messageType) {
-                MessageType.ETA -> TextFormatter(userPreferences).applyTemplate(destination, trip.arrivalTime.nsToCalendar())
+                MessageType.ETA -> TextFormatter(userPreferences).applyTemplate(destination, trip.arrivalTime.nsToCalendar(), plural)
                 MessageType.DELAY -> trip.delay()
             }
             // Send the message.

@@ -26,10 +26,10 @@ fun ViewManager.spinnerWithListener(items: Array<*>, onItemSelected: (position: 
 }
 
 /**
- * A switch with tags on either side.
+ * A languageSwitch with tags on either side.
  *
- * @param leftText The text on the left side of the switch. When the switch is left, its value is false.
- * @param rightText The text on the right side of the switch. When the switch is right, its value is true.
+ * @param leftText The text on the left side of the languageSwitch. When the languageSwitch is left, its value is false.
+ * @param rightText The text on the right side of the languageSwitch. When the languageSwitch is right, its value is true.
  */
 fun ViewManager.wordSwitch(leftText: String, rightText: String) : Switch {
     lateinit var switch: Switch

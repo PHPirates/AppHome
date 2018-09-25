@@ -36,8 +36,9 @@ class TextFormatter(private val userPreferences: UserPreferences) {
      *
      * @param destination The destination of the user. The text template depends on the time.
      * @param time The arrival time of the user.
+     * @param plural Whether the message should be written in singular or plural form.
      */
-    fun applyTemplate(destination: City, time: Calendar) : String {
+    fun applyTemplate(destination: City, time: Calendar, plural: Boolean) : String {
         // Get the template from the user.
         val template = {
             val temp = userPreferences.textTemplate[destination]!!
@@ -48,6 +49,11 @@ class TextFormatter(private val userPreferences: UserPreferences) {
         // Format the time according to the users preferences
         val formattedTime = formatTime(destination, time)
         // Apply the template.
-        return template()(formattedTime)
+        val message = template()(formattedTime)
+        // Transform the message to plural form if necessary.
+        return if (plural) message
+                .replace("Ik ben", "Wij zijn")
+                .replace("I am", "We are")
+            else message
         }
 }

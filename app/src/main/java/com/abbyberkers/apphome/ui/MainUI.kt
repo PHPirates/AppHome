@@ -25,7 +25,8 @@ class MainUI : AnkoComponent<MainAct> {
 
     lateinit var fromSpinner: Spinner
     lateinit var toSpinner: Spinner
-    lateinit var switch: Switch
+    lateinit var languageSwitch: Switch
+    lateinit var pluralSwitch: Switch
     lateinit var timesSpinner: TimesRow
     lateinit var previewText: TextView
 
@@ -60,20 +61,27 @@ class MainUI : AnkoComponent<MainAct> {
                 }.lparams(height = wrapContent, width = 0, initWeight = 1f)
             }
 
-            switch = wordSwitch("English", "Dutch")
-            switch.setOnCheckedChangeListener { _, boolean ->
-                run {
-                    // Get the language corresponding to the new value of the switch.
-                    val language = if (boolean) Language.DUTCH else Language.ENGLISH
-                    val destination = City.getSelectedCity(toSpinner)
-                    // Update the preferred language for the current direction.
-                    val user = prefs.getUserPreference()
-                    user.alterLanguage(destination, language)
-                    prefs.saveUserPreference(user)
+            languageSwitch = wordSwitch("English", "Dutch")
+            languageSwitch.setOnCheckedChangeListener { _, boolean ->
+                // Get the language corresponding to the new value of the languageSwitch.
+                val language = if (boolean) Language.DUTCH else Language.ENGLISH
+                val destination = City.getSelectedCity(toSpinner)
+                // Update the preferred language for the current direction.
+                val user = prefs.getUserPreference()
+                user.alterLanguage(destination, language)
+                prefs.saveUserPreference(user)
+                // Update the preview text if the times are already available.
+                if(timesSpinner.timePicker.visibility == View.VISIBLE) updatePreviewText(user)
+                // Hide the preview text if the times are still loading.
+                else previewText.visibility = View.INVISIBLE
+            }
 
-                    if(timesSpinner.timePicker.visibility == View.VISIBLE) updatePreviewText(user)
-                    else previewText.visibility = View.INVISIBLE
-                }
+            pluralSwitch = wordSwitch("Singular", "Plural")
+            pluralSwitch.setOnCheckedChangeListener { _, _ ->
+                // Update the preview text if the times are already available.
+                if(timesSpinner.timePicker.visibility == View.VISIBLE) updatePreviewText(prefs.getUserPreference())
+                // Hide the preview text if the times are still loading.
+                else previewText.visibility = View.INVISIBLE
             }
 
             timesSpinner = timesRow()
@@ -91,7 +99,8 @@ class MainUI : AnkoComponent<MainAct> {
                         // Send the WhatsApp message.
                         whatsapp.sendMessage(trip = timesSpinner.selectedTrip(),
                                 destination = City.getSelectedCity(toSpinner),
-                                userPreferences = prefs.getUserPreference())
+                                userPreferences = prefs.getUserPreference(),
+                                plural = pluralSwitch.isChecked)
                     }
                 }.lparams(height = wrapContent, width = 0, initWeight = 1f)
 
@@ -103,6 +112,7 @@ class MainUI : AnkoComponent<MainAct> {
                         whatsapp.sendMessage(trip = timesSpinner.selectedTrip(),
                                 destination = City.getSelectedCity(toSpinner),
                                 userPreferences = prefs.getUserPreference(),
+                                plural = pluralSwitch.isChecked,
                                 messageType = MessageType.DELAY)
                     }
                 }.lparams(height = wrapContent, width = 0, initWeight = 1f)
@@ -149,7 +159,8 @@ class MainUI : AnkoComponent<MainAct> {
         previewText.visibility = View.VISIBLE
         previewText.text = TextFormatter(user).applyTemplate(
                 destination = destination,
-                time = trip.arrivalTime.nsToCalendar()
+                time = trip.arrivalTime.nsToCalendar(),
+                plural = pluralSwitch.isChecked
         )
     }
 
@@ -167,12 +178,12 @@ class MainUI : AnkoComponent<MainAct> {
     }
 
     /**
-     * Set the value of the switch according to the preferences of the user.
+     * Set the value of the languageSwitch according to the preferences of the user.
      *
      * @param user of whom to use the preferences.
      */
     private fun updateSwitch(user: UserPreferences) {
         val lang = user.languagePref.getValue(City.getSelectedCity(toSpinner)).first
-        switch.isChecked = (lang == Language.DUTCH)
+        languageSwitch.isChecked = (lang == Language.DUTCH)
     }
 }
