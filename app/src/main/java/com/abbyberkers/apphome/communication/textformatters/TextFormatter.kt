@@ -39,11 +39,15 @@ class TextFormatter(private val userPreferences: UserPreferences) {
      */
     fun applyTemplate(destination: City, time: Calendar) : String {
         // Get the template from the user.
-        val template = userPreferences.textTemplate[destination]!!
+        val template = {
+            val temp = userPreferences.textTemplate[destination]!!
+            // Get the template corresponding to the current user preference.
+            if(userPreferences.languagePref[destination]!!.first == Language.ENGLISH)
+                temp.english else temp.dutch
+        }
         // Format the time according to the users preferences
         val formattedTime = formatTime(destination, time)
         // Apply the template.
-        return template(formattedTime)
-    }
-
+        return template()(formattedTime)
+        }
 }

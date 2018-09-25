@@ -10,6 +10,7 @@ import com.abbyberkers.apphome.City
 import com.abbyberkers.apphome.ns.NsApiService
 import com.abbyberkers.apphome.ns.xml.ReisMogelijkheden
 import com.abbyberkers.apphome.ns.xml.ReisMogelijkheid
+import com.abbyberkers.apphome.ui.MainUI
 import org.jetbrains.anko.*
 import org.jetbrains.anko.custom.ankoView
 import retrofit2.Call
@@ -28,10 +29,6 @@ class TimesRow(context: Context) : TableRow(context) {
             progress.lparams(height = wrapContent, width = 0, initWeight = 1f)
         }
         showTimes()
-    }
-
-    fun areTripsInitialized(): Boolean {
-        return ::trips.isInitialized
     }
 
     /**

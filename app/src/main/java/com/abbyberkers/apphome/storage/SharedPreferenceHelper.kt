@@ -3,7 +3,6 @@ package com.abbyberkers.apphome.storage
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-import android.util.Log
 import com.abbyberkers.apphome.communication.UserPreferences
 import com.google.gson.Gson
 

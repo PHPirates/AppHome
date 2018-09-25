@@ -1,12 +1,10 @@
 package com.abbyberkers.apphome.ui.components
 
-import android.R
+import android.view.Gravity
 import android.view.View
 import android.view.ViewManager
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.LinearLayout
-import android.widget.Spinner
+import android.widget.*
+import android.R
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk25.coroutines.onItemSelectedListener
 
@@ -25,4 +23,31 @@ fun ViewManager.spinnerWithListener(items: Array<*>, onItemSelected: (position: 
                 onNothingSelected { parent: AdapterView<*>? -> getContext().toast("Please select an item.") }
             }
     }
+}
+
+/**
+ * A switch with tags on either side.
+ *
+ * @param leftText The text on the left side of the switch. When the switch is left, its value is false.
+ * @param rightText The text on the right side of the switch. When the switch is right, its value is true.
+ */
+fun ViewManager.wordSwitch(leftText: String, rightText: String) : Switch {
+    lateinit var switch: Switch
+    tableRow {
+        textView {
+            text = leftText
+            textAlignment = View.TEXT_ALIGNMENT_CENTER
+        }.lparams(height = wrapContent, width = 0, initWeight = 1f)
+
+        linearLayout {
+            gravity = Gravity.CENTER
+            switch = switch()
+        }.lparams(height = wrapContent, width = 0, initWeight = 1f)
+
+        textView {
+            text = rightText
+            textAlignment = View.TEXT_ALIGNMENT_CENTER
+        }.lparams(height = wrapContent, width = 0, initWeight = 1f)
+    }
+    return switch
 }
