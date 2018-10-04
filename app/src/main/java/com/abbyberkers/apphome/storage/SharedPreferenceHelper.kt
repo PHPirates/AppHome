@@ -34,9 +34,11 @@ class SharedPreferenceHelper(private val context: Context) {
      * Get a user preference from the shared preferences.
      *
      * @param key (optional) the key from the preference to get. This is "user" by default.
+     *
+     * @return [UserPreferences] if they were set, null otherwise.
      */
     fun getUserPreference(key: String = "user",
-                          user: UserPreferences = UserPreferences.ABBY): UserPreferences {
+                          user: UserPreferences = UserPreferences.ABBY): UserPreferences? {
         val json = sharedPref.getString(key, "")
         // Convert the string to a UserPreference object.
         return Gson().fromJson(json, user::class.java)

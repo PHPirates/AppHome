@@ -61,7 +61,7 @@ class MainAct : AppCompatActivity() {
         menuInflater.inflate(R.menu.mainmenu, menu)
         mainUI.chooseUserItem = menu!!.getItem(0)
         if(sharedPref.sharedPref.contains("user")) {
-            val user = sharedPref.getUserPreference()
+            val user = sharedPref.getUserPreference()!!
             menu.getItem(0).title = user.name
         }
         return super.onCreateOptionsMenu(menu)

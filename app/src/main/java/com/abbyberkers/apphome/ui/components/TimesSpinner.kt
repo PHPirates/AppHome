@@ -1,14 +1,10 @@
 package com.abbyberkers.apphome.ui.components
 
 import android.content.Context
-import android.support.v4.content.res.ResourcesCompat
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewManager
-import android.widget.ArrayAdapter
 import android.widget.NumberPicker
-import android.widget.Spinner
-import com.abbyberkers.apphome.R
 import com.abbyberkers.apphome.converters.toStrings
 import com.abbyberkers.apphome.ns.xml.ReisMogelijkheid
 import org.jetbrains.anko.custom.ankoView

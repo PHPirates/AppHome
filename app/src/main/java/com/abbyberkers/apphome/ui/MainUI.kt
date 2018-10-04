@@ -36,6 +36,9 @@ class MainUI : AnkoComponent<MainAct> {
     override fun createView(ui: AnkoContext<MainAct>): View = with(ui) {
         tableLayout {
 
+            // Note: user preferences are not null in any click/value listener, as the first thing
+            // that happens on startup is that these user preferences will be set.
+
             padding = 16
 
             val prefs = SharedPreferenceHelper(context)
@@ -67,7 +70,7 @@ class MainUI : AnkoComponent<MainAct> {
                 val language = if (boolean) Language.DUTCH else Language.ENGLISH
                 val destination = City.getSelectedCity(toSpinner)
                 // Update the preferred language for the current direction.
-                val user = prefs.getUserPreference()
+                val user = prefs.getUserPreference()!!
                 user.alterLanguage(destination, language)
                 prefs.saveUserPreference(user)
                 // Update the preview text if the times are already available.
@@ -79,14 +82,14 @@ class MainUI : AnkoComponent<MainAct> {
             pluralSwitch = wordSwitch("Singular", "Plural")
             pluralSwitch.setOnCheckedChangeListener { _, _ ->
                 // Update the preview text if the times are already available.
-                if(timesSpinner.timePicker.visibility == View.VISIBLE) updatePreviewText(prefs.getUserPreference())
+                if(timesSpinner.timePicker.visibility == View.VISIBLE) updatePreviewText(prefs.getUserPreference()!!)
                 // Hide the preview text if the times are still loading.
                 else previewText.visibility = View.INVISIBLE
             }
 
             timesSpinner = timesRow()
             timesSpinner.timePicker.setOnValueChangedListener { _, _, newValue ->
-                updatePreviewText(prefs.getUserPreference(), trip = timesSpinner.trips[newValue])
+                updatePreviewText(prefs.getUserPreference()!!, trip = timesSpinner.trips[newValue])
             }
 
             previewText = textView { textAlignment = View.TEXT_ALIGNMENT_CENTER}
@@ -99,7 +102,7 @@ class MainUI : AnkoComponent<MainAct> {
                         // Send the WhatsApp message.
                         whatsapp.sendMessage(trip = timesSpinner.selectedTrip(),
                                 destination = City.getSelectedCity(toSpinner),
-                                userPreferences = prefs.getUserPreference(),
+                                userPreferences = prefs.getUserPreference()!!,
                                 plural = pluralSwitch.isChecked)
                     }
                 }.lparams(height = wrapContent, width = 0, initWeight = 1f)
@@ -111,7 +114,7 @@ class MainUI : AnkoComponent<MainAct> {
                         // Send the delay.
                         whatsapp.sendMessage(trip = timesSpinner.selectedTrip(),
                                 destination = City.getSelectedCity(toSpinner),
-                                userPreferences = prefs.getUserPreference(),
+                                userPreferences = prefs.getUserPreference()!!,
                                 plural = pluralSwitch.isChecked,
                                 messageType = MessageType.DELAY)
                     }
@@ -169,12 +172,15 @@ class MainUI : AnkoComponent<MainAct> {
      *
      * @param user of whom to use the preferences.
      */
-    fun updateDirection(user: UserPreferences) {
-        // Get the preferred direction from the user.
-        val direction = user.getDirection()
-        // Set this direction on the from and to spinners.
-        fromSpinner.setSelection(City.values().indexOf(direction.from))
-        toSpinner.setSelection(City.values().indexOf(direction.to))
+    fun updateDirection(user: UserPreferences?) {
+        // Only update if the user is not null (otherwise there is nothing to update).
+        user?.let {
+            // Get the preferred direction from the user.
+            val direction = user.getDirection()
+            // Set this direction on the from and to spinners.
+            fromSpinner.setSelection(City.values().indexOf(direction.from))
+            toSpinner.setSelection(City.values().indexOf(direction.to))
+        }
     }
 
     /**
@@ -182,8 +188,11 @@ class MainUI : AnkoComponent<MainAct> {
      *
      * @param user of whom to use the preferences.
      */
-    private fun updateSwitch(user: UserPreferences) {
-        val lang = user.languagePref.getValue(City.getSelectedCity(toSpinner)).first
-        languageSwitch.isChecked = (lang == Language.DUTCH)
+    private fun updateSwitch(user: UserPreferences?) {
+        // Only update if the user is not null (otherwise there is nothing to update).
+        user?.let {
+            val lang = user.languagePref.getValue(City.getSelectedCity(toSpinner)).first
+            languageSwitch.isChecked = (lang == Language.DUTCH)
+        }
     }
 }
