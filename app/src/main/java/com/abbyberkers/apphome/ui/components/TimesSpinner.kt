@@ -32,7 +32,7 @@ class TimesSpinner : NumberPicker {
      */
     fun setTimes(journeys: List<ReisMogelijkheid>?) {
         if (journeys != null) {
-            wrapSelectorWheel = false // Not including this will set it to true.
+            wrapSelectorWheel = false  // Not including this will set it to true.
             displayedValues = journeys.toStrings()
             minValue = 0
             maxValue = journeys.size - 1

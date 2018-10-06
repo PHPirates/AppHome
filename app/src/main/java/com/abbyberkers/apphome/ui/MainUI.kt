@@ -1,6 +1,7 @@
 package com.abbyberkers.apphome.ui
 
 import android.app.AlertDialog
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Spinner
@@ -88,8 +89,13 @@ class MainUI : AnkoComponent<MainAct> {
             }
 
             timesSpinner = timesRow()
+            // When the selected time changes we should update the preview text.
             timesSpinner.timePicker.setOnValueChangedListener { _, _, newValue ->
                 updatePreviewText(prefs.getUserPreference()!!, trip = timesSpinner.trips[newValue])
+            }
+            // When the times are loaded we should update the preview text.
+            timesSpinner.onTimesLoaded = {
+                updatePreviewText(prefs.getUserPreference()!!, trip = timesSpinner.selectedTrip())
             }
 
             previewText = textView { textAlignment = View.TEXT_ALIGNMENT_CENTER}
