@@ -3,10 +3,11 @@ package com.abbyberkers.apphome.ui.components
 import android.view.Gravity
 import android.view.View
 import android.view.ViewManager
-import android.widget.*
-import android.R
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Spinner
+import android.widget.Switch
 import org.jetbrains.anko.*
-import org.jetbrains.anko.sdk25.coroutines.onItemSelectedListener
 
 /**
  * Spinner with listener for selected item.
@@ -17,11 +18,16 @@ import org.jetbrains.anko.sdk25.coroutines.onItemSelectedListener
  */
 fun ViewManager.spinnerWithListener(items: Array<*>, onItemSelected: (position: Int) -> Unit) : Spinner {
     return spinner {
-            adapter = ArrayAdapter(this.context, R.layout.simple_spinner_dropdown_item, items)
-            onItemSelectedListener {
-                onItemSelected { adapterView, view, i, l -> onItemSelected(i) }
-                onNothingSelected { parent: AdapterView<*>? -> getContext().toast("Please select an item.") }
+        adapter = ArrayAdapter(this.context, android.R.layout.simple_spinner_dropdown_item, items)
+        onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                context.toast("Please select an item.")
             }
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                onItemSelected(position)
+            }
+        }
     }
 }
 

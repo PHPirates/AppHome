@@ -19,7 +19,7 @@ import com.abbyberkers.apphome.ns.xml.ReisMogelijkheid
 import com.abbyberkers.apphome.storage.SharedPreferenceHelper
 import com.abbyberkers.apphome.ui.components.*
 import org.jetbrains.anko.*
-import org.jetbrains.anko.sdk25.coroutines.onClick
+import org.jetbrains.anko.sdk27.coroutines.onClick
 
 class MainUI : AnkoComponent<MainAct> {
 
