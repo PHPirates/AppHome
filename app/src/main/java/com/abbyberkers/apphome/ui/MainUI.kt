@@ -1,7 +1,6 @@
 package com.abbyberkers.apphome.ui
 
 import android.app.AlertDialog
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.Spinner
