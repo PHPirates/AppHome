@@ -12,7 +12,7 @@ enum class Language(val hours: Map<Int, String>,
                     val connectors: Map<Int, String>,
                     val nextHourThreshold: Int,
                     val maxMinutes: Int) {
-    DUTCH(hours = mapOf(1 to "een",
+    DUTCH(hours = mapOf(1 to "één",
                 2 to "twee",
                 3 to "drie",
                 4 to "vier",

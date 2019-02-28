@@ -14,7 +14,7 @@ object TimeFormatterTest : Spek({
 
         val testCases = mapOf(
                 "12:00" to "twaalf uur",
-                "13:05" to "vijf over een",
+                "13:05" to "vijf over één",
                 "02:10" to "tien over twee",
                 "15:15" to "kwart over drie",
                 "04:20" to "tien voor half vijf",
