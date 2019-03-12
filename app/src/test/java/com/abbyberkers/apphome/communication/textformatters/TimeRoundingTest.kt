@@ -1,13 +1,11 @@
 package com.abbyberkers.apphome.communication.textformatters
 
 import com.abbyberkers.apphome.converters.toCalendar
-import com.abbyberkers.apphome.converters.toFormattedString
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it
 import org.jetbrains.spek.api.dsl.on
-import org.junit.Assert.assertEquals
-import kotlin.math.round
+import org.junit.jupiter.api.Assertions.assertEquals
 
 object TimeRoundingTest : Spek({
     val testCases = mapOf<String, String>(

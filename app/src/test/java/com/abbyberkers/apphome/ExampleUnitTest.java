@@ -1,8 +1,7 @@
 package com.abbyberkers.apphome;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * To work on unit tests, languageSwitch the Test Artifact in the Build Variants view.
@@ -10,7 +9,7 @@ import static org.junit.Assert.*;
 public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() {
-        assertEquals(4, 3 + 2);
+        assertEquals(4, 2 + 2);
     }
 
 }
