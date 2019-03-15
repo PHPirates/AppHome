@@ -10,7 +10,7 @@ We use this app in order to have quick access to departure and arrival times of 
 
 It is possible to switch between users to have different messages or even arrival times, for example selecting user 'Thomas' adds bike time from Eindhoven to Roosendaal, or selecting 'Abby' changes the message from Eindhoven to Heeze (customizations are hard-coded, for now).
 
-![Image of app](Screenshot1.6.0.png?raw=true "App Screenshot") 
+![Image of app](Screenshot1.6.0.jpg?raw=true "App Screenshot") 
 
 In previous versions there was also a widget which displays three departure times given a trajectory, and sends an arrival time when you click on it. It works most of the time (sometimes if it keeps 'loading...' changing the trajectory helps to reload).
 
