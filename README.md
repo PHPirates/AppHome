@@ -14,6 +14,6 @@ It is possible to switch between users to have different messages or even arriva
 
 In previous versions there was also a widget which displays three departure times given a trajectory, and sends an arrival time when you click on it. It works most of the time (sometimes if it keeps 'loading...' changing the trajectory helps to reload).
 
-![Widget Screenshot](ScreenshotWidget.png?raw=true "Widget Screenshot")
+<img src="ScreenshotWidget.png?raw=true" width="250">
 
 <sub>This project was previously maintainted on [BitBucket](https://bitbucket.org/slideclimb/apphome/overview)</sub>
