@@ -6,7 +6,7 @@ import android.view.View
 import android.view.ViewManager
 import android.widget.NumberPicker
 import com.abbyberkers.apphome.converters.toStrings
-import com.abbyberkers.apphome.ns.xml.ReisMogelijkheid
+import com.abbyberkers.apphome.ns.json.Trip
 import org.jetbrains.anko.custom.ankoView
 import org.jetbrains.anko.matchParent
 import org.jetbrains.anko.wrapContent
@@ -30,13 +30,13 @@ class TimesSpinner : NumberPicker {
      * If the journeys are null (there are no possible journeys), hide the spinner.
      * @param journeys A list of journeys to be on the spinner.
      */
-    fun setTimes(journeys: List<ReisMogelijkheid>?) {
-        if (journeys != null) {
+    fun setTimes(trips: List<Trip>?) {
+        if (trips != null) {
             wrapSelectorWheel = false  // Not including this will set it to true.
-            displayedValues = journeys.toStrings()
+            displayedValues = trips.toStrings()
             minValue = 0
-            maxValue = journeys.size - 1
-            value = (journeys.size - 1) / 2
+            maxValue = trips.size - 1
+            value = (trips.size - 1) / 2
         } else {
             visibility = View.GONE
         }

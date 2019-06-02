@@ -3,21 +3,20 @@ package com.abbyberkers.apphome.communication
 import android.content.Context
 import android.content.Intent
 import com.abbyberkers.apphome.City
-import com.abbyberkers.apphome.communication.textformatters.Language
 import com.abbyberkers.apphome.communication.textformatters.TextFormatter
 import com.abbyberkers.apphome.converters.nsToCalendar
-import com.abbyberkers.apphome.ns.xml.ReisMogelijkheid
+import com.abbyberkers.apphome.ns.json.Trip
 import org.jetbrains.anko.toast
 
 /**
  * Class to handle the WhatsApp communication.
  */
-class WhatsappCommunication(val context: Context) {
+class WhatsappCommunication(private val context: Context) {
 
     /**
      * Creates and sends a messages using WhatsApp.
      *
-     * @param trip The ReisMogelijkheid that is used to create the message. This is selected in the
+     * @param trip The [Trip] that is used to create the message. This is selected in the
      *      time spinner.
      * @param destination The city that is the destination of the trip. This has influence on the
      *      template of the message. It is selected in the to spinner.
@@ -25,17 +24,17 @@ class WhatsappCommunication(val context: Context) {
      *      message. It is selected in the menu in the toolbar.
      * @param messageType The type of the message. Can be ETA (the default) or a delay.
      */
-    fun sendMessage(trip: ReisMogelijkheid,
+    fun sendMessage(trip: Trip,
                     destination: City,
                     userPreferences: UserPreferences,
                     messageType: MessageType = MessageType.ETA,
                     plural: Boolean) {
         // If the delay is null and the message type is DELAY give the user a toast that there is no delay.
-        if (trip.delay() == null && messageType == MessageType.DELAY) context.toast("There is no delay.")
+        if (trip.delay() == "+0" && messageType == MessageType.DELAY) context.toast("There is no delay.")
         else {
             // Get the text depending on the message type.
             val text = when (messageType) {
-                MessageType.ETA -> TextFormatter(userPreferences).applyTemplate(destination, trip.arrivalTime.nsToCalendar(), plural)
+                MessageType.ETA -> TextFormatter(userPreferences).applyTemplate(destination, trip.arrivalTime()!!.nsToCalendar(), plural)
                 MessageType.DELAY -> trip.delay()
             }
             // Send the message.
@@ -48,7 +47,7 @@ class WhatsappCommunication(val context: Context) {
      *
      * @param text is the text to be sent.
      */
-    fun send(text: String) {
+    private fun send(text: String) {
         // Toast the text in AppHome so the user can see what text will be sent.
         context.toast(text)
         // Create the intent for opening WhatsApp.

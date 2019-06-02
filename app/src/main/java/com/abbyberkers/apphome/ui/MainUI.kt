@@ -15,7 +15,7 @@ import com.abbyberkers.apphome.communication.WhatsappCommunication
 import com.abbyberkers.apphome.communication.textformatters.Language
 import com.abbyberkers.apphome.communication.textformatters.TextFormatter
 import com.abbyberkers.apphome.converters.nsToCalendar
-import com.abbyberkers.apphome.ns.xml.ReisMogelijkheid
+import com.abbyberkers.apphome.ns.json.Trip
 import com.abbyberkers.apphome.storage.SharedPreferenceHelper
 import com.abbyberkers.apphome.ui.components.*
 import org.jetbrains.anko.*
@@ -103,7 +103,7 @@ class MainUI : AnkoComponent<MainAct> {
                 button {
                     textResource = R.string.send
                     onClick {
-                        val whatsapp = WhatsappCommunication(getContext())
+                        val whatsapp = WhatsappCommunication(context)
                         // Send the WhatsApp message.
                         whatsapp.sendMessage(trip = timesSpinner.selectedTrip(),
                                 destination = City.getSelectedCity(toSpinner),
@@ -115,7 +115,7 @@ class MainUI : AnkoComponent<MainAct> {
                 button {
                     textResource = R.string.send_delay
                     onClick {
-                        val whatsapp = WhatsappCommunication(getContext())
+                        val whatsapp = WhatsappCommunication(context)
                         // Send the delay.
                         whatsapp.sendMessage(trip = timesSpinner.selectedTrip(),
                                 destination = City.getSelectedCity(toSpinner),
@@ -162,12 +162,12 @@ class MainUI : AnkoComponent<MainAct> {
      */
     private fun updatePreviewText(user: UserPreferences,
                           destination: City = City.getSelectedCity(toSpinner),
-                          trip: ReisMogelijkheid = timesSpinner.selectedTrip()) {
+                          trip: Trip = timesSpinner.selectedTrip()) {
 
         previewText.visibility = View.VISIBLE
         previewText.text = TextFormatter(user).applyTemplate(
                 destination = destination,
-                time = trip.arrivalTime.nsToCalendar(),
+                time = trip.arrivalTime()!!.nsToCalendar(),
                 plural = pluralSwitch.isChecked
         )
     }

@@ -1,6 +1,6 @@
 package com.abbyberkers.apphome
 
-import com.abbyberkers.apphome.ns.maximumDelay
+import com.abbyberkers.apphome.ns_old.maximumDelay
 import org.jetbrains.spek.api.Spek
 import org.jetbrains.spek.api.dsl.given
 import org.jetbrains.spek.api.dsl.it

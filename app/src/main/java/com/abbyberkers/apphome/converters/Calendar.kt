@@ -11,7 +11,7 @@ import java.util.*
  */
 @JvmOverloads
 fun Calendar.toFormattedString(format: String = "HH:mm"): String =
-        SimpleDateFormat(format, java.util.Locale.getDefault()).format(this.time)
+        SimpleDateFormat(format, Locale.getDefault()).format(this.time)
 
 /**
  * Convert a calendar object to a string in NS format. Uses [Calendar.toFormattedString].
@@ -30,7 +30,7 @@ fun String.toNsDate(): Date = this.toDate("yyyy-MM-dd'T'HH:mm:ssZ")
  * @param format The format for the given string. Default is "HH:mm".
  */
 fun String.toDate(format: String = "HH:mm") : Date =
-        SimpleDateFormat(format, java.util.Locale.getDefault()).parse(this
+        SimpleDateFormat(format, Locale.getDefault()).parse(this
         )
 
 /**

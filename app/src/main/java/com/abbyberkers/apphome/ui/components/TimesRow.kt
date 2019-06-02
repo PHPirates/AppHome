@@ -7,8 +7,8 @@ import android.view.ViewManager
 import android.widget.TableRow
 import com.abbyberkers.apphome.City
 import com.abbyberkers.apphome.ns.NsApiService
-import com.abbyberkers.apphome.ns.xml.ReisMogelijkheden
-import com.abbyberkers.apphome.ns.xml.ReisMogelijkheid
+import com.abbyberkers.apphome.ns.json.Trip
+import com.abbyberkers.apphome.ns.json.Trips
 import org.jetbrains.anko.custom.ankoView
 import org.jetbrains.anko.progressBar
 import org.jetbrains.anko.tableRow
@@ -24,7 +24,7 @@ class TimesRow(context: Context) : TableRow(context) {
     val timePicker = timesSpinner { gravity = Gravity.CENTER }
     private val progress = progressBar()
 
-    lateinit var trips: List<ReisMogelijkheid>
+    lateinit var trips: List<Trip>
 
     init {
         tableRow {
@@ -47,24 +47,24 @@ class TimesRow(context: Context) : TableRow(context) {
             progress.visibility = View.GONE
         } else {
             // Prepare a call to the API.
-            val call = NsApiService.create().listTrips(
+            val call = NsApiService.create().getTrips(
                     fromStation = from.station,
                     toStation = to.station
             )
 
             // Make the call on another thread.
-            call.enqueue(object : Callback<ReisMogelijkheden> {
-                override fun onResponse(call: Call<ReisMogelijkheden>, response: Response<ReisMogelijkheden>) {
-                    // Get the trips from the response.
-                    trips = response.body()?.journeys?.filter { it.status != "NIET-MOGELIJK"} as List<ReisMogelijkheid>
-                    // Set the new times on the number picker.
+            call.enqueue(object : Callback<Trips> {
+                override fun onResponse(call: Call<Trips>, response: Response<Trips>) {
+                    trips = response.body()?.trips!!
+                    context.toast("success!")
+                    trips = response.body()?.trips as List<Trip>
                     timePicker.setTimes(trips)
                     showTimes()
                     onTimesLoaded()
                 }
 
-                override fun onFailure(call: Call<ReisMogelijkheden>?, t: Throwable?) {
-                    context.toast("Could not find NS.")
+                override fun onFailure(call: Call<Trips>, t: Throwable) {
+                    context.toast("NS unreachable.")
                     hideTimes()
                 }
             })
@@ -72,9 +72,9 @@ class TimesRow(context: Context) : TableRow(context) {
     }
 
     /**
-     * Get the trip [ReisMogelijkheid] that is currently selected.
+     * Get the [Trip] that is currently selected.
      */
-    fun selectedTrip() : ReisMogelijkheid = trips[timePicker.value]
+    fun selectedTrip() : Trip = trips[timePicker.value]
 
     /**
      * Hide the TimeSpinner and show the ProgressBar.

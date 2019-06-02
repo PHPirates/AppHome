@@ -10,8 +10,8 @@ import org.jetbrains.anko.*
 
 class MainAct : AppCompatActivity() {
 
-    val mainUI by lazy { MainUI() }
-    val sharedPref by lazy { SharedPreferenceHelper(applicationContext) }
+    private val mainUI by lazy { MainUI() }
+    private val sharedPref by lazy { SharedPreferenceHelper(applicationContext) }
 
     /**
      * Called when the app is created.
@@ -38,7 +38,7 @@ class MainAct : AppCompatActivity() {
      * Check if a user is chosen and set their preferred direction on the spinners.
      * If no user is chosen show the dialog to choose a user.
      */
-    fun setDefaultDirection() {
+    private fun setDefaultDirection() {
         sharedPref.let {
             // Check if the user is configured by checking if the key exists in the
             // shared preferences.
