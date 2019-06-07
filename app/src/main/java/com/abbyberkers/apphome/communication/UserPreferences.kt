@@ -33,7 +33,7 @@ enum class UserPreferences(
     ABBY(Direction(City.OVERLOON, City.EINDHOVEN),
             Direction(City.EINDHOVEN, City.OVERLOON),
             mutableMapOf(City.EINDHOVEN to Triple(Language.ENGLISH, TimesFormat.WORDS, 0),
-                    City.OVERLOON to Triple(Language.DUTCH, TimesFormat.WORDS, 25),
+                    City.OVERLOON to Triple(Language.DUTCH, TimesFormat.HM, 25),
                     City.HEEZE to Triple(Language.DUTCH, TimesFormat.WORDS, 15),
                     City.ROOSENDAAL to Triple(Language.ENGLISH, TimesFormat.WORDS, 0)),
             mapOf(City.EINDHOVEN to Template.ETA,

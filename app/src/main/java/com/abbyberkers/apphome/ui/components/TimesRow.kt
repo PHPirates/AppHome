@@ -56,7 +56,6 @@ class TimesRow(context: Context) : TableRow(context) {
             call.enqueue(object : Callback<Trips> {
                 override fun onResponse(call: Call<Trips>, response: Response<Trips>) {
                     trips = response.body()?.trips!!
-                    context.toast("success!")
                     trips = response.body()?.trips as List<Trip>
                     timePicker.setTimes(trips)
                     showTimes()

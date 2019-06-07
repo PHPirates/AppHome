@@ -10,8 +10,8 @@ android {
         applicationId "com.abbyberkers.apphome"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 10
-        versionName "1.6.0"
+        versionCode 11
+        versionName "2.0.0"
     }
     buildTypes {
         release {

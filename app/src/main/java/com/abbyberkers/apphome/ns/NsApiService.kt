@@ -14,8 +14,8 @@ interface NsApiService {
     fun getTrips(
             @Query("fromStation") fromStation: String,
             @Query("toStation") toStation: String,
-            @Query("previousAdvices") numberOfPreviousAdvices: Int = 5,
-            @Query("nextAdvices") numberOfNextAdvices: Int = 5
+            @Query("previousAdvices") numberOfPreviousAdvices: Int = 3,
+            @Query("nextAdvices") numberOfNextAdvices: Int = 3
     ): Call<Trips>
 
     companion object {
