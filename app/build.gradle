@@ -60,8 +60,8 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     // Junit 5
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.1'
 
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:support-v4:28.0.0'
@@ -74,28 +74,25 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-simplexml:2.5.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
 
+    implementation 'com.squareup.retrofit2:retrofit:2.6.1'
+    implementation 'com.squareup.retrofit2:converter-simplexml:2.6.1'
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation 'com.google.code.gson:gson:2.8.5'
 
-    testImplementation 'org.junit.platform:junit-platform-engine:1.3.2'
+    testImplementation 'org.junit.platform:junit-platform-engine:1.5.1'
     testImplementation 'org.jetbrains.spek:spek-api:1.2.1'
     testImplementation 'org.jetbrains.spek:spek-junit-platform-engine:1.2.1'
 
     // Anko Layouts
     implementation "org.jetbrains.anko:anko-sdk27:0.10.8" // sdk15, sdk19, sdk21, sdk23 are also available
-    implementation "org.jetbrains.anko:anko-appcompat-v7:0.10.7"
+    implementation "org.jetbrains.anko:anko-appcompat-v7:0.10.8"
 
     // Anko Commons
     implementation "org.jetbrains.anko:anko-commons:0.10.8"
 
     // Coroutine listeners for Anko Layouts
     implementation "org.jetbrains.anko:anko-sdk27-coroutines:0.10.8"
-    implementation "org.jetbrains.anko:anko-appcompat-v7-coroutines:0.10.5"
-
-    // Update dependencies, but they don't work here
-//    implementation "com.github.ben-manes.versions:0.20.0"
-//    implementation "se.patrikerdes.use-latest-versions:0.2.7"
-
+    implementation "org.jetbrains.anko:anko-appcompat-v7-coroutines:0.10.8"
 }
 repositories {
     mavenCentral()
