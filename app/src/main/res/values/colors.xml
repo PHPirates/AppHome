@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#075e54</color>  <!-- WhatsApp teal -->
+    <color name="colorPrimaryDark">#00342b</color>
+    <color name="colorAccent">#25D366</color> <!-- WhatsApp green-->
     <color name="divider">#69C6E7</color>
     <color name="black">#000000</color>
+    <color name="nsYellow">#FFC917</color>
     <color name="nsBlue">#0005A9</color>
-    <color name="nsYellow">#FFCC18</color>
 </resources>
