@@ -29,9 +29,8 @@ fun String.toNsDate(): Date = this.toDate("yyyy-MM-dd'T'HH:mm:ssZ")
  *
  * @param format The format for the given string. Default is "HH:mm".
  */
-fun String.toDate(format: String = "HH:mm") : Date =
-        SimpleDateFormat(format, Locale.getDefault()).parse(this
-        )
+fun String.toDate(format: String = "HH:mm"): Date =
+        SimpleDateFormat(format, Locale.getDefault()).parse(this)!!
 
 /**
  * Convert a string in NS format to a Calendar object. Uses [String.toNsDate].
@@ -46,7 +45,7 @@ fun String.nsToCalendar(): Calendar {
 /**
  * Convert a HH:mm string to a Calendar object. Uses [String.toDate].
  */
-fun String.toCalendar() : Calendar {
+fun String.toCalendar(): Calendar {
     val date = this.toDate()
     val calendar = GregorianCalendar()
     calendar.time = date

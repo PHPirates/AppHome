@@ -5,11 +5,19 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewManager
 import android.widget.NumberPicker
+import com.abbyberkers.apphome.communication.UserPreferences
+import com.abbyberkers.apphome.communication.textformatters.Language
+import com.abbyberkers.apphome.communication.textformatters.TimesFormat
+import com.abbyberkers.apphome.communication.textformatters.format
+import com.abbyberkers.apphome.converters.nsToCalendar
+import com.abbyberkers.apphome.converters.toCalendar
 import com.abbyberkers.apphome.converters.toStrings
 import com.abbyberkers.apphome.ns.json.Trip
+import com.abbyberkers.apphome.storage.SharedPreferenceHelper
 import org.jetbrains.anko.custom.ankoView
 import org.jetbrains.anko.matchParent
 import org.jetbrains.anko.wrapContent
+import java.util.*
 
 class TimesSpinner : NumberPicker {
 
@@ -25,6 +33,9 @@ class TimesSpinner : NumberPicker {
         layoutParams = LayoutParams(wrapContent, matchParent)
     }
 
+    private val sharedPref by lazy { SharedPreferenceHelper(context) }
+
+
     /**
      * Set the times of the journeys and their possible delays on the spinner.
      * If the journeys are null (there are no possible journeys), hide the spinner.
@@ -36,9 +47,27 @@ class TimesSpinner : NumberPicker {
             displayedValues = trips.toStrings()
             minValue = 0
             maxValue = trips.size - 1
-            value = (trips.size - 1) / 2
+            value = trips.getIndexToBeSelected()
         } else {
             visibility = View.GONE
+        }
+    }
+
+    /**
+     * Get the index of the time that should be selected by default.
+     *
+     * This depends per user. For Abby, get the time from the train that left if she get's on the sprinter in Blerick now.
+     * For Thomas, get the departure time of the next train that leaves.
+     */
+    private fun List<Trip>.getIndexToBeSelected(): Int {
+        val now = Calendar.getInstance()
+        // Convert all NS times to calendar times so we can compare them.
+        val tripTimes = this.map { it.departureTime()!!.nsToCalendar() }
+        // Get the index of the next train in the future.
+        val indexOfNextTime = tripTimes.indexOf(tripTimes.first { now.before(it) })
+        return when (sharedPref.getUserPreference()) {
+            UserPreferences.ABBY -> indexOfNextTime - 2
+            else -> indexOfNextTime
         }
     }
 }
