@@ -10,3 +10,4 @@ app/release/
 /captures
 /.idea/misc.xml
 !/app/build/outputs/apk/app-debug.apk
+/app/src/main/java/com/abbyberkers/apphome/ns/NsKey.kt

@@ -17,3 +17,16 @@ In previous versions there was also a widget which displays three departure time
 <img src="ScreenshotWidget.png?raw=true" width="250">
 
 <sub>This project was previously maintainted on [BitBucket](https://bitbucket.org/slideclimb/apphome/overview)</sub>
+
+
+## Getting the NS API key
+- Go to the [NS API Portal](https://apiportal.ns.nl) and log in
+- Go to our profile
+- Copy the primary key from the `Ns-App`
+- In the android project, create a Kotlin file `NsKey.kt` in the `ns` folder, and add the following content
+
+```
+package com.abbyberkers.apphome.ns
+
+const val key: String = <primary key>
+```
