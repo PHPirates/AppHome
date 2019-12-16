@@ -1,9 +1,9 @@
 package com.abbyberkers.apphome
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatActivity
 import com.abbyberkers.apphome.storage.SharedPreferenceHelper
 import com.abbyberkers.apphome.ui.MainUI
 import org.jetbrains.anko.*
