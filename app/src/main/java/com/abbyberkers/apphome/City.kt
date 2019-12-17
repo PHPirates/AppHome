@@ -6,7 +6,7 @@ import android.widget.Spinner
  * The possible cities.
  */
 enum class City(val string: String, val station: String = string) {
-    EINDHOVEN("Eindhoven"),
+    EINDHOVEN("Eindhoven Centraal"),
     ROOSENDAAL("Roosendaal"),
     OVERLOON("Overloon", "Vierlingsbeek"),
     HEEZE("Heeze");
