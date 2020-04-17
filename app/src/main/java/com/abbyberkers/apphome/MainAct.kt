@@ -77,7 +77,7 @@ class MainAct : AppCompatActivity() {
                 mainUI.userDialog.show()
                 true
             }
-            else -> super.onOptionsItemSelected(item)
+            else -> super.onOptionsItemSelected(item ?: return false)
         }
     }
 }
