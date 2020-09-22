@@ -25,6 +25,7 @@ class MainUI : AnkoComponent<MainAct> {
 
     lateinit var fromSpinner: Spinner
     lateinit var toSpinner: Spinner
+    lateinit var bikeTimeSwitch: Switch
     lateinit var languageSwitch: Switch
     lateinit var pluralSwitch: Switch
     lateinit var timesSpinner: TimesRow
@@ -79,6 +80,15 @@ class MainUI : AnkoComponent<MainAct> {
                 else previewText.visibility = View.INVISIBLE
             }
 
+            bikeTimeSwitch = wordSwitch("Station", "Bike")
+            bikeTimeSwitch.isChecked = true
+            bikeTimeSwitch.setOnCheckedChangeListener { _, _ ->
+                // Update the preview text if the times are already available.
+                if(timesSpinner.timePicker.visibility == View.VISIBLE) updatePreviewText(prefs.getUserPreference()!!)
+                // Hide the preview text if the times are still loading.
+                else previewText.visibility = View.INVISIBLE
+            }
+
             pluralSwitch = wordSwitch("Singular", "Plural")
             pluralSwitch.setOnCheckedChangeListener { _, _ ->
                 // Update the preview text if the times are already available.
@@ -108,6 +118,7 @@ class MainUI : AnkoComponent<MainAct> {
                         whatsapp.sendMessage(trip = timesSpinner.selectedTrip(),
                                 destination = City.getSelectedCity(toSpinner),
                                 userPreferences = prefs.getUserPreference()!!,
+                                bikeTime = bikeTimeSwitch.isChecked,
                                 plural = pluralSwitch.isChecked)
                     }
                 }.lparams(height = wrapContent, width = 0, initWeight = 1f)
@@ -120,6 +131,7 @@ class MainUI : AnkoComponent<MainAct> {
                         whatsapp.sendMessage(trip = timesSpinner.selectedTrip(),
                                 destination = City.getSelectedCity(toSpinner),
                                 userPreferences = prefs.getUserPreference()!!,
+                                bikeTime = bikeTimeSwitch.isChecked,
                                 plural = pluralSwitch.isChecked,
                                 messageType = MessageType.DELAY)
                     }
@@ -168,6 +180,7 @@ class MainUI : AnkoComponent<MainAct> {
         previewText.text = TextFormatter(user).applyTemplate(
                 destination = destination,
                 time = trip.arrivalTime()!!.nsToCalendar(),
+                bikeTime = bikeTimeSwitch.isChecked,
                 plural = pluralSwitch.isChecked
         )
     }

@@ -17,14 +17,14 @@ class TextFormatter(private val userPreferences: UserPreferences) {
      *
      * @return
      */
-    private fun formatTime(destination: City, time: Calendar) : String {
+    private fun formatTime(destination: City, time: Calendar, bikeTime: Boolean) : String {
         // Get the language preferences of a user based on their destination.
         val languagePref = userPreferences.languagePref[destination]!!
         val language = languagePref.first
         val timesFormat = languagePref.second
         val localTravelMinutes = languagePref.third
 
-        time.add(Calendar.MINUTE, localTravelMinutes)
+        if (bikeTime) time.add(Calendar.MINUTE, localTravelMinutes)
         val roundedTime = time.roundToFive()
 
         // Format the time using these preferences.
@@ -38,7 +38,7 @@ class TextFormatter(private val userPreferences: UserPreferences) {
      * @param time The arrival time of the user.
      * @param plural Whether the message should be written in singular or plural form.
      */
-    fun applyTemplate(destination: City, time: Calendar, plural: Boolean) : String {
+    fun applyTemplate(destination: City, time: Calendar, bikeTime: Boolean, plural: Boolean) : String {
         // Get the template from the user.
         val template = {
             val temp = userPreferences.textTemplate[destination]!!
@@ -47,7 +47,7 @@ class TextFormatter(private val userPreferences: UserPreferences) {
                 temp.english else temp.dutch
         }
         // Format the time according to the users preferences
-        val formattedTime = formatTime(destination, time)
+        val formattedTime = formatTime(destination, time, bikeTime)
         // Apply the template.
         val message = template()(formattedTime)
         // Transform the message to plural form if necessary.
