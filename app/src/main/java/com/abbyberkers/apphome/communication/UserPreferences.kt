@@ -19,27 +19,39 @@ enum class UserPreferences(
         /** Map containing message templates given the times. */
         val textTemplate: Map<City, Template>) {
 
-    THOMAS(Direction(City.ROOSENDAAL, City.EINDHOVEN),
-            Direction(City.EINDHOVEN, City.ROOSENDAAL),
-            mutableMapOf(City.EINDHOVEN to Triple(Language.ENGLISH, TimesFormat.WORDS, 0),
-                    City.OVERLOON to Triple(Language.ENGLISH, TimesFormat.WORDS, 25),
-                    City.HEEZE to Triple(Language.ENGLISH, TimesFormat.WORDS, 15),
-                    City.ROOSENDAAL to Triple(Language.DUTCH, TimesFormat.WORDS, 25)),
-            mapOf(City.EINDHOVEN to Template.YAY,
-                    City.OVERLOON to Template.YAY,
-                    City.HEEZE to Template.YAY,
-                    City.ROOSENDAAL to Template.DEFAULT)
+    THOMAS(Direction(City.ROOSENDAAL, City.HELMOND),
+            Direction(City.HELMOND, City.ROOSENDAAL),
+            mutableMapOf(
+                City.EINDHOVEN to Triple(Language.ENGLISH, TimesFormat.WORDS, 0),
+                City.OVERLOON to Triple(Language.ENGLISH, TimesFormat.WORDS, 25),
+                City.HELMOND to Triple(Language.ENGLISH, TimesFormat.WORDS, 6),
+                City.ROOSENDAAL to Triple(Language.DUTCH, TimesFormat.WORDS, 25),
+                City.STRIJP to Triple(Language.DUTCH, TimesFormat.WORDS, 0),
+            ),
+            mapOf(
+                City.EINDHOVEN to Template.YAY,
+                City.OVERLOON to Template.YAY,
+                City.HELMOND to Template.YAY,
+                City.ROOSENDAAL to Template.GENERIC,
+                City.STRIJP to Template.GENERIC,
+            )
     ),
-    ABBY(Direction(City.OVERLOON, City.EINDHOVEN),
-            Direction(City.EINDHOVEN, City.OVERLOON),
-            mutableMapOf(City.EINDHOVEN to Triple(Language.ENGLISH, TimesFormat.WORDS, 0),
-                    City.OVERLOON to Triple(Language.DUTCH, TimesFormat.HM, 25),
-                    City.HEEZE to Triple(Language.DUTCH, TimesFormat.WORDS, 15),
-                    City.ROOSENDAAL to Triple(Language.ENGLISH, TimesFormat.WORDS, 25)),
-            mapOf(City.EINDHOVEN to Template.YAY,
-                    City.OVERLOON to Template.DEFAULT,
-                    City.HEEZE to Template.DEFAULT,
-                    City.ROOSENDAAL to Template.YAY)
+    ABBY(Direction(City.HELMOND, City.STRIJP),
+            Direction(City.STRIJP, City.HELMOND),
+            mutableMapOf(
+                City.EINDHOVEN to Triple(Language.ENGLISH, TimesFormat.WORDS, 0),
+                City.OVERLOON to Triple(Language.DUTCH, TimesFormat.HM, 25),
+                City.HELMOND to Triple(Language.DUTCH, TimesFormat.WORDS, 6),
+                City.ROOSENDAAL to Triple(Language.ENGLISH, TimesFormat.WORDS, 25),
+                City.STRIJP to Triple(Language.DUTCH, TimesFormat.WORDS, 5),
+            ),
+            mapOf(
+                City.EINDHOVEN to Template.YAY,
+                City.OVERLOON to Template.GENERIC,
+                City.HELMOND to Template.YAY,
+                City.ROOSENDAAL to Template.YAY,
+                City.STRIJP to Template.GENERIC,
+            )
     );
 
     /**

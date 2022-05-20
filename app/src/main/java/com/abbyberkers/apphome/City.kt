@@ -9,7 +9,9 @@ enum class City(val string: String, val station: String = string) {
     EINDHOVEN("Eindhoven Centraal"),
     ROOSENDAAL("Roosendaal"),
     OVERLOON("Overloon", "Vierlingsbeek"),
-    HEEZE("Heeze");
+    HELMOND("Helmond Brouwhuis"),
+    STRIJP("Strijp-S", "Eindhoven Strijp-S"),
+    ;
 
     companion object {
         /**

@@ -70,14 +70,14 @@ class MainAct : AppCompatActivity() {
     /**
      * Set the listener on the menu.
      */
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return when(item?.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
             R.id.change_user -> {
                 // Show the dialog to choose a user.
                 mainUI.userDialog.show()
                 true
             }
-            else -> super.onOptionsItemSelected(item ?: return false)
+            else -> super.onOptionsItemSelected(item)
         }
     }
 }
