@@ -4,11 +4,11 @@ apply plugin: 'de.mannodermaus.android-junit5'
 //apply plugin: 'jacoco-android'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     defaultConfig {
         applicationId "com.abbyberkers.apphome"
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 16
         versionName "2.2.0"
     }
@@ -27,9 +27,6 @@ android {
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_8
         sourceCompatibility JavaVersion.VERSION_1_8
-    }
-    lintOptions {
-        abortOnError false
     }
     testOptions {
         junitPlatform {
@@ -53,14 +50,18 @@ android {
             }
         }
     }
+    lint {
+        abortOnError false
+    }
+    namespace 'com.abbyberkers.apphome'
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     // Junit 5
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
@@ -72,13 +73,13 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-simplexml:2.9.0'
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.google.code.gson:gson:2.9.0'
 
     testImplementation 'org.junit.platform:junit-platform-engine:1.7.0'
     testImplementation 'org.jetbrains.spek:spek-api:1.2.1'
     testImplementation 'org.jetbrains.spek:spek-junit-platform-engine:1.2.1'
 
-    implementation "androidx.preference:preference-ktx:1.1.1"
+    implementation 'androidx.preference:preference-ktx:1.2.0'
 
     // Anko Layouts
     implementation "org.jetbrains.anko:anko-sdk27:0.10.8" // sdk15, sdk19, sdk21, sdk23 are also available
@@ -93,5 +94,5 @@ dependencies {
 }
 repositories {
     mavenCentral()
-    jcenter()
+    mavenCentral()
 }
